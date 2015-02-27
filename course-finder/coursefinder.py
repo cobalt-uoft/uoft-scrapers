@@ -19,6 +19,20 @@ class CourseFinder:
         self.cookies = http.cookiejar.CookieJar()
         self.s = requests.Session()
 
+    def update_files(self):
+        """Update the local JSON files for this scraper."""
+
+        urls = self.search()
+        for x in urls:
+            course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
+            print('Current Course: %s' % course_id)
+            url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
+            html = self.get_course_html(url)
+            data = self.parse_course_html(course_id, html)
+            with open('json/%s.json' % course_id, 'w+') as outfile:
+                json.dump(data, outfile)
+
+    '''
     def run_update(self):
         """Does everything."""
 
@@ -41,6 +55,7 @@ class CourseFinder:
             self.count += 1
             percent = str(round((self.count / self.total) * 100, 2))
             print('Current Course: %s \t Progress: %s%s' % (course_id, percent, "%"))
+    '''
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""
@@ -241,7 +256,3 @@ class CourseFinder:
     def push_to_mongo(self, doc):
         """Push all the data to the MongoDB server."""
         self.courses.insert(doc)
-
-# Run the beautiful script :)
-cf = CourseFinder()
-cf.run_update()
