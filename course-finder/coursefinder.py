@@ -25,12 +25,18 @@ class CourseFinder:
         urls = self.search()
         for x in urls:
             course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
+            course_code = course_id[:8]
             print('Current Course: %s' % course_id)
             url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
             html = self.get_course_html(url)
+            with open('html/%s.html' % course_id, 'w+') as outfile:
+                outfile.write(html.decode('utf-8'))
             data = self.parse_course_html(course_id, html)
-            with open('json/%s.json' % course_id, 'w+') as outfile:
-                json.dump(data, outfile)
+            if data:
+                with open('json/%s.json' % course_id, 'w+') as outfile:
+                    json.dump(data[0], outfile)
+                with open('../calendar/json/%s.json' % course_code, 'w+') as outfile:
+                    json.dump(data[1], outfile)
 
     '''
     def run_update(self):
@@ -93,13 +99,16 @@ class CourseFinder:
                 r = self.s.get(url, cookies=self.cookies)
                 if r.status_code == 200:
                     html = r.text
-            except requests.exceptions.Timeout:
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
                 continue
 
         return html.encode('utf-8')
 
     def parse_course_html(self, course_id, html):
         """Create JSON files from the HTML pages downloaded."""
+
+        if "The course you are trying to access does not exist" in html.decode('utf-8'):
+            return False
 
         soup = BeautifulSoup(html)
 
@@ -157,12 +166,6 @@ class CourseFinder:
         else:
             prereq = ""
 
-        apsc_elec = soup.find(id= "u140")
-        if not apsc_elec is None:
-            apsc_elec = apsc_elec.find_all("span", id="u140")[0].get_text().strip()
-        else:
-            apsc_elec = ""
-
         #Meeting Sections
 
         meeting_table = soup.find(id = "u172")
@@ -204,7 +207,7 @@ class CourseFinder:
 
                     location = ""
                     try:
-                        location = locations[i].replace(" ", "")
+                        location = locations[i]
                     except IndexError:
                         location = ""
 
@@ -228,14 +231,15 @@ class CourseFinder:
                     ("code", code),
                     ("instructors", instructors),
                     ("times", time_data),
-                    ("class_size", int(class_size))
+                    ("size", int(class_size)),
+                    ("enrolment", 0)
                 ])
 
                 sections.append(data)
 
         # Dictionary creation
         course = OrderedDict([
-            ("course_id", course_id),
+            ("id", course_id),
             ("code", course_code),
             ("name", course_name),
             ("description", description),
@@ -243,16 +247,31 @@ class CourseFinder:
             ("department", department),
             ("prerequisites", prereq),
             ("exclusions", exclusions),
-            ("course_level", course_level),
-            ("breadths", breadths),
+            ("level", course_level),
             ("campus", campus),
             ("term", term),
-            ("apsc_elec", apsc_elec),
+            ("breadths", breadths),
             ("meeting_sections", sections)
         ])
 
-        return course
+        basic_course = OrderedDict([
+            ("code", course_code),
+            ("name", course_name),
+            ("description", description),
+            ("division", division),
+            ("department", department),
+            ("prerequisites", prereq),
+            ("exclusions", exclusions),
+            ("level", course_level),
+            ("campus", campus),
+            ("breadths", breadths)
+        ])
+
+        return [course, basic_course]
 
     def push_to_mongo(self, doc):
         """Push all the data to the MongoDB server."""
         self.courses.insert(doc)
+
+cf = CourseFinder()
+cf.update_files()

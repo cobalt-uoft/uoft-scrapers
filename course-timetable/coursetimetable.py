@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 import time
 import re
+import os
 import json
 import pymongo
 import pprint
@@ -11,18 +12,42 @@ import tidylib
 
 class CourseTimetable:
 
-    def __init__(self, season):
-        self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/%s' % season
+    def __init__(self):
+        self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
         self.s = requests.Session()
-        self.year = 2014
-        self.sponsors = []
+        self.day_map = {
+            'M': 'Monday',
+            'T': 'Tuesday',
+            'W': 'Wednesday',
+            'R': 'Thursday',
+            'F': 'Friday',
+            'S': 'Saturday'
+        }
 
-    def parse_sponsor(self, sponsor):
-        with open('html/%s' % sponsor) as f:
-            html = f.read()
+    def update_files(self):
+        term = "winter"
+        year = 2014
 
-        document, errors = tidylib.tidy_document(html,
-    options={'numeric-entities':1})
+        data = self.get_sponsors(term)
+
+        year = data[0]
+        sponsors = data[1]
+
+        for sponsor in sponsors:
+            html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
+            self.save('html/%s/%s' % (str(year), sponsor), html.encode('utf-8'))
+
+            data = self.parse_sponsor(html, year, term, sponsor)
+
+            for course in data:
+                self.save_json('json/%s/%s' % (str(year), course["id"] + ".json"), course)
+                print("Current course: " + course["id"])
+
+
+
+
+    def parse_sponsor(self, html, year, term, sponsor=''):
+        document, errors = tidylib.tidy_document(html, options={'numeric-entities':1})
 
         soup = BeautifulSoup(document)
 
@@ -55,7 +80,7 @@ class CourseTimetable:
                     continue
                 else:
                     colspan = int(colspan) - 1
-                    if colspan > 1:
+                    if colspan > 0:
                         for x in range(colspan):
                             tds.insert(i+1, soup.new_tag("td"))
                             i += 1
@@ -70,8 +95,8 @@ class CourseTimetable:
                     current_course = [
                         None, # course code
                         None, # name
-                        {}, # sections
-                        breadths
+                        OrderedDict([]), # sections
+                        []
                     ]
 
                     semester = tds[1].get_text().strip()
@@ -93,19 +118,27 @@ class CourseTimetable:
 
                 if instructors.lower() == "tba":
                     instructors = ""
-                else:
-                    instructors = instructors.replace(".", "")
 
                 if len(instructors) > 0:
                     instructors = instructors.split("/")
+                    for i in range(len(instructors)):
+                        instructors[i] = instructors[i].split(".")
+                        instructors[i] = [x.strip() for x in instructors[i]]
+                        instructors[i] = ' '.join(instructors[i])
                 else:
                     instructors = []
 
-                current_course[2][current_section] = {
+                try:
+                    if not isinstance(current_course[2][current_section], list):
+                        current_course[2][current_section] = []
+                except KeyError:
+                    current_course[2][current_section] = []
+
+                current_course[2][current_section].append({
                     'time': time,
                     'location': location,
                     'instructors': instructors
-                }
+                })
 
             elif len(tds) == 6:
                 if tds[0].get('colspan') == '6':
@@ -119,7 +152,7 @@ class CourseTimetable:
                         current_course = [
                             course_code, # course code
                             name, # name
-                            {}, # sections
+                            OrderedDict([]), # sections
                             breadths
                         ]
                 else:
@@ -144,18 +177,131 @@ class CourseTimetable:
                     else:
                         instructors = []
 
-                    current_course[2][current_section] = {
+                    try:
+                        if not isinstance(current_course[2][current_section], list):
+                            current_course[2][current_section] = []
+                    except KeyError:
+                        current_course[2][current_section] = []
+
+                    current_course[2][current_section].append({
                         'time': time,
                         'location': location,
                         'instructors': instructors
-                    }
+                    })
 
 
 
         course_info = course_info[1:] + [current_course]
 
-        pprint.pprint(course_info)
-        print(len(course_info))
+        courses = []
+
+        for course in course_info:
+
+            course_id = course[0]
+            course_term = ""
+            if term == "winter":
+                if course[0][-1] in "FY":
+                    course_id += str(year) + "9"
+                    course_term = str(year) + " Fall"
+                    if course[0][-1] == "Y":
+                        course_term += " +"
+                elif course[0][-1] == "S":
+                    course_id += str(year + 1) + "1"
+                    course_term = str(year + 1) + " Winter"
+            elif term == "summer":
+                if course[0][-1] == "Y":
+                    course_id += str(year + 1) + "5"
+                    course_term = str(year + 1) + " Summer Y"
+                elif course[0][-1] in "FS":
+                    course_id += str(year + 1) + "5" + course[0][-1]
+                    if course_id[0][-1] == "F":
+                        course_term = str(year + 1) + " Summer F"
+                    elif course_id[0][-1] == "S":
+                        course_term = str(year + 1) + " Summer S"
+
+            course_code = course[0]
+
+            level = int(course_code[3] + "00")
+
+            print(course)
+
+            sections = []
+            for k in course[2]:
+
+                code = k
+                instructors = []
+                time_data = []
+                for x in course[2][k]:
+                    print(x)
+                    if x["time"] != "":
+
+                        instructors += x["instructors"]
+
+                        location = x["location"]
+
+                        #magic
+
+                        days = re.findall("[MTWRFS]", x["time"])
+
+                        time = ""
+                        mob = re.search('\d', x["time"])
+                        if mob:
+                            time = x["time"][mob.start():]
+
+
+                        hours = []
+                        time = time.split('-')
+                        for t in time:
+                            if ":" in t:
+                                t = t.split(':')
+                                t = int(t[0]) + (int(t[1]) / 60)
+                            else:
+                                t = int(t)
+                            if t >= 1 and t <= 8:
+                                t += 12
+                            hours.append(t)
+
+                        if len(hours) == 1:
+                            hours.append(hours[0] + 1)
+
+                        for i in range(len(hours)):
+                            if 1 <= hours[i] <= 8:
+                                hours[i] += 12
+
+                        for day_key in days:
+                            day = self.day_map[day_key]
+
+                            time_data.append(OrderedDict([
+                                ("day", day),
+                                ("start", hours[0]),
+                                ("end", hours[1]),
+                                ("duration", hours[1] - hours[0]),
+                                ("location", location)
+                            ]))
+
+                instructors = list(set(instructors))
+
+                course[2][k]
+                data = OrderedDict([
+                    ("code", code),
+                    ("instructors", instructors),
+                    ("times", time_data)
+                ])
+
+                sections.append(data)
+
+            course = OrderedDict([
+                ("id", course_id),
+                ("code", course_code),
+                ("level", level),
+                ("campus", "UTSG"),
+                ("term", course_term),
+                ("meeting_sections", sections)
+            ])
+
+            courses.append(course)
+
+        return courses
 
 
     def format_data(self, text, regex):
@@ -167,30 +313,37 @@ class CourseTimetable:
         return text
 
     def save(self, name, data):
+        if not os.path.exists(os.path.dirname(name)):
+            os.makedirs(os.path.dirname(name))
         with open(name, "wb") as file:
             file.write(data)
 
-    def save_sponsors(self):
-        for x in self.sponsors:
-            html = self.s.get('%s/%s' % (self.host, x)).text
-            self.save('html/%s' % x, html.encode('utf-8'))
+    def save_json(self, name, data):
+        if not os.path.exists(os.path.dirname(name)):
+            os.makedirs(os.path.dirname(name))
+        with open(name, "w+") as file:
+            json.dump(data, file)
 
-    def get_sponsors(self):
-        html = self.s.get('%s/sponsors.htm' % self.host).text
-        self.save('html/sponsors.html', html.encode('utf-8'))
+    def get_sponsors(self, term):
+        html = self.s.get('%s/%s/sponsors.htm' % (self.host, term)).text
 
         soup = BeautifulSoup(html)
 
-        self.year = int(re.search("([0-9]{4})-[0-9]{4}", soup.title.get_text()).group(1))
+        title = soup.title.get_text().strip()
 
+        year = -1
+        year = int(re.search("([0-9]{4})", title).group(0))
+
+        self.save('html/%s/sponsors.html' % str(year), html.encode('utf-8'))
+
+        sponsors = []
         for x in soup.find_all('a'):
             url = x.get('href')
             if ".htm" in url and "/" not in url:
-                self.sponsors.append(url)
+                sponsors.append(url)
+        return [year, sponsors]
 
 
 
-ct = CourseTimetable("winter")
-ct.get_sponsors()
-#ct.save_sponsors()
-ct.parse_sponsor('assem.html')
+ct = CourseTimetable()
+ct.update_files()
