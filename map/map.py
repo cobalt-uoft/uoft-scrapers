@@ -7,16 +7,62 @@ import json
 import pymongo
 import pprint
 import tidylib
+from secrets import *
 
 class Map:
 
     def __init__(self):
         self.host = 'http://map.utoronto.ca/'
         self.s = requests.Session()
+        self.client = pymongo.MongoClient(MONGO_URL)
+        self.buildings = self.client[MONGO_DB].buildings
+        self.campuses = ['utsg', 'utm', 'utsc']
 
-    def update_buildings(self, campus):
+    def mongo(self):
         # have to send info to database, after formatting it
-        pass
+        for campus in self.campuses:
+            data = self.get_map_json(campus)
+            for building in data['buildings']:
+
+                _id = building['id']
+                code = building['code']
+                name = building['title']
+                short_name = self.get_value(building, 'short_name')
+                lat = self.get_value(building, 'lat', True)
+                lng = self.get_value(building, 'lng', True)
+
+                street = self.get_value(building, 'street')
+                city = self.get_value(building, 'city')
+                province = self.get_value(building, 'province')
+                country = self.get_value(building, 'country')
+                postal = self.get_value(building, 'postal')
+
+                doc = OrderedDict([
+                    ('id', _id),
+                    ('code', code),
+                    ('name', name),
+                    ('short_name', short_name),
+                    ('campus', campus.upper()),
+                    ('lat', lat),
+                    ('lng', lng),
+                    ('address', OrderedDict([
+                        ('street', street),
+                        ('city', city),
+                        ('province', province),
+                        ('country', country),
+                        ('postal', postal)
+                    ]))
+                ])
+
+                self.buildings.insert(doc)
+
+            print('Campus: %s' % campus)
+
+    def get_value(self, building, val, number=False):
+        if val in building.keys():
+            return building[val]
+        else:
+            return 0 if number else ''
 
     def get_map_json(self, campus):
         self.s.get(self.host)
@@ -32,3 +78,4 @@ class Map:
         return data
 
 map = Map()
+map.mongo()
