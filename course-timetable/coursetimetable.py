@@ -33,6 +33,8 @@ class CourseTimetable:
         year = data[0]
         sponsors = data[1]
 
+        print(year)
+
         for sponsor in sponsors:
             html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
             self.save('html/%s/%s' % (str(year), sponsor), html.encode('utf-8'))
@@ -44,8 +46,6 @@ class CourseTimetable:
                 print("Current course: " + course["id"])
 
 
-
-
     def parse_sponsor(self, html, year, term, sponsor=''):
         document, errors = tidylib.tidy_document(html, options={'numeric-entities':1})
 
@@ -53,7 +53,7 @@ class CourseTimetable:
 
         table = soup.table
 
-        trs = table.find_all("tr")[2:] if 'assem' in sponsor else table.find_all("tr")[3:]
+        trs = table.find_all("tr")[2:] if 'assem' in sponsor else table.find_all("tr")[2:]
 
         course_info = []
 
@@ -66,6 +66,8 @@ class CourseTimetable:
         current_section = None
 
         for tr in trs:
+
+            print(tr)
 
             if "Cancel" in tr.get_text():
                 continue
@@ -85,7 +87,7 @@ class CourseTimetable:
                             tds.insert(i+1, soup.new_tag("td"))
                             i += 1
 
-            if len(tds) in [9, 10]:
+            if len(tds) >= 9:
 
                 course_code = self.format_data(tds[0].get_text(), "([A-Z]{3}[0-9]{3}[HY]1)")
 
@@ -129,6 +131,7 @@ class CourseTimetable:
                     instructors = []
 
                 try:
+                    print(current_course)
                     if not isinstance(current_course[2][current_section], list):
                         current_course[2][current_section] = []
                 except KeyError:
@@ -325,11 +328,13 @@ class CourseTimetable:
             json.dump(data, file)
 
     def get_sponsors(self, term):
-        html = self.s.get('%s/%s/sponsors.htm' % (self.host, term)).text
+        html = self.s.get('%s/%s/index.html' % (self.host, term)).text
 
         soup = BeautifulSoup(html)
 
         title = soup.title.get_text().strip()
+
+        print(title)
 
         year = -1
         year = int(re.search("([0-9]{4})", title).group(0))
