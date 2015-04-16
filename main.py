@@ -7,7 +7,9 @@ import pymongo
 import pprint
 
 from course.course import CourseManager
+
 from building.building import BuildingManager
+from building.food import FoodManager
 
 class Scraper:
 
