@@ -26,22 +26,20 @@ class Timetable:
 
     def update_files(self):
         term = "summer"
-        year = 2014
+
+        year = 0
 
         data = self.get_sponsors(term)
 
+        sponsors = data["sponsors"]
+
         if term == "summer":
-            year = data[0] - 1
+            #2015 summer counts as 2014 term
+            year = data["year"] - 1
         else:
-            year = data[0]
-
-        sponsors = data[1]
-
-        print(year)
+            year = data["year"]
 
         for sponsor in sponsors:
-            if 'intensive' in sponsor:
-                continue
             html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
             self.save('html/%s/%s' % (str(year), sponsor), html.encode('utf-8'))
 
@@ -351,5 +349,14 @@ class Timetable:
         for x in soup.find_all('a'):
             url = x.get('href')
             if ".htm" in url and "/" not in url:
-                sponsors.append(url)
-        return [year, sponsors]
+                if "intensive" not in url:
+                    sponsors.append(url)
+        return {
+            "year": year
+            "sponsors": sponsors
+        }
+
+
+if __name__ == "__main__":
+    t = Timetable()
+    t.update_files()
