@@ -12,7 +12,7 @@ import tidylib
 class UTSCTimetable:
 
     def __init__(self):
-        pass
+        self.host = 'http://www.utsc.utoronto.ca/~registrar/scheduling/timetable'
 
     def update_files(self):
         pass

@@ -12,7 +12,7 @@ import tidylib
 class UTMTimetable:
 
     def __init__(self):
-        pass
+        self.host = 'https://student.utm.utoronto.ca/timetable/'
 
     def update_files(self):
         pass
