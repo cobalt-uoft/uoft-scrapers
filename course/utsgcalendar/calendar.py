@@ -7,7 +7,7 @@ import json
 import os
 import pymongo
 
-class Calendar:
+class UTSGCalendar:
 
     def __init__(self):
         pass
