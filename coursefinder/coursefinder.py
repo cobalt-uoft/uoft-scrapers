@@ -6,7 +6,7 @@ import re
 import json
 import os
 
-class CourseFinder:
+class Coursefinder:
     """A wrapper for utilizing UofT's Course Finder web service.
 
     Course Finder is located at http://coursefinder.utoronto.ca/.
@@ -46,7 +46,7 @@ class CourseFinder:
                     self.push_to_mongo(doc)
                     print(doc['code'])
     '''
-    
+
     '''
     def run_update(self):
         """Does everything."""

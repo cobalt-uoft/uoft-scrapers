@@ -18,6 +18,11 @@ class Map:
         self.buildings = self.client['cobalt'].buildings
         self.campuses = ['utsg', 'utm', 'utsc']
 
+    def update_files(self):
+        #remove mongo(self) and add this method that just makes the dict and
+        #saves it as JSON
+        pass
+
     def mongo(self):
         # have to send info to database, after formatting it
         for campus in self.campuses:

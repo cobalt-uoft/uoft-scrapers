@@ -6,8 +6,8 @@ import json
 import pymongo
 import pprint
 
-import buildings
-import courses
+from course import CourseManager
+from building import BuildingManager
 
 class Scraper:
 
@@ -15,15 +15,19 @@ class Scraper:
         self.client = pymongo.MongoClient(os.environ.get('MONGO_URL'))
 
     def run(self):
-        self.update_courses()
-        self.update_buildings()
+        self.refresh_courses()
+        self.refresh_buildings()
 
-    def update_courses(self):
+    def refresh_courses(self):
         c = CourseManager(self.client)
         c.update()
         c.upload()
 
-    def update_buildings(self):
+    def refresh_buildings(self):
         b = BuildingManager(self.client)
         b.update()
         b.upload()
+
+if __name__ == "__main__":
+    s = Scraper()
+    s.run()
