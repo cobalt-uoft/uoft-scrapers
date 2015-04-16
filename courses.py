@@ -6,17 +6,24 @@ import json
 import pymongo
 import pprint
 
-class CourseScraper:
+class CourseManager:
 
-    def __init__(self):
-        self.client = pymongo.MongoClient(os.environ.get('MONGO_URL'))
-        self.courses = {
-            '2014': self.client['cobalt'].courses_2014,
-            '2015': self.client['cobalt'].courses_2015
-        }
+    def __init__(self, client):
+        self.courses = client
+
+    def update(self):
+        #Init all the course scraper classes, and update_files()
+
+        #Calendar
+        #Timetable
+        #CourseFinder
+
         pass
 
     def upload(self):
+        #upload the best possible schema by getting the most up to date
+        #information from each scraper file
+
         year = 2015
 
         for (dirpath, dirnames, filenames) in os.walk('course-timetable/json/%s' % str(year)):

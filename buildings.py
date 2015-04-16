@@ -6,9 +6,13 @@ import json
 import pymongo
 import pprint
 
-class BuildingScraper:
+class BuildingManager:
 
-    def __init__(self):
+    def __init__(self, client):
+        self.client = client
+
+    def update(self):
+        #Map update_files()
         pass
 
     def upload(self):
