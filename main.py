@@ -28,6 +28,9 @@ class Scraper:
         b.update()
         b.upload()
 
+        f = FoodManager(self.client)
+        f.upload()
+
 if __name__ == "__main__":
     s = Scraper()
     s.run()
