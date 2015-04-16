@@ -2,20 +2,20 @@ import requests, http.cookiejar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import time
+import os
 import re
 import json
 import pymongo
 import pprint
 import tidylib
-from secrets import *
 
 class Map:
 
     def __init__(self):
         self.host = 'http://map.utoronto.ca/'
         self.s = requests.Session()
-        self.client = pymongo.MongoClient(MONGO_URL)
-        self.buildings = self.client[MONGO_DB].buildings
+        self.client = pymongo.MongoClient(os.environ.get('MONGODB_URL'))
+        self.buildings = self.client['cobalt'].buildings
         self.campuses = ['utsg', 'utm', 'utsc']
 
     def mongo(self):
@@ -77,5 +77,5 @@ class Map:
 
         return data
 
-map = Map()
-map.mongo()
+#map = Map()
+#map.mongo()
