@@ -15,8 +15,6 @@ class FoodManager:
         self.m = Map()
 
     def update(self):
-        #The below should already have been called from building.py
-        #m.update_files()
         pass
 
     def upload(self):

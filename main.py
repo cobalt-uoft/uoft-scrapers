@@ -7,9 +7,8 @@ import pymongo
 import pprint
 
 from course.course import CourseManager
-
 from building.building import BuildingManager
-from building.food import FoodManager
+from food.food import FoodManager
 
 class Scraper:
 
@@ -19,6 +18,7 @@ class Scraper:
     def run(self):
         self.refresh_courses()
         self.refresh_buildings()
+        self.refresh_foods()
 
     def refresh_courses(self):
         c = CourseManager(self.client)
@@ -30,7 +30,9 @@ class Scraper:
         b.update()
         b.upload()
 
+    def refresh_foods(self):
         f = FoodManager(self.client)
+        f.update()
         f.upload()
 
 if __name__ == "__main__":

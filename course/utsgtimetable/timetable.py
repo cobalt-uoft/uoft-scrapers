@@ -10,7 +10,7 @@ import pprint
 import tidylib
 
 
-class Timetable:
+class UTSGTimetable:
 
     def __init__(self):
         self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
@@ -352,11 +352,6 @@ class Timetable:
                 if "intensive" not in url:
                     sponsors.append(url)
         return {
-            "year": year
+            "year": year,
             "sponsors": sponsors
         }
-
-
-if __name__ == "__main__":
-    t = Timetable()
-    t.update_files()

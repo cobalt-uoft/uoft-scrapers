@@ -8,7 +8,9 @@ import pprint
 
 from course.cal.calendar import Calendar
 from course.coursefinder.coursefinder import Coursefinder
-from course.timetable.timetable import Timetable
+from course.utsgtimetable.timetable import UTSGTimetable
+from course.utmtimetable.timetable import UTMTimetable
+from course.utsctimetable.timetable import UTSCTimetable
 
 class CourseManager:
 
@@ -16,12 +18,18 @@ class CourseManager:
         self.courses = client
         self.c = Calendar()
         self.cf = Coursefinder()
-        self.t = Timetable()
+        self.t = {
+            "utsg": UTSGTimetable(),
+            "utm": UTMTimetable(),
+            "utsc": UTSCTimetable()
+        }
 
     def update(self):
         self.c.update_files()
         self.cf.update_files()
-        self.t.update_files()
+        self.t["utsg"].update_files()
+        self.t["utm"].update_files()
+        self.t["utsc"].update_files()
 
     def upload(self):
         #upload the best possible schema by getting the most up to date
