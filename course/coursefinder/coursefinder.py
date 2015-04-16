@@ -5,9 +5,11 @@ import time
 import re
 import json
 import os
+import sys
+
 
 class Coursefinder:
-    """A wrapper for utilizing UofT's Course Finder web service.
+    """A scraper for UofT's Course Finder web service.
 
     Course Finder is located at http://coursefinder.utoronto.ca/.
     """
@@ -21,56 +23,23 @@ class Coursefinder:
     def update_files(self):
         """Update the local JSON files for this scraper."""
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         urls = self.search()
-        for x in urls:
+        for x in urls[:5]:
             course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
             course_code = course_id[:8]
             print('Current Course: %s' % course_id)
             url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
             html = self.get_course_html(url)
-            with open('html/%s.html' % course_id, 'w+') as outfile:
-                outfile.write(html.decode('utf-8'))
+            #with open('html/%s.html' % course_id, 'w+') as outfile:
+            #    outfile.write(html.decode('utf-8'))
             data = self.parse_course_html(course_id, html)
             if data:
                 with open('json/%s.json' % course_id, 'w+') as outfile:
                     json.dump(data[0], outfile)
-                with open('../calendar/json/%s.json' % course_code, 'w+') as outfile:
-                    json.dump(data[1], outfile)
-
-    '''
-    def mongo(self):
-        for root, dirs, filenames in os.walk('./json'):
-            for f in filenames[1:]:
-                with open('./json/' + f) as fi:
-                    doc = json.loads(fi.read(), object_pairs_hook=OrderedDict)
-                    self.push_to_mongo(doc)
-                    print(doc['code'])
-    '''
-
-    '''
-    def run_update(self):
-        """Does everything."""
-
-        urls = self.search()
-        for x in urls:
-            course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
-            exists = self.courses.find_one({"course_id": course_id})
-            if exists is not None:
-                self.count += 1
-                percent = str(round((self.count / self.total) * 100, 2))
-                print('Skipping Course: %s \t Progress: %s%s' % (course_id, percent, "%"))
-                continue
-            url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
-            html = self.get_course_html(url)
-            data = self.parse_course_html(course_id, html)
-            with open('json/%s.json' % course_id, 'w+') as outfile:
-                json.dump(data, outfile)
-            self.push_to_mongo(data)
-
-            self.count += 1
-            percent = str(round((self.count / self.total) * 100, 2))
-            print('Current Course: %s \t Progress: %s%s' % (course_id, percent, "%"))
-    '''
+                #with open('../calendar/json/%s.json' % course_code, 'w+') as outfile:
+                #    json.dump(data[1], outfile)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""
@@ -278,6 +247,7 @@ class Coursefinder:
 
         return [course, basic_course]
 
-    def push_to_mongo(self, doc):
-        """Push all the data to the MongoDB server."""
-        self.courses['2014'].insert(doc)
+
+if __name__ == "__main__":
+    cf = Coursefinder()
+    cf.update_files()

@@ -19,12 +19,7 @@ class Map:
         self.campuses = ['utsg', 'utm', 'utsc']
 
     def update_files(self):
-        #remove mongo(self) and add this method that just makes the dict and
-        #saves it as JSON
-        pass
-
-    def mongo(self):
-        # have to send info to database, after formatting it
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         for campus in self.campuses:
             data = self.get_map_json(campus)
             for building in data['buildings']:
@@ -59,9 +54,7 @@ class Map:
                     ]))
                 ])
 
-                self.buildings.insert(doc)
-
-            print('Campus: %s' % campus)
+                #TODO: send to a /json!
 
     def get_value(self, building, val, number=False):
         if val in building.keys():

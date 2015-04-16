@@ -15,8 +15,8 @@ class BuildingManager:
         self.m = Map()
 
     def update(self):
-        m.update_files()
+        self.m.update_files()
 
     def upload(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         #Upload the JSON files to database through self.client and the os module
-        pass

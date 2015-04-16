@@ -25,6 +25,8 @@ class UTSGTimetable:
         }
 
     def update_files(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         term = "summer"
 
         year = 0
@@ -39,7 +41,7 @@ class UTSGTimetable:
         else:
             year = data["year"]
 
-        for sponsor in sponsors:
+        for sponsor in sponsors[:5]:
             html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
             self.save('html/%s/%s' % (str(year), sponsor), html.encode('utf-8'))
 

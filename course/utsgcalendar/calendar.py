@@ -13,4 +13,4 @@ class UTSGCalendar:
         pass
 
     def update_files(self):
-        pass
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))

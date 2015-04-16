@@ -15,4 +15,4 @@ class UTMTimetable:
         self.host = 'https://student.utm.utoronto.ca/timetable/'
 
     def update_files(self):
-        pass
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))

@@ -43,6 +43,6 @@ class CourseManager:
         self.utsc["timetable"].update_files()
 
     def upload(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         #upload the best possible schema by getting the most up to date
         #information from each scraper directory's JSON files
-        pass

@@ -15,4 +15,4 @@ class UTSCTimetable:
         self.host = 'http://www.utsc.utoronto.ca/~registrar/scheduling/timetable'
 
     def update_files(self):
-        pass
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
