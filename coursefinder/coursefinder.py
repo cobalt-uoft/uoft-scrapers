@@ -5,8 +5,6 @@ import time
 import re
 import json
 import os
-import pymongo
-from secrets import *
 
 class CourseFinder:
     """A wrapper for utilizing UofT's Course Finder web service.
@@ -19,8 +17,6 @@ class CourseFinder:
         self.urls = None
         self.cookies = http.cookiejar.CookieJar()
         self.s = requests.Session()
-        self.client = pymongo.MongoClient(MONGO_URL)
-        self.courses = self.client[MONGO_DB].courses
 
     def update_files(self):
         """Update the local JSON files for this scraper."""
@@ -41,6 +37,7 @@ class CourseFinder:
                 with open('../calendar/json/%s.json' % course_code, 'w+') as outfile:
                     json.dump(data[1], outfile)
 
+    '''
     def mongo(self):
         for root, dirs, filenames in os.walk('./json'):
             for f in filenames[1:]:
@@ -48,7 +45,8 @@ class CourseFinder:
                     doc = json.loads(fi.read(), object_pairs_hook=OrderedDict)
                     self.push_to_mongo(doc)
                     print(doc['code'])
-
+    '''
+    
     '''
     def run_update(self):
         """Does everything."""
@@ -282,7 +280,4 @@ class CourseFinder:
 
     def push_to_mongo(self, doc):
         """Push all the data to the MongoDB server."""
-        self.courses.insert(doc)
-
-cf = CourseFinder()
-cf.mongo()
+        self.courses['2014'].insert(doc)

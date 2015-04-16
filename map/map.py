@@ -14,7 +14,7 @@ class Map:
     def __init__(self):
         self.host = 'http://map.utoronto.ca/'
         self.s = requests.Session()
-        self.client = pymongo.MongoClient(os.environ.get('MONGODB_URL'))
+        self.client = pymongo.MongoClient(os.environ.get('MONGO_URL'))
         self.buildings = self.client['cobalt'].buildings
         self.campuses = ['utsg', 'utm', 'utsc']
 

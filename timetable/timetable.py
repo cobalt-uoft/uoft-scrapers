@@ -10,32 +10,38 @@ import pprint
 import tidylib
 
 
-class CourseTimetable:
+class Timetable:
 
     def __init__(self):
         self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
         self.s = requests.Session()
         self.day_map = {
-            'M': 'Monday',
-            'T': 'Tuesday',
-            'W': 'Wednesday',
-            'R': 'Thursday',
-            'F': 'Friday',
-            'S': 'Saturday'
+            'M': 'MONDAY',
+            'T': 'TUESDAY',
+            'W': 'WEDNESDAY',
+            'R': 'THURSDAY',
+            'F': 'FRIDAY',
+            'S': 'SATURDAY'
         }
 
     def update_files(self):
-        term = "winter"
+        term = "summer"
         year = 2014
 
         data = self.get_sponsors(term)
 
-        year = data[0]
+        if term == "summer":
+            year = data[0] - 1
+        else:
+            year = data[0]
+
         sponsors = data[1]
 
         print(year)
 
         for sponsor in sponsors:
+            if 'intensive' in sponsor:
+                continue
             html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
             self.save('html/%s/%s' % (str(year), sponsor), html.encode('utf-8'))
 
@@ -347,8 +353,3 @@ class CourseTimetable:
             if ".htm" in url and "/" not in url:
                 sponsors.append(url)
         return [year, sponsors]
-
-
-
-ct = CourseTimetable()
-ct.update_files()
