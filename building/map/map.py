@@ -81,6 +81,3 @@ class Map:
         data = json.loads(html)
 
         return data
-
-#map = Map()
-#map.mongo()

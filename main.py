@@ -6,8 +6,8 @@ import json
 import pymongo
 import pprint
 
-from course import CourseManager
-from building import BuildingManager
+from course.course import CourseManager
+from building.building import BuildingManager
 
 class Scraper:
 

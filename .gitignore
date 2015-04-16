@@ -1,4 +1,3 @@
-*.pyc
-*/html
-*/json
-secrets.py*
+html
+json
+__pycache__

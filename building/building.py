@@ -6,7 +6,7 @@ import json
 import pymongo
 import pprint
 
-from map.map import Map
+from building.map.map import Map
 
 class BuildingManager:
 

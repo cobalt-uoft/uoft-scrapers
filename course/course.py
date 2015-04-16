@@ -6,9 +6,9 @@ import json
 import pymongo
 import pprint
 
-from calendar.calendar import Calendar
-from coursefinder.coursefinder import Coursefinder
-from timetable.timetable import Timetable
+from course.cal.calendar import Calendar
+from course.coursefinder.coursefinder import Coursefinder
+from course.timetable.timetable import Timetable
 
 class CourseManager:
 
