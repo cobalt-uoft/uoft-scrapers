@@ -10,7 +10,11 @@ import pymongo
 class UTSGCalendar:
 
     def __init__(self):
-        pass
+        self.host = 'http://www.artsandscience.utoronto.ca/ofr/calendar/'
+        
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        if not os.path.exists('json'):
+            os.makedirs('json')
 
     def update_files(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))

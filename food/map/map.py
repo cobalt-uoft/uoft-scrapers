@@ -15,6 +15,10 @@ class Map:
         self.s = requests.Session()
         self.campuses = ['utsg', 'utm', 'utsc']
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        if not os.path.exists('json'):
+            os.makedirs('json')
+
     def update_files(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         for campus in self.campuses:

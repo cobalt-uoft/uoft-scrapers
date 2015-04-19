@@ -20,6 +20,10 @@ class Coursefinder:
         self.cookies = http.cookiejar.CookieJar()
         self.s = requests.Session()
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        if not os.path.exists('json'):
+            os.makedirs('json')
+
     def update_files(self):
         """Update the local JSON files for this scraper."""
 
