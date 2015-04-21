@@ -1,3 +1,7 @@
+/*
+  You must create a file named `config.json`
+  that looks like the following object.
+*/
 {
   "MONGO_URL": "mongodb://<user>:<pass>@<hostname>:27017/cobalt"
 }
