@@ -24,17 +24,17 @@ class Scraper:
         self.refresh_foods()
 
     def refresh_courses(self):
-        c = CourseManager(self.client)
+        c = CourseManager(self.db)
         c.update()
         c.upload()
 
     def refresh_buildings(self):
-        b = BuildingManager(self.client)
+        b = BuildingManager(self.db)
         b.update()
         b.upload()
 
     def refresh_foods(self):
-        f = FoodManager(self.client)
+        f = FoodManager(self.db)
         f.update()
         f.upload()
 
