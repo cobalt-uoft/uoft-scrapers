@@ -1,4 +1,5 @@
-import requests, http.cookiejar
+import requests
+import http.cookiejar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import time
@@ -8,6 +9,7 @@ import json
 import pymongo
 import pprint
 import tidylib
+
 
 class Map:
 
@@ -58,7 +60,7 @@ class Map:
                     ]))
                 ])
 
-                #TODO: send to a /json!
+                # TODO: send to a /json!
 
     def get_value(self, building, val, number=False):
         if val in building.keys():
@@ -73,7 +75,8 @@ class Map:
             'Referer': self.host
         }
 
-        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus), headers=headers).text
+        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
+                          headers=headers).text
 
         data = json.loads(html)
 

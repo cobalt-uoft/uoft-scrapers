@@ -1,4 +1,5 @@
-import requests, http.cookiejar
+import requests
+import http.cookiejar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import time
@@ -36,14 +37,14 @@ class Coursefinder:
             print('Current Course: %s' % course_id)
             url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
             html = self.get_course_html(url)
-            #with open('html/%s.html' % course_id, 'w+') as outfile:
+            # with open('html/%s.html' % course_id, 'w+') as outfile:
             #    outfile.write(html.decode('utf-8'))
             data = self.parse_course_html(course_id, html)
             if data:
                 with open('json/%s.json' % course_id, 'w+') as outfile:
                     json.dump(data[0], outfile)
-                #with open('../calendar/json/%s.json' % course_code, 'w+') as outfile:
-                #    json.dump(data[1], outfile)
+                # with open('../calendar/json/%s.json' % course_code, 'w+')
+                # as outfile: json.dump(data[1], outfile)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""
@@ -81,7 +82,8 @@ class Coursefinder:
                 r = self.s.get(url, cookies=self.cookies)
                 if r.status_code == 200:
                     html = r.text
-            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+            except (requests.exceptions.Timeout,
+                    requests.exceptions.ConnectionError):
                 continue
 
         return html.encode('utf-8')
@@ -89,31 +91,38 @@ class Coursefinder:
     def parse_course_html(self, course_id, html):
         """Create JSON files from the HTML pages downloaded."""
 
-        if "The course you are trying to access does not exist" in html.decode('utf-8'):
+        if "The course you are trying to access does not exist" in \
+                html.decode('utf-8'):
             return False
 
         soup = BeautifulSoup(html)
 
         # Things that appear on all courses
 
-        title = soup.find(id = "u19")
-        title_name = title.find_all("span", class_="uif-headerText-span")[0].get_text()
+        title = soup.find(id="u19")
+        title_name = title.find_all("span",
+                                    class_="uif-headerText-span")[0].get_text()
 
         course_code = course_id[:-5]
 
         course_name = title_name[10:]
 
-        division = soup.find(id = "u23").find_all("span", id="u23")[0].get_text().strip()
+        division = soup.find(id="u23").find_all("span", id="u23")[0] \
+            .get_text().strip()
 
-        description = soup.find(id = "u32").find_all("span", id="u32")[0].get_text().strip()
+        description = soup.find(id="u32").find_all("span", id="u32")[0] \
+            .get_text().strip()
 
-        department = soup.find(id = "u41").find_all("span", id="u41")[0].get_text().strip()
+        department = soup.find(id="u41").find_all("span", id="u41")[0] \
+            .get_text().strip()
 
-        course_level = soup.find(id = "u86").find_all("span", id="u86")[0].get_text().strip()
+        course_level = soup.find(id="u86").find_all("span", id="u86")[0] \
+            .get_text().strip()
         course_level = course_level[:3]
         course_level = int(course_level)
 
-        campus = soup.find(id = "u149").find_all("span", id="u149")[0].get_text().strip()
+        campus = soup.find(id="u149").find_all("span", id="u149")[0] \
+            .get_text().strip()
 
         if campus == "St. George":
             campus = "UTSG"
@@ -122,38 +131,41 @@ class Coursefinder:
         elif campus == "Scarborough":
             campus = "UTSC"
 
-        term = soup.find(id = "u158").find_all("span", id="u158")[0].get_text().strip()
+        term = soup.find(id="u158").find_all("span", id="u158")[0] \
+            .get_text().strip()
 
         # Things that don't appear on all courses
 
-        as_breadth = soup.find(id= "u122")
+        as_breadth = soup.find(id="u122")
         breadths = []
-        if not as_breadth is None:
-            as_breadth = as_breadth.find_all("span", id="u122")[0].get_text().strip()
+        if as_breadth is not None:
+            as_breadth = as_breadth.find_all("span", id="u122")[0] \
+                .get_text().strip()
             for ch in as_breadth:
                 if ch in "12345":
                     breadths.append(int(ch))
 
         breadths = sorted(breadths)
 
-        exclusions = soup.find(id= "u68")
-        if not exclusions is None:
-            exclusions = exclusions.find_all("span", id="u68")[0].get_text().strip()
+        exclusions = soup.find(id="u68")
+        if exclusions is not None:
+            exclusions = exclusions.find_all("span", id="u68")[0] \
+                .get_text().strip()
         else:
             exclusions = ""
 
-        prereq = soup.find(id= "u50")
-        if not prereq is None:
+        prereq = soup.find(id="u50")
+        if prereq is not None:
             prereq = prereq.find_all("span", id="u50")[0].get_text().strip()
         else:
             prereq = ""
 
-        #Meeting Sections
+        # Meeting Sections
 
-        meeting_table = soup.find(id = "u172")
+        meeting_table = soup.find(id="u172")
 
         trs = []
-        if not meeting_table is None:
+        if meeting_table is not None:
             trs = meeting_table.find_all("tr")
 
         sections = []
@@ -171,7 +183,8 @@ class Coursefinder:
 
                 instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"))
                 instructors = instructors.get_text().split("\n")
-                instructors = list(filter(None, [x.strip() for x in instructors]))
+                instructors =
+                list(filter(None, [x.strip() for x in instructors]))
 
                 raw_locations = tds[3].get_text().strip().split(" ")
                 locations = []
@@ -192,7 +205,6 @@ class Coursefinder:
                         location = locations[i]
                     except IndexError:
                         location = ""
-
 
                     for i in range(len(hours)):
                         x = hours[i].split(':')

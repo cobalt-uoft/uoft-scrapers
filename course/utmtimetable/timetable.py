@@ -1,4 +1,5 @@
-import requests, http.cookiejar
+import requests
+import http.cookiejar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import time

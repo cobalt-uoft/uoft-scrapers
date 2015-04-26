@@ -10,10 +10,11 @@ from course.course import CourseManager
 from building.building import BuildingManager
 from food.food import FoodManager
 
+
 class Scraper:
 
     def __init__(self):
-        with open('config.json') as data_file:    
+        with open('config.json') as data_file:
             self.config = json.load(data_file)
 
         self.db = pymongo.MongoClient(self.config["MONGO_URL"])

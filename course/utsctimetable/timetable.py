@@ -1,4 +1,5 @@
-import requests, http.cookiejar
+import requests
+import http.cookiejar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import time
@@ -12,7 +13,8 @@ import tidylib
 class UTSCTimetable:
 
     def __init__(self):
-        self.host = 'http://www.utsc.utoronto.ca/~registrar/scheduling/timetable'
+        self.host =
+        'http://www.utsc.utoronto.ca/~registrar/scheduling/timetable'
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         if not os.path.exists('json'):
