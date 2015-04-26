@@ -183,8 +183,8 @@ class Coursefinder:
 
                 instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"))
                 instructors = instructors.get_text().split("\n")
-                instructors =
-                list(filter(None, [x.strip() for x in instructors]))
+                instructors = \
+                    list(filter(None, [x.strip() for x in instructors]))
 
                 raw_locations = tds[3].get_text().strip().split(" ")
                 locations = []
