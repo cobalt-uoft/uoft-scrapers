@@ -8,6 +8,7 @@ import pprint
 
 from building.map.map import Map
 
+
 class BuildingManager:
 
     def __init__(self, client):
@@ -19,4 +20,5 @@ class BuildingManager:
 
     def upload(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        #Upload the JSON files to database through self.client and the os module
+        # Upload the JSON files to database through self.client
+        # and the os module

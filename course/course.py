@@ -16,6 +16,7 @@ from course.utmtimetable.timetable import UTMTimetable
 
 from course.utsctimetable.timetable import UTSCTimetable
 
+
 class CourseManager:
 
     def __init__(self, client):
@@ -44,5 +45,5 @@ class CourseManager:
 
     def upload(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        #upload the best possible schema by getting the most up to date
-        #information from each scraper directory's JSON files
+        # upload the best possible schema by getting the most up to date
+        # information from each scraper directory's JSON files
