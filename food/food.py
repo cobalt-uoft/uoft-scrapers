@@ -8,6 +8,7 @@ import pprint
 
 from building.map.map import Map
 
+
 class FoodManager:
 
     def __init__(self, client):
@@ -19,4 +20,5 @@ class FoodManager:
 
     def upload(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        #Upload the JSON files to database through self.client and the os module
+        # Upload the JSON files to database through self.client
+        # and the os module
