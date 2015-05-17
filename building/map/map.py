@@ -60,7 +60,8 @@ class Map:
                     ]))
                 ])
 
-                # TODO: send to a /json!
+                with open('json/%s.json' % _id, 'w') as fp:
+                    json.dump(doc, fp)
 
     def get_value(self, building, val, number=False):
         if val in building.keys():

@@ -6,6 +6,7 @@ import time
 import os
 import re
 import json
+import pymongo
 import pprint
 import tidylib
 
@@ -15,6 +16,8 @@ class Map:
     def __init__(self):
         self.host = 'http://map.utoronto.ca/'
         self.s = requests.Session()
+        self.client = pymongo.MongoClient(os.environ.get('MONGO_URL'))
+        self.buildings = self.client['cobalt'].buildings
         self.campuses = ['utsg', 'utm', 'utsc']
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +28,12 @@ class Map:
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         for campus in self.campuses:
             data = self.get_map_json(campus)
-            # get food data
+
+    def get_value(self, building, val, number=False):
+        if val in building.keys():
+            return building[val]
+        else:
+            return 0 if number else ''
 
     def get_map_json(self, campus):
         self.s.get(self.host)

@@ -20,22 +20,22 @@ class Scraper:
         self.db = pymongo.MongoClient(self.config["MONGO_URL"])
 
     def run(self):
-        self.refresh_courses()
         self.refresh_buildings()
         self.refresh_foods()
+        #self.refresh_courses()
 
     def refresh_courses(self):
-        c = CourseManager(self.db)
+        c = CourseManager(self.db.cobalt)
         c.update()
         c.upload()
 
     def refresh_buildings(self):
-        b = BuildingManager(self.db)
+        b = BuildingManager(self.db.cobalt)
         b.update()
         b.upload()
 
     def refresh_foods(self):
-        f = FoodManager(self.db)
+        f = FoodManager(self.db.cobalt)
         f.update()
         f.upload()
 
