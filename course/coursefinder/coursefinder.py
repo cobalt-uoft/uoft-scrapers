@@ -37,14 +37,10 @@ class Coursefinder:
             print('Current Course: %s' % course_id)
             url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
             html = self.get_course_html(url)
-            # with open('html/%s.html' % course_id, 'w+') as outfile:
-            #    outfile.write(html.decode('utf-8'))
-            data = self.parse_course_html(course_id, html)
+            data = self.parse_course_html(course_id, html) # this needs to be queued with workers
             if data:
                 with open('json/%s.json' % course_id, 'w+') as outfile:
-                    json.dump(data[0], outfile)
-                # with open('../calendar/json/%s.json' % course_code, 'w+')
-                # as outfile: json.dump(data[1], outfile)
+                    json.dump(data, outfile)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""
@@ -248,20 +244,7 @@ class Coursefinder:
             ("meeting_sections", sections)
         ])
 
-        basic_course = OrderedDict([
-            ("code", course_code),
-            ("name", course_name),
-            ("description", description),
-            ("division", division),
-            ("department", department),
-            ("prerequisites", prereq),
-            ("exclusions", exclusions),
-            ("level", course_level),
-            ("campus", campus),
-            ("breadths", breadths)
-        ])
-
-        return [course, basic_course]
+        return course
 
 
 if __name__ == "__main__":
