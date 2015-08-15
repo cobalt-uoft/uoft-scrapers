@@ -1,35 +1,30 @@
 import requests
-import http.cookiejar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import time
 import os
 import re
 import json
-import pymongo
-import pprint
-import tidylib
+from ..scraper import Scraper
 
 
-class Map:
+class Map(Scraper):
+    """A scraper for UofT's Map web service.
 
+    UofT Map is located at http://map.utoronto.ca/.
+    """
     def __init__(self):
-        self.host = 'http://map.utoronto.ca/'
-        self.s = requests.Session()
-        self.client = pymongo.MongoClient(os.environ.get('MONGO_URL'))
-        self.buildings = self.client['cobalt'].buildings
-        self.campuses = ['utsg', 'utm', 'utsc']
+        super().__init__('Map', os.path.dirname(os.path.abspath(__file__)))
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        if not os.path.exists('json'):
-            os.makedirs('json')
+        self.host = 'http://map.utoronto.ca/'
+        self.campuses = ['utsg', 'utm', 'utsc']
+        self.s = requests.Session()
 
     def update_files(self):
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        """Update the local JSON files for this scraper."""
+
         for campus in self.campuses:
             data = self.get_map_json(campus)
             for building in data['buildings']:
-
                 _id = building['id']
                 code = building['code']
                 name = building['title']
@@ -63,22 +58,23 @@ class Map:
                 with open('json/%s.json' % _id, 'w') as fp:
                     json.dump(doc, fp)
 
+    def get_map_json(self, campus):
+        """Retrieve the JSON structure from host."""
+
+        self.s.get(self.host)
+        headers = {
+            'Referer': self.host
+        }
+        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
+                          headers=headers).text
+        data = json.loads(html)
+        return data
+
     def get_value(self, building, val, number=False):
+        """Retrieve the desired value from the parsed response dictionary."""
+
         if val in building.keys():
             return building[val]
         else:
             return 0 if number else ''
 
-    def get_map_json(self, campus):
-        self.s.get(self.host)
-
-        headers = {
-            'Referer': self.host
-        }
-
-        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
-                          headers=headers).text
-
-        data = json.loads(html)
-
-        return data

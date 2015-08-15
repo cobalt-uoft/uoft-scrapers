@@ -7,37 +7,36 @@ import re
 import json
 import os
 import sys
+from ..scraper import Scraper
 
 
-class Coursefinder:
+class Coursefinder(Scraper):
     """A scraper for UofT's Course Finder web service.
 
     Course Finder is located at http://coursefinder.utoronto.ca/.
     """
 
     def __init__(self):
+        super().__init__('Coursefinder', os.path.dirname(os.path.abspath(__file__)))
+
         self.host = 'http://coursefinder.utoronto.ca/course-search/search'
         self.urls = None
         self.cookies = http.cookiejar.CookieJar()
         self.s = requests.Session()
 
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        if not os.path.exists('json'):
-            os.makedirs('json')
-
     def update_files(self):
         """Update the local JSON files for this scraper."""
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
+        
         urls = self.search()
         for x in urls[:5]:
             course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
             course_code = course_id[:8]
             print('Current Course: %s' % course_id)
             url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
+
+            # this needs to be queued with workers
             html = self.get_course_html(url)
-            data = self.parse_course_html(course_id, html) # this needs to be queued with workers
+            data = self.parse_course_html(course_id, html)
             if data:
                 with open('json/%s.json' % course_id, 'w+') as outfile:
                     json.dump(data, outfile)
@@ -246,7 +245,3 @@ class Coursefinder:
 
         return course
 
-
-if __name__ == "__main__":
-    cf = Coursefinder()
-    cf.update_files()

@@ -1,3 +1,0 @@
-{
-  "MONGO_URL": "mongodb://<user>:<pass>@<hostname>:27017/cobalt"
-}

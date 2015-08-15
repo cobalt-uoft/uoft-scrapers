@@ -1,21 +1,20 @@
 import requests
 import http.cookiejar
 from bs4 import BeautifulSoup
-from collections import OrderedDict
-import time
+from collections import OrderedDict`
 import re
 import os
 import json
-import pymongo
-import pprint
 import tidylib
+from ..scraper import Scraper
 
 
-class UTSGTimetable:
+class UTSGTimetable(Scraper):
 
     def __init__(self):
+        super().__init__('UTSG Timetable', os.path.dirname(os.path.abspath(__file__)))
+
         self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
-        self.s = requests.Session()
         self.day_map = {
             'M': 'MONDAY',
             'T': 'TUESDAY',
@@ -24,20 +23,12 @@ class UTSGTimetable:
             'F': 'FRIDAY',
             'S': 'SATURDAY'
         }
-
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        if not os.path.exists('json'):
-            os.makedirs('json')
+        self.s = requests.Session()
 
     def update_files(self):
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
         term = "summer"
-
         year = 0
-
         data = self.get_sponsors(term)
-
         sponsors = data["sponsors"]
 
         if term == "summer":
