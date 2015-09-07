@@ -58,8 +58,12 @@ class Map(Scraper):
                 with open('json/%s.json' % _id, 'w') as fp:
                     json.dump(doc, fp)
 
+        print('%s completed.' % self.name)
+
     def get_map_json(self, campus):
         """Retrieve the JSON structure from host."""
+
+        print('Scraping %s.' % campus)
 
         self.s.get(self.host)
         headers = {

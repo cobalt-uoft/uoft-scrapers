@@ -1,7 +1,7 @@
 import requests
 import http.cookiejar
 from bs4 import BeautifulSoup
-from collections import OrderedDict`
+from collections import OrderedDict
 import re
 import os
 import json
@@ -24,30 +24,32 @@ class UTSGTimetable(Scraper):
             'S': 'SATURDAY'
         }
         self.s = requests.Session()
+        self.terms = ["summer", "winter"]
 
     def update_files(self):
-        term = "summer"
-        year = 0
-        data = self.get_sponsors(term)
-        sponsors = data["sponsors"]
+        for term in self.terms:
+            year = 0
+            data = self.get_sponsors(term)
+            sponsors = data["sponsors"]
 
-        if term == "summer":
-            # 2015 summer counts as 2014 term
-            year = data["year"] - 1
-        else:
-            year = data["year"]
+            if term == "summer":
+                # 2015 summer counts as 2014 term
+                year = data["year"] - 1
+            else:
+                year = data["year"]
 
-        for sponsor in sponsors[:5]:
-            html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
-            self.save('html/%s/%s' % (str(year), sponsor),
-                      html.encode('utf-8'))
+            for sponsor in sponsors:
+                print('Scraping %s/%s.' % (term, sponsor.split('.')[0]))
+                html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
+                self.save('html/%s/%s' % (str(year), sponsor),
+                          html.encode('utf-8'))
 
-            data = self.parse_sponsor(html, year, term, sponsor)
+                data = self.parse_sponsor(html, year, term, sponsor)
 
-            for course in data:
-                self.save_json('json/%s/%s' % (str(year),
-                               course["id"] + ".json"), course)
-                print("Current course: " + course["id"])
+                for course in data:
+                    self.save_json('json/%s/%s' % (str(year),
+                                   course["id"] + ".json"), course)
+        print('%s completed.' % self.name)
 
     def parse_sponsor(self, html, year, term, sponsor=''):
         document, errors = \
@@ -71,8 +73,6 @@ class UTSGTimetable(Scraper):
         current_section = None
 
         for tr in trs:
-
-            print(tr)
 
             if "Cancel" in tr.get_text():
                 continue
@@ -141,7 +141,6 @@ class UTSGTimetable(Scraper):
                     instructors = []
 
                 try:
-                    print(current_course)
                     if not isinstance(current_course[2][current_section],
                                       list):
                         current_course[2][current_section] = []
@@ -248,7 +247,7 @@ class UTSGTimetable(Scraper):
 
             level = int(course_code[3] + "00")
 
-            print(course)
+
 
             sections = []
             for k in course[2]:
@@ -257,7 +256,7 @@ class UTSGTimetable(Scraper):
                 instructors = []
                 time_data = []
                 for x in course[2][k]:
-                    print(x)
+
                     if x["time"] != "":
 
                         instructors += x["instructors"]
@@ -353,8 +352,6 @@ class UTSGTimetable(Scraper):
         soup = BeautifulSoup(html)
 
         title = soup.title.get_text().strip()
-
-        print(title)
 
         year = -1
         year = int(re.search("([0-9]{4})", title).group(0))
