@@ -26,13 +26,20 @@ class Coursefinder(Scraper):
 
     def update_files(self):
         """Update the local JSON files for this scraper."""
-        
+
         urls = self.search()
-        for x in urls[:5]:
+
+        completed = 0
+        total = len(urls)
+
+        for x in urls:
             course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
             course_code = course_id[:8]
-            print('Current Course: %s' % course_id)
             url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
+
+            percentage = int((completed / total) * 100) + 1
+            completed += 1
+            print('Scraping %s. (%i%%)' % (course_code, percentage))
 
             # this needs to be queued with workers
             html = self.get_course_html(url)
@@ -40,6 +47,8 @@ class Coursefinder(Scraper):
             if data:
                 with open('json/%s.json' % course_id, 'w+') as outfile:
                     json.dump(data, outfile)
+
+        print('%s completed.' % self.name)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""

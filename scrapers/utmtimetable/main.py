@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
 from ..scraper import Scraper
+import os
 
 class UTMTimetable(Scraper):
 
@@ -11,4 +12,5 @@ class UTMTimetable(Scraper):
         self.host = 'https://student.utm.utoronto.ca/timetable/'
 
     def update_files(self):
-        pass
+        print('Not implemented')
+        print('%s completed.' % self.name)

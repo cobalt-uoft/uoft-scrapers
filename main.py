@@ -42,7 +42,7 @@ def scrape_m():
 
 args = [x.lower() for x in sys.argv]
 
-if args[0] == 'all':
+if 'all' in args:
     scrape_all()
 else:
     for x in args:

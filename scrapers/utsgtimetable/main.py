@@ -221,6 +221,9 @@ class UTSGTimetable(Scraper):
 
         for course in course_info:
 
+            if len(course) == 0:
+                continue
+
             course_id = course[0]
             course_term = ""
             if term == "winter":
