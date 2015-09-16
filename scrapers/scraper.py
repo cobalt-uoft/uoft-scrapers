@@ -10,4 +10,4 @@ class Scraper:
         if not os.path.exists('json'):
             os.makedirs('json')
 
-        print('\n%s initialized.' % self.name)
+        print('%s initialized.' % self.name)
