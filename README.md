@@ -31,6 +31,7 @@ Scrape multiple sources at once by specifying more than one scraper:
 ```bash
   python3 main.py map utsgtimetable
 ```
+All scraped data is outputted in JSON files located in the scraper's respective directory at `json/`.
 A complete list of accepted arguments:
  - all
  - [coursefinder](http://coursefinder.utoronto.ca/)
