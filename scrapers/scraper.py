@@ -1,13 +1,15 @@
 import os
+import shutil
 
 class Scraper:
     """Scraper superclass."""
-    
+
     def __init__(self, name, path):
         self.name = name
-        
+
         os.chdir(path)
-        if not os.path.exists('json'):
-            os.makedirs('json')
+        if os.path.exists('json'):
+            shutil.rmtree('json')
+        os.makedirs('json')
 
         print('%s initialized.' % self.name)

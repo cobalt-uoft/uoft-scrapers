@@ -99,7 +99,7 @@ class Coursefinder(Scraper):
                 html.decode('utf-8'):
             return False
 
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "html.parser")
 
         # Things that appear on all courses
 
@@ -185,7 +185,7 @@ class Coursefinder(Scraper):
                 for i in range(0, len(raw_times) - 1, 2):
                     times.append(raw_times[i] + " " + raw_times[i + 1])
 
-                instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"))
+                instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"), "html.parser")
                 instructors = instructors.get_text().split("\n")
                 instructors = \
                     list(filter(None, [x.strip() for x in instructors]))
@@ -253,4 +253,3 @@ class Coursefinder(Scraper):
         ])
 
         return course
-
