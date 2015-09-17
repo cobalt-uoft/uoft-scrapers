@@ -1,5 +1,5 @@
 # UofT Scrapers
-This is a library of scrapers for various UofT websites. It is built to generate up-to-date databases for [Cobalt](https://github.com/cobalt-io), but can be used as a stand-alone script for anyone to utilize.
+This is a library of scrapers for various University of Toronto websites. It is built to generate up-to-date databases for [Cobalt](https://github.com/cobalt-io), but can be used as a stand-alone script for anyone to utilize.
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.4.3/)
@@ -33,9 +33,9 @@ Scrape multiple sources at once by specifying more than one scraper:
 ```
 A complete list of accepted arguments:
  - all
- - coursefinder
- - utmtimetable
- - utsctimetable
- - utsgtimetable
- - utsgcalendar
- - map
+ - [coursefinder](http://coursefinder.utoronto.ca/)
+ - [utmtimetable](https://student.utm.utoronto.ca/timetable/)
+ - [utsctimetable](http://www.utsc.utoronto.ca/~registrar/scheduling/timetable)
+ - [utsgtimetable](http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm)
+ - [utsgcalendar](http://www.artsandscience.utoronto.ca/ofr/calendar/)
+ - [map](http://map.utoronto.ca/)
