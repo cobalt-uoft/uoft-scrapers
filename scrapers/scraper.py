@@ -12,4 +12,4 @@ class Scraper:
             shutil.rmtree('json')
         os.makedirs('json')
 
-        print('%s initialized.' % self.name)
+        print('%s initialized.' % self.name, flush=True)

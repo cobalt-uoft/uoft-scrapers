@@ -12,5 +12,5 @@ class UTSGCalendar(Scraper):
         self.host = 'http://www.artsandscience.utoronto.ca/ofr/calendar/'
 
     def update_files(self):
-        print('Not implemented')
-        print('%s completed.' % self.name)
+        print('Not implemented', flush=True)
+        print('%s completed.' % self.name, flush=True)

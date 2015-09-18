@@ -59,4 +59,4 @@ else:
         elif x == 'map':
             scrape_m()
 
-print("Finished.")
+print("Finished.", flush=True)

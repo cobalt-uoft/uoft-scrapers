@@ -39,7 +39,7 @@ class Coursefinder(Scraper):
 
             percentage = int((completed / total) * 100) + 1
             completed += 1
-            print('Scraping %s. (%i%%)' % (course_code, percentage))
+            print('Scraping %s. (%i%%)' % (course_code, percentage), flush=True)
 
             # this needs to be queued with workers
             html = self.get_course_html(url)
@@ -48,7 +48,7 @@ class Coursefinder(Scraper):
                 with open('json/%s.json' % course_id, 'w+') as outfile:
                     json.dump(data, outfile)
 
-        print('%s completed.' % self.name)
+        print('%s completed.' % self.name, flush=True)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""

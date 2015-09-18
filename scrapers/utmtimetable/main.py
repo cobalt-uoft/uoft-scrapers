@@ -12,5 +12,5 @@ class UTMTimetable(Scraper):
         self.host = 'https://student.utm.utoronto.ca/timetable/'
 
     def update_files(self):
-        print('Not implemented')
-        print('%s completed.' % self.name)
+        print('Not implemented', flush=True)
+        print('%s completed.' % self.name, flush=True)

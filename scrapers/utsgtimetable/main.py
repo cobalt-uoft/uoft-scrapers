@@ -39,7 +39,7 @@ class UTSGTimetable(Scraper):
                 year = data["year"]
 
             for sponsor in sponsors:
-                print('Scraping %s/%s.' % (term, sponsor.split('.')[0]))
+                print('Scraping %s/%s.' % (term, sponsor.split('.')[0]), flush=True)
                 html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
                 self.save('html/%s/%s' % (str(year), sponsor),
                           html.encode('utf-8'))
@@ -49,7 +49,7 @@ class UTSGTimetable(Scraper):
                 for course in data:
                     self.save_json('json/%s/%s' % (str(year),
                                    course["id"] + ".json"), course)
-        print('%s completed.' % self.name)
+        print('%s completed.' % self.name, flush=True)
 
     def parse_sponsor(self, html, year, term, sponsor=''):
         document, errors = \

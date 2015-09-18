@@ -13,5 +13,5 @@ class UTSCTimetable(Scraper):
             'http://www.utsc.utoronto.ca/~registrar/scheduling/timetable'
 
     def update_files(self):
-        print('Not implemented')
-        print('%s completed.' % self.name)
+        print('Not implemented', flush=True)
+        print('%s completed.' % self.name, flush=True)
