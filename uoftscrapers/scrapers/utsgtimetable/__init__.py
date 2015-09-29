@@ -48,7 +48,7 @@ class UTSGTimetable(Scraper):
                 data = self.parse_sponsor(html, year, term, sponsor)
 
                 for course in data:
-                    self.save_json('%s/%s' % (str(year),
+                    self.save_json('%s/%s/%s' % (self.location, str(year),
                                    course["id"] + ".json"), course)
         shutil.rmtree('.html')
         self.logger.info('%s completed.' % self.name)

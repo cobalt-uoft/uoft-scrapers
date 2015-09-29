@@ -45,7 +45,7 @@ class CourseFinder(Scraper):
             html = self.get_course_html(url)
             data = self.parse_course_html(course_id, html)
             if data:
-                with open('%s.json' % course_id, 'w+') as outfile:
+                with open('%s/%s.json' % (self.location, course_id), 'w+') as outfile:
                     json.dump(data, outfile)
 
         self.logger.info('%s completed.' % self.name)

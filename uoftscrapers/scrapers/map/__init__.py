@@ -56,7 +56,7 @@ class Map(Scraper):
                     ]))
                 ])
 
-                with open('%s.json' % _id, 'w') as fp:
+                with open('%s/%s.json' % (self.location, _id), 'w') as fp:
                     json.dump(doc, fp)
 
         self.logger.info('%s completed.' % self.name)
