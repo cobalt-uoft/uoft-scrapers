@@ -15,11 +15,11 @@ This is a library of scrapers for various University of Toronto websites. It is 
 ```python
 import uoftscrapers
 
-# Example: scrape http://map.utoronto.ca/ to ./some/path
+# Example: scrape http://map.utoronto.ca to ./some/path
 m = uoftscrapers.Map("./some/path")
 m.run()
 
-# Example: scrape http://coursefinder.utoronto.ca/ to current location
+# Example: scrape http://coursefinder.utoronto.ca to current location
 cf = uoftscrapers.CourseFinder()
 cf.run()
 ```
@@ -52,6 +52,8 @@ http://map.utoronto.ca/
   }
 }
 ```
+
+------
 
 ### Course Finder
 ##### Class name
@@ -91,6 +93,8 @@ http://coursefinder.utoronto.ca/
 }
 ```
 
+------
+
 ### UTSG Timetable
 ##### Class name
 ```python
@@ -129,16 +133,19 @@ http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
 }
 ```
 
+------
+
 ### UTM Timetable
 ##### Class name
 ```python
-#
 uoftscrapers.UTMTimetable
 ```
 ##### Scraper source
 https://student.utm.utoronto.ca/timetable/
 ##### Output format
 Not implemented.
+
+------
 
 ### UTSC Timetable
 ##### Class name
@@ -149,6 +156,8 @@ uoftscrapers.UTSCTimetable
 http://www.utsc.utoronto.ca/~registrar/scheduling/timetable
 ##### Output format
 Not implemented.
+
+------
 
 ### UTSG Calendar
 ##### Class name
