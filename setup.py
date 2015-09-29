@@ -1,15 +1,11 @@
 from distutils.core import setup
 from codecs import open
 
-with open('README.rst', 'r', 'utf-8') as f:
-    readme = f.read()
-
 setup(
     name = 'uoftscrapers',
     packages = ['uoftscrapers'],
     version = '0.1',
     description = 'University of Toronto public web scraping scripts.',
-    long_description = readme,
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
     url = 'https://github.com/cobalt-io/uoft-scrapers',
