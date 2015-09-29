@@ -3,7 +3,15 @@ from codecs import open
 
 setup(
     name = 'uoftscrapers',
-    packages = ['uoftscrapers'],
+    packages = [
+        'uoftscrapers',
+        'uoftscrapers.scrapers.coursefinder',
+        'uoftscrapers.scrapers.map',
+        'uoftscrapers.scrapers.utmtimetable',
+        'uoftscrapers.scrapers.utsctimetable',
+        'uoftscrapers.scrapers.utsgcalendar',
+        'uoftscrapers.scrapers.utsgtimetable'
+    ],
     version = '0.1.2',
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',

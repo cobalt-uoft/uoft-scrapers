@@ -2,12 +2,12 @@ import logging
 import os
 import sys
 
-from .scrapers.coursefinder.main import CourseFinder
-from .scrapers.utmtimetable.main import UTMTimetable
-from .scrapers.utsctimetable.main import UTSCTimetable
-from .scrapers.utsgtimetable.main import UTSGTimetable
-from .scrapers.utsgcalendar.main import UTSGCalendar
-from .scrapers.map.main import Map
+from .scrapers.coursefinder import CourseFinder
+from .scrapers.utmtimetable import UTMTimetable
+from .scrapers.utsctimetable import UTSCTimetable
+from .scrapers.utsgtimetable import UTSGTimetable
+from .scrapers.utsgcalendar import UTSGCalendar
+from .scrapers.map import Map
 
 class NullHandler(logging.Handler):
     def emit(self, record):
