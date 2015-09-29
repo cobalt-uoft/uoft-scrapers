@@ -7,7 +7,7 @@ with open('README.rst', 'r', 'utf-8') as f:
 setup(
     name = 'uoftscrapers',
     packages = ['uoftscrapers'],
-    version = '0.1.1',
+    version = '0.1',
     description = 'University of Toronto public web scraping scripts.',
     long_description = readme,
     author = 'Qasim Iqbal',
