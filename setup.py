@@ -4,7 +4,7 @@ from codecs import open
 setup(
     name = 'uoftscrapers',
     packages = ['uoftscrapers'],
-    version = '0.1',
+    version = '0.1.2',
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
@@ -14,6 +14,6 @@ setup(
     package_dir={'uoftscrapers': 'uoftscrapers'},
     include_package_data=True,
     keywords = ['uoft', 'scraper', 'toronto'],
-    install_requires = ['docutils>=2.6.2', 'beautifulsoup4>=4.3.2', 'pytidylib>=0.2.4'],
+    install_requires = ['requests>=2.6.2', 'beautifulsoup4>=4.3.2', 'pytidylib>=0.2.4'],
     classifiers = [],
 )
