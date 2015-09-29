@@ -27,12 +27,15 @@ cf.run()
 ## Library Reference
 
 ### Map
+
 ##### Class name
 ```python
 uoftscrapers.Map
 ```
+
 ##### Scraper source
 http://map.utoronto.ca/
+
 ##### Output format
 ```js
 {
@@ -56,12 +59,15 @@ http://map.utoronto.ca/
 ------
 
 ### Course Finder
+
 ##### Class name
 ```python
 uoftscrapers.CourseFinder
 ```
+
 ##### Scraper source
 http://coursefinder.utoronto.ca/
+
 #### Output format
 ```js
 {
@@ -96,12 +102,15 @@ http://coursefinder.utoronto.ca/
 ------
 
 ### UTSG Timetable
+
 ##### Class name
 ```python
 uoftscrapers.UTSGTimetable
 ```
+
 ##### Scraper source
 http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
+
 ##### Output format
 ```js
 {
@@ -136,35 +145,44 @@ http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
 ------
 
 ### UTM Timetable
+
 ##### Class name
 ```python
 uoftscrapers.UTMTimetable
 ```
+
 ##### Scraper source
 https://student.utm.utoronto.ca/timetable/
+
 ##### Output format
 Not implemented.
 
 ------
 
 ### UTSC Timetable
+
 ##### Class name
 ```python
 uoftscrapers.UTSCTimetable
 ```
+
 ##### Scraper source
 http://www.utsc.utoronto.ca/~registrar/scheduling/timetable
+
 ##### Output format
 Not implemented.
 
 ------
 
 ### UTSG Calendar
+
 ##### Class name
 ```python
 uoftscrapers.UTSGCalendar
 ```
+
 ##### Scraper source
 http://www.artsandscience.utoronto.ca/ofr/calendar/
+
 ##### Output format
 Not implemented.

@@ -1,13 +1,13 @@
 from distutils.core import setup
 from codecs import open
 
-with open('README.md', 'r', 'utf-8') as f:
+with open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
 
 setup(
     name = 'uoftscrapers',
     packages = ['uoftscrapers'],
-    version = '0.1',
+    version = '0.1.1',
     description = 'University of Toronto public web scraping scripts.',
     long_description = readme,
     author = 'Qasim Iqbal',
