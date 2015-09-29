@@ -13,7 +13,7 @@ setup(
         'uoftscrapers.scrapers.utsgtimetable',
         'uoftscrapers.scrapers.scraper'
     ],
-    version = '0.1.4',
+    version = '0.1.5',
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
