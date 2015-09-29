@@ -4,7 +4,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.4.3/)
  - [pip](https://pypi.python.org/pypi/pip#downloads)
- - [tidy](http://www.w3.org/People/Raggett/tidy/)
+ - [tidy](http://tidy.sourceforge.net/#binaries)
 
 ## Installation
 ```bash
