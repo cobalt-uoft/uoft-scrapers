@@ -18,7 +18,7 @@ setup(
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
     url = 'https://github.com/cobalt-io/uoft-scrapers',
-    download_url = 'https://github.com/cobalt-io/uoft-scrapers/tarball/0.1',
+    download_url = 'https://github.com/cobalt-io/uoft-scrapers/tarball/0.1.5',
     package_data={'': ['LICENSE.md']},
     package_dir={'uoftscrapers': 'uoftscrapers'},
     include_package_data=True,
