@@ -10,9 +10,10 @@ setup(
         'uoftscrapers.scrapers.utmtimetable',
         'uoftscrapers.scrapers.utsctimetable',
         'uoftscrapers.scrapers.utsgcalendar',
-        'uoftscrapers.scrapers.utsgtimetable'
+        'uoftscrapers.scrapers.utsgtimetable',
+        'uoftscrapers.scrapers.scraper'
     ],
-    version = '0.1.3',
+    version = '0.1.4',
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
