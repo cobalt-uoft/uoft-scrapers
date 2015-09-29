@@ -24,15 +24,16 @@ cf = uoftscrapers.CourseFinder()
 cf.run()
 ```
 
-## Class Reference
+## Library Reference
 
 ### Map
+##### Class name
 ```python
-# http://map.utoronto.ca/
 uoftscrapers.Map
 ```
-
-#### Output format
+##### Scraper source
+http://map.utoronto.ca/
+##### Output format
 ```js
 {
   id: String,
@@ -52,13 +53,13 @@ uoftscrapers.Map
 }
 ```
 
-
 ### Course Finder
+##### Class name
 ```python
-# http://coursefinder.utoronto.ca/
 uoftscrapers.CourseFinder
 ```
-
+##### Scraper source
+http://coursefinder.utoronto.ca/
 #### Output format
 ```js
 {
@@ -89,15 +90,15 @@ uoftscrapers.CourseFinder
   }]
 }
 ```
-
 
 ### UTSG Timetable
+##### Class name
 ```python
-# http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
 uoftscrapers.UTSGTimetable
 ```
-
-#### Output format
+##### Scraper source
+http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
+##### Output format
 ```js
 {
   id: String,
@@ -128,32 +129,33 @@ uoftscrapers.UTSGTimetable
 }
 ```
 
-
 ### UTM Timetable
+##### Class name
 ```python
-# https://student.utm.utoronto.ca/timetable/
+#
 uoftscrapers.UTMTimetable
 ```
-
-#### Output format
+##### Scraper source
+https://student.utm.utoronto.ca/timetable/
+##### Output format
 Not implemented.
-
 
 ### UTSC Timetable
+##### Class name
 ```python
-# http://www.utsc.utoronto.ca/~registrar/scheduling/timetable
 uoftscrapers.UTSCTimetable
 ```
-
-#### Output format
+##### Scraper source
+http://www.utsc.utoronto.ca/~registrar/scheduling/timetable
+##### Output format
 Not implemented.
 
-
 ### UTSG Calendar
+##### Class name
 ```python
-# http://www.artsandscience.utoronto.ca/ofr/calendar/
 uoftscrapers.UTSGCalendar
 ```
-
-#### Output format
+##### Scraper source
+http://www.artsandscience.utoronto.ca/ofr/calendar/
+##### Output format
 Not implemented.
