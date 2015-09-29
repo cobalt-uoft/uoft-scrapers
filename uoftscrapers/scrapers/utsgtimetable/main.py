@@ -11,8 +11,8 @@ from ..scraper import Scraper
 
 class UTSGTimetable(Scraper):
 
-    def __init__(self):
-        super().__init__('UTSG Timetable', os.path.dirname(os.path.abspath(__file__)))
+    def __init__(self, output_location='.'):
+        super().__init__('UTSG Timetable', output_location)
 
         self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
         self.day_map = {
@@ -26,7 +26,7 @@ class UTSGTimetable(Scraper):
         self.s = requests.Session()
         self.terms = ["summer", "winter"]
 
-    def update_files(self):
+    def run(self):
         for term in self.terms:
             year = 0
             data = self.get_sponsors(term)
@@ -39,7 +39,7 @@ class UTSGTimetable(Scraper):
                 year = data["year"]
 
             for sponsor in sponsors:
-                print('Scraping %s/%s.' % (term, sponsor.split('.')[0]), flush=True)
+                self.logger.info('Scraping %s/%s.' % (term, sponsor.split('.')[0]))
                 html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
                 self.save('html/%s/%s' % (str(year), sponsor),
                           html.encode('utf-8'))
@@ -49,7 +49,7 @@ class UTSGTimetable(Scraper):
                 for course in data:
                     self.save_json('json/%s/%s' % (str(year),
                                    course["id"] + ".json"), course)
-        print('%s completed.' % self.name, flush=True)
+        self.logger.info('%s completed.' % self.name)
 
     def parse_sponsor(self, html, year, term, sponsor=''):
         document, errors = \

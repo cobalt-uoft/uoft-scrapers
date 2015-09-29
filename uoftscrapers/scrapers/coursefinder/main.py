@@ -10,21 +10,21 @@ import sys
 from ..scraper import Scraper
 
 
-class Coursefinder(Scraper):
+class CourseFinder(Scraper):
     """A scraper for UofT's Course Finder web service.
 
     Course Finder is located at http://coursefinder.utoronto.ca/.
     """
 
-    def __init__(self):
-        super().__init__('Coursefinder', os.path.dirname(os.path.abspath(__file__)))
+    def __init__(self, output_location='.'):
+        super().__init__('Course Finder', output_location)
 
         self.host = 'http://coursefinder.utoronto.ca/course-search/search'
         self.urls = None
         self.cookies = http.cookiejar.CookieJar()
         self.s = requests.Session()
 
-    def update_files(self):
+    def run(self):
         """Update the local JSON files for this scraper."""
 
         urls = self.search()
@@ -39,16 +39,16 @@ class Coursefinder(Scraper):
 
             percentage = int((completed / total) * 100) + 1
             completed += 1
-            print('Scraping %s. (%i%%)' % (course_code, percentage), flush=True)
+            self.logger.info('Scraping %s. (%i%%)' % (course_code, percentage))
 
             # this needs to be queued with workers
             html = self.get_course_html(url)
             data = self.parse_course_html(course_id, html)
             if data:
-                with open('json/%s.json' % course_id, 'w+') as outfile:
+                with open('%s.json' % course_id, 'w+') as outfile:
                     json.dump(data, outfile)
 
-        print('%s completed.' % self.name, flush=True)
+        self.logger.info('%s completed.' % self.name)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""

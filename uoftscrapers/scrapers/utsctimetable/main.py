@@ -7,11 +7,12 @@ import os
 
 class UTSCTimetable(Scraper):
 
-    def __init__(self):
-        super().__init__('UTSC Timetable', os.path.dirname(os.path.abspath(__file__)))
+    def __init__(self, output_location='.'):
+        super().__init__('UTSC Timetable', output_location)
+
         self.host = \
             'http://www.utsc.utoronto.ca/~registrar/scheduling/timetable'
 
-    def update_files(self):
-        print('Not implemented', flush=True)
-        print('%s completed.' % self.name, flush=True)
+    def run(self):
+        self.logger.info('Not implemented')
+        self.logger.info('%s completed.' % self.name)

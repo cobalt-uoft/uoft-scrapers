@@ -12,14 +12,15 @@ class Map(Scraper):
 
     UofT Map is located at http://map.utoronto.ca/.
     """
-    def __init__(self):
-        super().__init__('Map', os.path.dirname(os.path.abspath(__file__)))
+
+    def __init__(self, output_location='.'):
+        super().__init__('Map', output_location)
 
         self.host = 'http://map.utoronto.ca/'
         self.campuses = ['utsg', 'utm', 'utsc']
         self.s = requests.Session()
 
-    def update_files(self):
+    def run(self):
         """Update the local JSON files for this scraper."""
 
         for campus in self.campuses:
@@ -58,12 +59,12 @@ class Map(Scraper):
                 with open('json/%s.json' % _id, 'w') as fp:
                     json.dump(doc, fp)
 
-        print('%s completed.' % self.name, flush=True)
+        self.logger.info('%s completed.' % self.name)
 
     def get_map_json(self, campus):
         """Retrieve the JSON structure from host."""
 
-        print('Scraping %s.' % campus, flush=True)
+        self.logger.info('Scraping %s.' % campus)
 
         self.s.get(self.host)
         headers = {

@@ -1,15 +1,16 @@
 import os
 import shutil
+import logging
 
 class Scraper:
     """Scraper superclass."""
 
-    def __init__(self, name, path):
+    def __init__(self, name, location):
         self.name = name
+        self.logger = logging.getLogger("uoftscrapers")
 
-        os.chdir(path)
-        if os.path.exists('json'):
-            shutil.rmtree('json')
-        os.makedirs('json')
+        if not os.path.exists(location):
+            os.makedirs(location)
+        os.chdir(location)
 
-        print('%s initialized.' % self.name, flush=True)
+        self.logger.info('%s initialized.' % self.name)

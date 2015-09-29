@@ -7,10 +7,11 @@ import os
 
 class UTMTimetable(Scraper):
 
-    def __init__(self):
-        super().__init__('UTM Timetable', os.path.dirname(os.path.abspath(__file__)))
+    def __init__(self, output_location='.'):
+        super().__init__('UTM Timetable', output_location)
+
         self.host = 'https://student.utm.utoronto.ca/timetable/'
 
-    def update_files(self):
-        print('Not implemented', flush=True)
-        print('%s completed.' % self.name, flush=True)
+    def run(self):
+        self.logger.info('Not implemented')
+        self.logger.info('%s completed.' % self.name)
