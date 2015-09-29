@@ -6,6 +6,7 @@ import re
 import os
 import json
 import tidylib
+import shutil
 from ..scraper import Scraper
 
 
@@ -41,14 +42,15 @@ class UTSGTimetable(Scraper):
             for sponsor in sponsors:
                 self.logger.info('Scraping %s/%s.' % (term, sponsor.split('.')[0]))
                 html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
-                self.save('html/%s/%s' % (str(year), sponsor),
+                self.save('.html/%s/%s' % (str(year), sponsor),
                           html.encode('utf-8'))
 
                 data = self.parse_sponsor(html, year, term, sponsor)
 
                 for course in data:
-                    self.save_json('json/%s/%s' % (str(year),
+                    self.save_json('%s/%s' % (str(year),
                                    course["id"] + ".json"), course)
+        shutil.rmtree('.html')
         self.logger.info('%s completed.' % self.name)
 
     def parse_sponsor(self, html, year, term, sponsor=''):
@@ -359,7 +361,7 @@ class UTSGTimetable(Scraper):
         year = -1
         year = int(re.search("([0-9]{4})", title).group(0))
 
-        self.save('html/%s/sponsors.html' % str(year), html.encode('utf-8'))
+        self.save('.html/%s/sponsors.html' % str(year), html.encode('utf-8'))
 
         sponsors = []
         for x in soup.find_all('a'):

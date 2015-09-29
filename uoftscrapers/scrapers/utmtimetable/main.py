@@ -14,4 +14,5 @@ class UTMTimetable(Scraper):
 
     def run(self):
         self.logger.info('Not implemented')
+        raise NotImplementedError('This scraper has not been implemented yet.')
         self.logger.info('%s completed.' % self.name)
