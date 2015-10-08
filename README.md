@@ -1,5 +1,5 @@
 # UofT Scrapers
-This is a library of scrapers for various University of Toronto websites. It is built to generate up-to-date databases for [Cobalt](https://github.com/cobalt-io), but is distributed as a stand-alone library for anyone to utilize.
+This is a library of scrapers for various University of Toronto websites. It is built to generate up-to-date databases for [Cobalt](https://cobalt.qas.im/), but is distributed as a stand-alone library for anyone to utilize.
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.4.3/)
