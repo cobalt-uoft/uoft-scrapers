@@ -26,7 +26,7 @@ cf.run()
 
 ## Library Reference
 
-### Map
+### Buildings
 
 ##### Class name
 ```python
