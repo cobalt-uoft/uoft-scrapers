@@ -6,14 +6,14 @@ setup(
     packages = [
         'uoftscrapers',
         'uoftscrapers.scrapers.coursefinder',
-        'uoftscrapers.scrapers.map',
+        'uoftscrapers.scrapers.buildings',
         'uoftscrapers.scrapers.utmtimetable',
         'uoftscrapers.scrapers.utsctimetable',
         'uoftscrapers.scrapers.utsgcalendar',
         'uoftscrapers.scrapers.utsgtimetable',
         'uoftscrapers.scrapers.scraper'
     ],
-    version = '0.1.6',
+    version = '0.1.7',
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',

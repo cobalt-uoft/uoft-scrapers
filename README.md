@@ -15,9 +15,9 @@ This is a library of scrapers for various University of Toronto websites. It is 
 ```python
 import uoftscrapers
 
-# Example: scrape http://map.utoronto.ca to ./some/path
-m = uoftscrapers.Map("./some/path")
-m.run()
+# Example: scrape http://map.utoronto.ca building data to ./some/path
+b = uoftscrapers.Buildings("./some/path")
+b.run()
 
 # Example: scrape http://coursefinder.utoronto.ca to current location
 cf = uoftscrapers.CourseFinder()
@@ -30,7 +30,7 @@ cf.run()
 
 ##### Class name
 ```python
-uoftscrapers.Map
+uoftscrapers.Buildings
 ```
 
 ##### Scraper source
@@ -44,15 +44,18 @@ http://map.utoronto.ca/
   name: String,
   short_name: String,
   campus: String,
-  lat: Number,
-  lng: Number,
   address: {
     street: String,
     city: String,
     province: String,
     country: String,
     postal: String
-  }
+  },
+  lat: Number,
+  lng: Number,
+  polygon: [
+    [Number, Number]
+  ]
 }
 ```
 
