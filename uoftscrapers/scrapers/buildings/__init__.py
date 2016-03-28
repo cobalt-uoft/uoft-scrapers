@@ -36,7 +36,8 @@ class Buildings(Scraper):
                 lat = self.get_value(building, 'lat', True)
                 lng = self.get_value(building, 'lng', True)
 
-                street = self.get_value(building, 'street')
+                street = ' '.join(filter(
+                    None, self.get_value(building, 'street').split(' ')))
                 city = self.get_value(building, 'city')
                 province = self.get_value(building, 'province')
                 country = self.get_value(building, 'country')
