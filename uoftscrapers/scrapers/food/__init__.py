@@ -37,6 +37,9 @@ class Food(Scraper):
                 lng = self.get_value(entry, 'lng', True)
                 url = self.get_value(entry, 'url')
 
+                if not image == '':
+                    image = "%s%s" % (self.host[:-1], image)
+
                 doc = OrderedDict([
                     ('id', id_),
                     ('building_id', building_id),
