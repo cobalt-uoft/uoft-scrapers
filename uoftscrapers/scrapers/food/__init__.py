@@ -77,6 +77,25 @@ class Food(Scraper):
     def get_hours(self, food_id):
         """Parse and return the restaurant's opening and closing times."""
 
+        def conv_time(t):
+            """Convert and return time of the form HH:MM a.m./p.m. to
+            decimal format."""
+
+            time, period = t[:-4].strip(), t[-4:].strip()
+
+            # for mistyped times, e.g. http://map.utoronto.ca/json/hours/1329
+            if t[0] == ':':
+                time = time[1:len(time)-2] + ':' + time[-2:]
+
+            m = 0
+            if ':' in time:
+                h, m = [int(x) for x in time.split(':')]
+            else:
+                h = int(time)
+
+            h += 12 if period == 'p.m.' else 0
+            return h + (m / 60)
+
         headers = {
             'Referer': self.host
         }
@@ -94,20 +113,16 @@ class Food(Scraper):
             timings = soup.find('tbody').find_all('td')
 
             for i in range(len(timings)):
-                closed, opening, closing = False, '', ''
+                opening = closing = 0
                 day, timing = days[i], timings[i].text
 
-                # when closed for the full day, timing will not have a '-'
-                if '-' in timing:
-                    opening, closing = timing.split(' -')
-                else:
-                    closed = True
-
-                hours.update({day: OrderedDict([
-                    ('closed', closed),
-                    ('open', opening),
-                    ('close', closing)])})
-
+                if 'closed' not in timing:
+                    # timing is provided as HH:MM p.d. -HH:MM p.d.
+                    timing = timing.split(' -')
+                    opening, closing = (conv_time(timing[0]),
+                                        conv_time(timing[1]))
+                hours.update(
+                    {day: OrderedDict([('open', opening), ('close', closing)])})
             return hours
         else:
             return ''  # hours unavailable
