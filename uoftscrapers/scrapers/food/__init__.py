@@ -18,6 +18,60 @@ class Food(Scraper):
         self.campuses = ['utsg', 'utm', 'utsc']
         self.s = requests.Session()
 
+    def run(self):
+        for campus in self.campuses:
+            data = self.get_map_json(campus)['layers'][2]
+
+            for entry in data['markers']:
+                id_ = str(entry['id'])
+                building_id = entry['building_code']
+                name = entry['title']
+                address =  entry['address']
+                hours = self.get_hours(id_)
+
+                short_name = self.get_value(entry, 'slug')
+                desc = self.get_value(entry, 'desc').strip()
+                tags = self.get_value(entry, 'tags').split(', ')
+                image = self.get_value(entry, 'image')
+                lat = self.get_value(entry, 'lat', True)
+                lng = self.get_value(entry, 'lng', True)
+                url = self.get_value(entry, 'url')
+
+                doc = OrderedDict([
+                    ('id', id_),
+                    ('building_id', building_id),
+                    ('name', name),
+                    ('short_name', short_name),
+                    ('description', desc),
+                    ('url', url),
+                    ('tags', tags),
+                    ('image', image),
+                    ('campus', campus.upper()),
+                    ('lat', lat),
+                    ('lng', lng),
+                    ('address', address),
+                    ('hours', hours)
+                ])
+
+                with open('%s/%s.json' % (self.location, id_), 'w') as fp:
+                    json.dump(doc, fp)
+
+        self.logger.info('%s completed.' % self.name)
+
+    def get_map_json(self, campus):
+        """Retrieve the JSON structure from host."""
+
+        self.logger.info('Scraping %s.' % campus)
+
+        self.s.get(self.host)
+        headers = {
+            'Referer': self.host
+        }
+        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
+                          headers=headers).text
+        data = json.loads(html)
+        return data
+
     def get_hours(self, food_id):
         """Parse and return the restaurant's opening and closing times."""
         headers = {
@@ -54,3 +108,12 @@ class Food(Scraper):
             return hours
         else:
             return ''
+
+
+    def get_value(self, entry, val, number=False):
+        """Retrieve the desired value from the parsed response dictionary."""
+
+        if val in entry.keys():
+            return entry[val]
+        else:
+            return 0 if number else ''
