@@ -15,20 +15,20 @@ class Food(Scraper):
         super().__init__('Food', output_location)
 
         self.host = 'http://map.utoronto.ca/'
-        self.campuses = ['utsg', 'utm', 'utsc']
+        self.campuses = [('utsg', 2), ('utm', 1), ('utsc', 0)]
         self.s = requests.Session()
 
     def run(self):
-        for campus in self.campuses:
-            data = self.get_map_json(campus)['layers'][2]
+        for campus, food_index in self.campuses:
+            data = self.get_map_json(campus)['layers'][food_index]
 
             for entry in data['markers']:
                 id_ = str(entry['id'])
-                building_id = entry['building_code']
                 name = entry['title']
-                address =  entry['address']
-                hours = self.get_hours(id_)
 
+                building_id = self.get_value(entry, 'building_code')
+                address = self.get_value(entry, 'address')
+                hours = self.get_hours(id_)
                 short_name = self.get_value(entry, 'slug')
                 desc = self.get_value(entry, 'desc').strip()
                 tags = self.get_value(entry, 'tags').split(', ')
@@ -63,7 +63,6 @@ class Food(Scraper):
 
         self.logger.info('Scraping %s.' % campus)
 
-        self.s.get(self.host)
         headers = {
             'Referer': self.host
         }
@@ -74,6 +73,7 @@ class Food(Scraper):
 
     def get_hours(self, food_id):
         """Parse and return the restaurant's opening and closing times."""
+
         headers = {
             'Referer': self.host
         }
@@ -107,8 +107,7 @@ class Food(Scraper):
 
             return hours
         else:
-            return ''
-
+            return ''  # hours unavailable
 
     def get_value(self, entry, val, number=False):
         """Retrieve the desired value from the parsed response dictionary."""
