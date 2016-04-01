@@ -29,7 +29,7 @@ class LayersScraper(Scraper):
         return data['layers']
 
     @staticmethod
-    def get_value(self, entry, val, number=False):
+    def get_value(entry, val, number=False):
         """Retrieve the desired value from the parsed response dictionary."""
 
         if val in entry.keys():
