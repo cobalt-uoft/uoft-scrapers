@@ -1,6 +1,6 @@
 import requests
 import json
-from ..scraper import Scraper
+from .. import Scraper
 
 
 class LayersScraper(Scraper):
