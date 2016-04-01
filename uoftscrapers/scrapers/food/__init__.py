@@ -1,11 +1,10 @@
-import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
-from ..scraper import Scraper
+from ..layers import LayersScraper
 
 
-class Food(Scraper):
+class Food(LayersScraper):
     """A scraper for UofT restaurants.
 
     UofT Food data is located at http://map.utoronto.ca
@@ -14,13 +13,11 @@ class Food(Scraper):
     def __init__(self, output_location='.'):
         super().__init__('Food', output_location)
 
-        self.host = 'http://map.utoronto.ca/'
         self.campuses = [('utsg', 2), ('utm', 1), ('utsc', 0)]
-        self.s = requests.Session()
 
     def run(self):
         for campus, food_index in self.campuses:
-            data = self.get_map_json(campus)['layers'][food_index]
+            data = self.get_layers_json(campus)[food_index]
 
             for entry in data['markers']:
                 id_ = str(entry['id'])
@@ -60,19 +57,6 @@ class Food(Scraper):
                     json.dump(doc, fp)
 
         self.logger.info('%s completed.' % self.name)
-
-    def get_map_json(self, campus):
-        """Retrieve the JSON structure from host."""
-
-        self.logger.info('Scraping %s.' % campus)
-
-        headers = {
-            'Referer': self.host
-        }
-        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
-                          headers=headers).text
-        data = json.loads(html)
-        return data
 
     def get_hours(self, food_id):
         """Parse and return the restaurant's opening and closing times."""
@@ -126,11 +110,3 @@ class Food(Scraper):
             return hours
         else:
             return ''  # hours unavailable
-
-    def get_value(self, entry, val, number=False):
-        """Retrieve the desired value from the parsed response dictionary."""
-
-        if val in entry.keys():
-            return entry[val]
-        else:
-            return 0 if number else ''
