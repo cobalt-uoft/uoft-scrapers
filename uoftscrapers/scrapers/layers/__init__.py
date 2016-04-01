@@ -1,10 +1,10 @@
 import requests
 import json
-from .. import Scraper
+from ..scraper import Scraper
 
 
 class LayersScraper(Scraper):
-    """A subclass for scraping Layers of the UofT Map.
+    """A superclass for scraping Layers of the UofT Map.
 
     Map is located at http://map.utoronto.ca
     """

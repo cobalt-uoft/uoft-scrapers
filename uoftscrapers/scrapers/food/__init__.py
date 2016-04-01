@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
-from ..scraper.layers import LayersScraper
+from ..layers import LayersScraper
 
 
 class Food(LayersScraper):

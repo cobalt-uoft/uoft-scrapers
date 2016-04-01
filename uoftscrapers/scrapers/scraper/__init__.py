@@ -2,7 +2,6 @@ import os
 import shutil
 import logging
 
-
 class Scraper:
     """Scraper superclass."""
 
