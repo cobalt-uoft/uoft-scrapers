@@ -9,7 +9,7 @@ class LayersScraper(Scraper):
     Map is located at http://map.utoronto.ca
     """
 
-    def __init__(self, name, output_location='.'):
+    def __init__(self, name, output_location):
         super().__init__(name, output_location)
 
         self.host = 'http://map.utoronto.ca/'
@@ -18,7 +18,7 @@ class LayersScraper(Scraper):
     def get_layers_json(self, campus):
         """Retrieve the JSON structure from host."""
 
-        self.logger.info('Scraping map layers %s.' % campus)
+        self.logger.info('Scraping map layers for %s.' % campus)
 
         headers = {
             'Referer': self.host
