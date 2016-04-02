@@ -62,12 +62,12 @@ class Food(LayersScraper):
         """Parse and return the restaurant's opening and closing times."""
 
         def conv_time(t):
-            """Convert and return time of the form HH:MM a.m./p.m. to
-            decimal format."""
+            """Convert time of form "HH:MM p.d." to decimal (p.d. is one
+            of a.m./p.m.)"""
 
             time, period = t[:-4].strip(), t[-4:].strip()
 
-            # for mistyped times, e.g. http://map.utoronto.ca/json/hours/1329
+            # for mistyped times (i.e. http://map.utoronto.ca/json/hours/1329)
             if t[0] == ':':
                 time = time[1:len(time)-2] + ':' + time[-2:]
 
@@ -85,28 +85,24 @@ class Food(LayersScraper):
         }
         html = self.s.get('%s%s%s' % (self.host, 'json/hours/', food_id),
                           headers=headers).text
-
         soup = BeautifulSoup(html, 'html.parser')
 
-        if not soup.find('tbody').text == '':
-            hours = OrderedDict()
+        hours = OrderedDict()
 
+        if not soup.find('tbody').text == '':
             days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday',
                     'friday', 'saturday']
 
             timings = soup.find('tbody').find_all('td')
 
             for i in range(len(timings)):
-                opening = closing = 0
+                open_ = close = 0
                 day, timing = days[i], timings[i].text
 
                 if 'closed' not in timing:
-                    # timing is provided as HH:MM p.d. -HH:MM p.d.
-                    timing = timing.split(' -')
-                    opening, closing = (conv_time(timing[0]),
-                                        conv_time(timing[1]))
-                hours.update(
-                    {day: OrderedDict([('open', opening), ('close', closing)])})
-            return hours
-        else:
-            return ''  # hours unavailable
+                    # timing is of form "HH:MM p.d. -HH:MM p.d."
+                    open_, close = [conv_time(t) for t in timing.split(' -')]
+
+                hours.update({day: OrderedDict([('open', open_),
+                                                ('close', close)])})
+        return hours
