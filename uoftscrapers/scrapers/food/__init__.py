@@ -96,13 +96,16 @@ class Food(LayersScraper):
             timings = soup.find('tbody').find_all('td')
 
             for i in range(len(timings)):
+                is_closed = True
                 open_ = close = 0
                 day, timing = days[i], timings[i].text
 
                 if 'closed' not in timing:
+                    is_closed = False
                     # timing is of form "HH:MM p.d. -HH:MM p.d."
                     open_, close = [conv_time(t) for t in timing.split(' -')]
 
-                hours.update({day: OrderedDict([('open', open_),
+                hours.update({day: OrderedDict([('closed', is_closed),
+                                                ('open', open_),
                                                 ('close', close)])})
         return hours
