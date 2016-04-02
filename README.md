@@ -131,26 +131,32 @@ http://map.utoronto.ca/
   address: String,
   hours: {
     sunday: {
+      closed: Boolean,
       open: Number,
       close: Number
     },
     monday: {
+      closed: Boolean,
       open: Number,
       close: Number
     }
     tuesday: {
+      closed: Boolean,
       open: Number,
       close: Number
     },
     wednesday: {
+      closed: Boolean,
       open: Number,
       close: Number
     },
     thursday: {
+      closed: Boolean,
       open: Number,
       close: Number
     },
     friday: {
+      closed: Boolean,
       open: Number,
       close: Number
     }
