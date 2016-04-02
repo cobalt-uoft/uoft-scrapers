@@ -24,10 +24,16 @@ class Food(LayersScraper):
                 name = entry['title']
 
                 building_id = self.get_value(entry, 'building_code')
-                address = self.get_value(entry, 'address')
+
+                address = ' '.join(
+                    filter(None, self.get_value(entry, 'address').split()))
+
                 hours = self.get_hours(id_)
                 short_name = self.get_value(entry, 'slug')
-                desc = self.get_value(entry, 'desc').strip()
+
+                desc = BeautifulSoup(self.get_value(entry, 'desc').strip(),
+                                     'html.parser').text
+
                 tags = self.get_value(entry, 'tags').split(', ')
                 image = self.get_value(entry, 'image')
                 lat = self.get_value(entry, 'lat', True)
@@ -35,7 +41,7 @@ class Food(LayersScraper):
                 url = self.get_value(entry, 'url')
 
                 if not image == '':
-                    image = "%s%s" % (self.host[:-1], image)
+                    image = '%s%s' % (self.host[:-1], image)
 
                 doc = OrderedDict([
                     ('id', id_),
