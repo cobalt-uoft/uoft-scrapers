@@ -104,6 +104,62 @@ http://coursefinder.utoronto.ca/
 
 ------
 
+### Food
+
+##### Class name
+```python
+uoftscrapers.Food
+```
+
+##### Scraper source
+http://map.utoronto.ca/
+
+##### Output format
+```js
+{
+  id: String,
+  building_id: String,
+  name: String,
+  short_name: String,
+  description: String,
+  url: String,
+  tags: [String],
+  image: String,
+  campus: String,
+  lat: Number,
+  lng: Number,
+  address: String,
+  hours: {
+    sunday: {
+      open: Number,
+      close: Number
+    },
+    monday: {
+      open: Number,
+      close: Number
+    }
+    tuesday: {
+      open: Number,
+      close: Number
+    },
+    wednesday: {
+      open: Number,
+      close: Number
+    },
+    thursday: {
+      open: Number,
+      close: Number
+    },
+    friday: {
+      open: Number,
+      close: Number
+    }
+  }
+}
+```
+
+------
+
 ### UTSG Timetable
 
 ##### Class name
