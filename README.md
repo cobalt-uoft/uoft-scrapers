@@ -159,6 +159,11 @@ http://map.utoronto.ca/
       closed: Boolean,
       open: Number,
       close: Number
+    },
+    saturday: {
+      closed: Boolean,
+      open: Number,
+      close: Number
     }
   }
 }

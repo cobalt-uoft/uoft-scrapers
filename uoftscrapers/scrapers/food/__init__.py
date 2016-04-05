@@ -34,7 +34,7 @@ class Food(LayersScraper):
                 desc = BeautifulSoup(self.get_value(entry, 'desc').strip(),
                                      'html.parser').text
 
-                tags = self.get_value(entry, 'tags').split(', ')
+                tags = self.get_value(entry, 'tags').lower().split(', ')
                 image = self.get_value(entry, 'image')
                 lat = self.get_value(entry, 'lat', True)
                 lng = self.get_value(entry, 'lng', True)
