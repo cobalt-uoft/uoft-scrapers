@@ -2,12 +2,17 @@
 This is a library of scrapers for various University of Toronto websites. It is built to generate up-to-date databases for [Cobalt](https://cobalt.qas.im/), but is distributed as a stand-alone library for anyone to utilize.
 
 ## Table of Contents
-- [UofT Scrapers](#UofT-Scrapers)
-- [Requirements](#Requirements)
-- [Installation](#Installation)
-- [Usage](#Usage)
-- [Library Reference](#Library-Reference)
-  - 
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Library Reference](#library-reference)
+  - [Buildings](#buildings)
+  - [Course Finder](#course-finder)
+  - [Food](#food)
+  - [UTSG Timetable](#utsg-timetable)
+  - [UTM Timetable](#utm-timetable)
+  - [UTSC Timetable](#utsc-timetable)
+  - [UTSG Calendar](#utsg-calendar)
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.4.3/)
