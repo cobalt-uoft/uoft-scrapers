@@ -50,7 +50,7 @@ class Textbooks(Scraper):
 
             departments = BeautifulSoup(r.text, "xml").find_all('department')
 
-            for department in departments[:1]:
+            for department in departments[:10]:
                 dept_id = department.get('id')
                 dept_name = department.get('name').title()
                 self.logger.info('Retrieving section info from %s.' % dept_name)
@@ -69,7 +69,7 @@ class Textbooks(Scraper):
 
                 courses = BeautifulSoup(r.text, "xml").find_all('course')
 
-                for course in courses[:1]:
+                for course in courses:
                     course_id = course.get('id')
                     course_name = course.get('name')
                     payload = {
@@ -87,7 +87,7 @@ class Textbooks(Scraper):
 
                     sections = BeautifulSoup(r.text, "xml").find_all('section')
 
-                    for section in sections[:1]:
+                    for section in sections:
                         term_name = term.get_text()
                         m = re.search('(\d{5})', term_name)
                         session = m.group(0)
@@ -100,7 +100,7 @@ class Textbooks(Scraper):
                             'session': session
                         })
 
-        all_books = []
+        all_books = {}
 
         count = len(all_sections)
         done = 0
@@ -139,13 +139,32 @@ class Textbooks(Scraper):
                     continue
 
                 title = self.get_text_from_class(book, 'book-title')
+
                 edition = self.get_text_from_class(book, 'book-edition')
+                if len(edition) > 0:
+                    edition = ''.join(list(filter(str.isdigit, edition)))
+                    try:
+                        edition = int(edition)
+                    except ValueError:
+                        edition = 1
+                if edition == '' or 0:
+                    edition = 1
+
                 author = self.get_text_from_class(book, 'book-author')
+                m = re.search('([\d]+[E]?)', author)
+                if m != None:
+                    junk = m.group(0)
+                    author = author.replace(junk, '').strip()
+
                 isbn = self.get_text_from_class(book, 'isbn')
                 required = self.get_text_from_class(book, 'book-req')
                 required = required == 'Required'
+
                 price = self.get_text_from_class(book, 'book-price-list')
-                price = float(price[1:])
+                try:
+                    price = float(price[1:])
+                except ValueError:
+                    price = 0
 
                 instructor = section['section_instructor'].split(',')
                 if len(instructor) == 2:
@@ -177,7 +196,18 @@ class Textbooks(Scraper):
                     ("courses", courses)
                 ])
 
-                print(json.dumps(textbook))
+                if isbn in all_books:
+                    index = -1
+                    for i in range(len(all_books[isbn]['courses'])):
+                        if courses[0]['id'] == all_books[isbn]['courses'][index]['id']:
+                            index = i
+                            break
+                    if index >= 0:
+                        all_books[isbn]['courses'][index]['meeting_sections'] += meeting_sections
+                    else:
+                        all_books[isbn]['courses'] += courses
+                else:
+                    all_books[isbn] = textbook
 
             done += 1
             self.logger.info('Scraped %s %s. (%s%%)' % (
@@ -185,6 +215,8 @@ class Textbooks(Scraper):
                 section['section_code'],
                 str(int((done / count) * 100))
             ))
+
+        print(json.dumps(list(all_books.values())))
 
     def get_text_from_class(self, soup, name):
         obj = soup.find(class_=name)
