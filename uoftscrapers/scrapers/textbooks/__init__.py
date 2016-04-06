@@ -138,6 +138,10 @@ class Textbooks(Scraper):
                 if 'not_available_' in image:
                     continue
 
+                book_id = book.find(class_='product-field-pf_id').get('value')
+
+                url = '%s/buy_book_detail.asp?pf_id=%s' % (self.host, book_id)
+
                 title = self.get_text_from_class(book, 'book-title')
 
                 edition = self.get_text_from_class(book, 'book-edition')
@@ -157,8 +161,8 @@ class Textbooks(Scraper):
                     author = author.replace(junk, '').strip()
 
                 isbn = self.get_text_from_class(book, 'isbn')
-                required = self.get_text_from_class(book, 'book-req')
-                required = required == 'Required'
+                requirement = self.get_text_from_class(book, 'book-req')
+                requirement = requirement.lower()
 
                 price = self.get_text_from_class(book, 'book-price-list')
                 try:
@@ -182,17 +186,19 @@ class Textbooks(Scraper):
                 courses = [OrderedDict([
                     ("id", course_id),
                     ("code", section['course_code']),
-                    ("required", required),
+                    ("requirement", requirement),
                     ("meeting_sections", meeting_sections)
                 ])]
 
                 textbook = OrderedDict([
-                    ("id", isbn),
+                    ("id", book_id),
+                    ("isbn", isbn),
                     ("title", title),
                     ("edition", edition),
                     ("author", author),
                     ("image", image),
                     ("price", price),
+                    ("url", url),
                     ("courses", courses)
                 ])
 
@@ -221,6 +227,6 @@ class Textbooks(Scraper):
     def get_text_from_class(self, soup, name):
         obj = soup.find(class_=name)
         if obj != None:
-            return obj.get_text().replace('\xa0', ' ')
+            return obj.get_text().replace('\xa0', ' ').strip()
         else:
             return ''
