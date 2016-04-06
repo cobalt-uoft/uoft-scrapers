@@ -3,10 +3,10 @@ This is a library of scrapers for various University of Toronto websites. It is 
 
 ## Table of Contents
 - [UofT Scrapers](#UofT-Scrapers)
-- [Requirements](##Requirements)
-- [Installation](##Installation)
-- [Usage](##Usage)
-- [Library Reference](##Library-Reference)
+- [Requirements](#Requirements)
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [Library Reference](#Library-Reference)
   - 
 
 ## Requirements
