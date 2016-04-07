@@ -60,7 +60,7 @@ class Food(LayersScraper):
                     ('hours', hours)
                 ])
 
-                with open('%s/%s' % (self.location, id_), 'w') as fp:
+                with open('%s/%s.json' % (self.location, id_), 'w') as fp:
                     json.dump(doc, fp)
 
         self.logger.info('%s completed.' % self.name)
