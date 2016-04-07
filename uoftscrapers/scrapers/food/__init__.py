@@ -34,7 +34,8 @@ class Food(LayersScraper):
                 desc = BeautifulSoup(self.get_value(entry, 'desc').strip(),
                                      'html.parser').text
 
-                tags = self.get_value(entry, 'tags').lower().split(', ')
+                tags = list(filter(
+                    None, self.get_value(entry, 'tags').lower().split(', ')))
                 image = self.get_value(entry, 'image')
                 lat = self.get_value(entry, 'lat', True)
                 lng = self.get_value(entry, 'lng', True)
@@ -59,8 +60,9 @@ class Food(LayersScraper):
                     ('hours', hours)
                 ])
 
-                with open('%s/%s.json' % (self.location, id_), 'w') as fp:
+                with open('%s/food.json' % (self.location), 'a') as fp:
                     json.dump(doc, fp)
+                    fp.write('\n')
 
         self.logger.info('%s completed.' % self.name)
 
