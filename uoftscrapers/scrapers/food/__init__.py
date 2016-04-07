@@ -20,7 +20,7 @@ class Food(LayersScraper):
             data = self.get_layers_json(campus)[food_index]
 
             for entry in data['markers']:
-                id_ = str(entry['id'])
+                id_ = str(entry['id']).zfill(4)
                 name = entry['title']
 
                 building_id = self.get_value(entry, 'building_code')
@@ -60,9 +60,8 @@ class Food(LayersScraper):
                     ('hours', hours)
                 ])
 
-                with open('%s/food.json' % (self.location), 'a') as fp:
+                with open('%s/%s' % (self.location, id_), 'w') as fp:
                     json.dump(doc, fp)
-                    fp.write('\n')
 
         self.logger.info('%s completed.' % self.name)
 
