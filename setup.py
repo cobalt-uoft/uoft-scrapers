@@ -7,11 +7,14 @@ setup(
         'uoftscrapers',
         'uoftscrapers.scrapers.coursefinder',
         'uoftscrapers.scrapers.buildings',
+        'uoftscrapers.scrapers.food',
+        'uoftscrapers.scrapers.textbooks',
         'uoftscrapers.scrapers.utmtimetable',
         'uoftscrapers.scrapers.utsctimetable',
         'uoftscrapers.scrapers.utsgcalendar',
         'uoftscrapers.scrapers.utsgtimetable',
-        'uoftscrapers.scrapers.scraper'
+        'uoftscrapers.scrapers.scraper',
+        'uoftscrapers.scrapers.scraper.layers'
     ],
     version = '0.1.8',
     description = 'University of Toronto public web scraping scripts.',
@@ -23,6 +26,6 @@ setup(
     package_dir={'uoftscrapers': 'uoftscrapers'},
     include_package_data=True,
     keywords = ['uoft', 'scraper', 'toronto'],
-    install_requires = ['requests>=2.6.2', 'beautifulsoup4>=4.3.2', 'pytidylib>=0.2.4'],
+    install_requires = ['requests>=2.6.2', 'beautifulsoup4>=4.3.2', 'pytidylib>=0.2.4', 'lxml>=3.6.0'],
     classifiers = [],
 )

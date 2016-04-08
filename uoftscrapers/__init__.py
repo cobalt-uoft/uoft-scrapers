@@ -9,6 +9,7 @@ from .scrapers.utsgtimetable import UTSGTimetable
 from .scrapers.utsgcalendar import UTSGCalendar
 from .scrapers.buildings import Buildings
 from .scrapers.food import Food
+from .scrapers.textbooks import Textbooks
 
 class NullHandler(logging.Handler):
     def emit(self, record):
