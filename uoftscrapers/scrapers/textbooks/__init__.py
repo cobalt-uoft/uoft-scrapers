@@ -22,18 +22,31 @@ class Textbooks(Scraper):
     def run(self):
         """Update the local JSON files for this scraper."""
 
+        all_departments = []
+        all_courses = []
         all_sections = []
+        all_books = {}
 
         r = requests.get('%s/buy_courselisting.asp' % self.host)
 
         listing = BeautifulSoup(r.text, "html.parser")
         terms = listing.find(id='fTerm').find_all('option')[1:]
 
+        accepted_terms = []
         for term in terms:
-            if 'MICHENER' or 'CONTINUING STUDIES' or 'MEDICAL' in term.get_text():
-                terms.remove(term)
+            val = term.get_text()
+            if val.startswith('ST GEORGE') or val.startswith('MISSISSAUGA') \
+                or val.startswith('SCARBOROUGH'):
+                accepted_terms.append(term)
 
-        for term in terms[:1]:
+        done = 0
+        count = len(accepted_terms)
+
+        for term in accepted_terms:
+            term_name = term.get_text()
+            m = re.search('(\d{5})', term_name)
+            session = m.group(0)
+
             campus, term_id = term.get('value').split('|')
             payload = {
                 'control': 'campus',
@@ -49,58 +62,84 @@ class Textbooks(Scraper):
                 params=payload, headers=headers)
 
             departments = BeautifulSoup(r.text, "xml").find_all('department')
+            for department in departments:
+                all_departments.append({
+                    'dept_id': department.get('id'),
+                    'dept_name': department.get('name').title(),
+                    'term_id': term_id,
+                    'session': session
+                })
 
-            for department in departments[:10]:
-                dept_id = department.get('id')
-                dept_name = department.get('name').title()
-                self.logger.info('Retrieving section info from %s.' % dept_name)
-                payload = {
-                    'control': 'department',
-                    'dept': dept_id,
-                    'term': term_id,
-                    't': int(round(time.time() * 1000))
-                }
-                headers = {
-                    'Referer': '%s/buy_courselisting.asp' % self.host
-                }
+            done += 1
+            self.logger.info('(1/4)\t(%s%%)\tRetreived department info from %s.' % (
+                str(int((done / count) * 100)),
+                term_name
+            ))
 
-                r = requests.get('%s/textbooks_xml.asp' % self.host,
-                    params=payload, headers=headers)
+        done = 0
+        count = len(all_departments)
 
-                courses = BeautifulSoup(r.text, "xml").find_all('course')
+        for department in all_departments:
+            payload = {
+                'control': 'department',
+                'dept': department['dept_id'],
+                'term': department['term_id'],
+                't': int(round(time.time() * 1000))
+            }
+            headers = {
+                'Referer': '%s/buy_courselisting.asp' % self.host
+            }
 
-                for course in courses:
-                    course_id = course.get('id')
-                    course_name = course.get('name')
-                    payload = {
-                        'control': 'course',
-                        'course': course_id,
-                        'term': term_id,
-                        't': int(round(time.time() * 1000))
-                    }
-                    headers = {
-                        'Referer': '%s/buy_courselisting.asp' % self.host
-                    }
+            r = requests.get('%s/textbooks_xml.asp' % self.host,
+                params=payload, headers=headers)
 
-                    r = requests.get('%s/textbooks_xml.asp' % self.host,
-                        params=payload, headers=headers)
+            courses = BeautifulSoup(r.text, "xml").find_all('course')
+            for course in courses:
+                all_courses.append({
+                    'course_id': course.get('id'),
+                    'course_name': course.get('name'),
+                    'term_id': department['term_id'],
+                    'session': department['session']
+                })
 
-                    sections = BeautifulSoup(r.text, "xml").find_all('section')
+            done += 1
+            self.logger.info('(2/4)\t(%s%%)\tRetreived course info from %s.' % (
+                str(int((done / count) * 100)),
+                department['dept_name']
+            ))
 
-                    for section in sections:
-                        term_name = term.get_text()
-                        m = re.search('(\d{5})', term_name)
-                        session = m.group(0)
+        done = 0
+        count = len(all_courses)
 
-                        all_sections.append({
-                            'section_id': section.get('id'),
-                            'section_code': section.get('name'),
-                            'section_instructor': section.get('instructor'),
-                            'course_code': course_name,
-                            'session': session
-                        })
+        for course in all_courses:
+            payload = {
+                'control': 'course',
+                'course': course['course_id'],
+                'term': course['term_id'],
+                't': int(round(time.time() * 1000))
+            }
+            headers = {
+                'Referer': '%s/buy_courselisting.asp' % self.host
+            }
 
-        all_books = {}
+            r = requests.get('%s/textbooks_xml.asp' % self.host,
+                params=payload, headers=headers)
+
+            sections = BeautifulSoup(r.text, "xml").find_all('section')
+            for section in sections:
+                all_sections.append({
+                    'section_id': section.get('id'),
+                    'section_code': section.get('name'),
+                    'section_instructor': section.get('instructor'),
+                    'course_code': course['course_name'],
+                    'session': course['session']
+                })
+
+            done += 1
+            self.logger.info('(3/4)\t(%s%%)\tRetreived section info from %s.' % (
+                str(int((done / count) * 100)),
+                course['course_name']
+            ))
 
         count = len(all_sections)
         done = 0
@@ -172,7 +211,7 @@ class Textbooks(Scraper):
 
                 instructor = section['section_instructor'].split(',')
                 if len(instructor) == 2:
-                    instructor = '%s %s' % (instructor[0][0], instructor[1].strip())
+                    instructor = '%s %s' % (instructor[0][:1], instructor[1].strip())
                 else:
                     instructor = None
 
@@ -202,27 +241,31 @@ class Textbooks(Scraper):
                     ("courses", courses)
                 ])
 
-                if isbn in all_books:
+                if book_id in all_books:
                     index = -1
-                    for i in range(len(all_books[isbn]['courses'])):
-                        if courses[0]['id'] == all_books[isbn]['courses'][index]['id']:
+                    for i in range(len(all_books[book_id]['courses'])):
+                        if courses[0]['id'] == book_id:
                             index = i
                             break
                     if index >= 0:
-                        all_books[isbn]['courses'][index]['meeting_sections'] += meeting_sections
+                        all_books[book_id]['courses'][index]['meeting_sections'] += meeting_sections
                     else:
-                        all_books[isbn]['courses'] += courses
+                        all_books[book_id]['courses'] += courses
                 else:
-                    all_books[isbn] = textbook
+                    all_books[book_id] = textbook
 
             done += 1
-            self.logger.info('Scraped %s %s. (%s%%)' % (
+            self.logger.info('(4/4)\t(%s%%)\tScraped %s %s.' % (
+                str(int((done / count) * 100)),
                 section['course_code'],
-                section['section_code'],
-                str(int((done / count) * 100))
+                section['section_code']
             ))
 
-        print(json.dumps(list(all_books.values())))
+        all_books = list(all_books.values())
+
+        for book in all_books:
+            with open('%s/%s.json' % (self.location, book['id']), 'w+') as outfile:
+                json.dump(book, outfile)
 
     def get_text_from_class(self, soup, name):
         obj = soup.find(class_=name)
