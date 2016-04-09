@@ -275,12 +275,17 @@ class Textbooks(Scraper):
             instructor = section['section_instructor'].split(',')
             if len(instructor) == 2:
                 instructor = '%s %s' % (instructor[0][:1], instructor[1].strip())
+                instructor = instructor.strip()
             else:
-                instructor = None
+                instructor = ''
+
+            instructors = [instructor]
+            if len(instructor) == 0:
+                instructors = []
 
             meeting_sections = [OrderedDict([
                 ("code", section['section_code']),
-                ("instructors", [instructor])
+                ("instructors", instructors)
             ])]
 
             course_id = '%s%s' % (section['course_code'], section['session'])
