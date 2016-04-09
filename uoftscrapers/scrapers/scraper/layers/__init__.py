@@ -18,7 +18,7 @@ class LayersScraper(Scraper):
     def get_layers_json(self, campus):
         """Retrieve the JSON structure from host."""
 
-        self.logger.info('Scraping map layers for %s.' % campus)
+        self.logger.info('Scraping map layers for %s.' % campus.upper())
 
         headers = {
             'Referer': self.host

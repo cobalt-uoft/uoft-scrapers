@@ -14,14 +14,17 @@ class Food(LayersScraper):
         super().__init__('Food', output_location)
 
         self.campuses = [('utsg', 2), ('utm', 1), ('utsc', 0)]
+        self.logger.info('%s scraper initialized.' % self.name)
 
     def run(self):
         for campus, food_index in self.campuses:
             data = self.get_layers_json(campus)[food_index]
 
             for entry in data['markers']:
-                id_ = str(entry['id'])
+                id_ = str(entry['id']).zfill(4)
                 name = entry['title']
+                self.logger.info('Scraping %s @ %s, %s' %
+                                 (name, campus.upper(), id_.lstrip('0')))
 
                 building_id = self.get_value(entry, 'building_code')
 
@@ -34,7 +37,9 @@ class Food(LayersScraper):
                 desc = BeautifulSoup(self.get_value(entry, 'desc').strip(),
                                      'html.parser').text
 
-                tags = self.get_value(entry, 'tags').lower().split(', ')
+                tags = list(filter(
+                    None, self.get_value(entry, 'tags').lower().split(', ')))
+
                 image = self.get_value(entry, 'image')
                 lat = self.get_value(entry, 'lat', True)
                 lng = self.get_value(entry, 'lng', True)
@@ -62,7 +67,7 @@ class Food(LayersScraper):
                 with open('%s/%s.json' % (self.location, id_), 'w') as fp:
                     json.dump(doc, fp)
 
-        self.logger.info('%s completed.' % self.name)
+        self.logger.info('%s scraper completed.' % self.name)
 
     def get_hours(self, food_id):
         """Parse and return the restaurant's opening and closing times."""
