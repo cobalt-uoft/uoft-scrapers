@@ -1,16 +1,16 @@
-import requests
+from ..scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import json
-from ..scraper import Scraper
-import os
-import time
+from operator import itemgetter
 from pprint import pprint
-import re
 from queue import Queue
 from threading import Thread, Lock
+from time import time
+import json
 import logging
-from operator import itemgetter
+import os
+import re
+import requests
 import sys
 
 class Textbooks(Scraper):
@@ -33,7 +33,7 @@ class Textbooks(Scraper):
         departments = self.retrieve_departments(terms)
 
         # Get course info
-        ts = time.time()
+        ts = time()
         queue = Queue()
 
         for x in range(Textbooks.threads):
@@ -42,15 +42,15 @@ class Textbooks(Scraper):
             worker.start()
 
         total = len(departments)
-        Textbooks.logger.info('Queued %d departments.' % total)
+        Textbooks.logger.info('Queued %d departments. (1/3)' % total)
         for department in departments:
             queue.put((department, total))
 
         queue.join()
-        Textbooks.logger.info('Took %.2fs to retreive course info.' % (time.time() - ts))
+        Textbooks.logger.info('Took %.2fs to retreive course info.' % (time() - ts))
 
         # Get section info
-        ts = time.time()
+        ts = time()
         queue = Queue()
 
         for x in range(Textbooks.threads):
@@ -59,15 +59,15 @@ class Textbooks(Scraper):
             worker.start()
 
         total = len(CoursesWorker.all_courses)
-        Textbooks.logger.info('Queued %d courses.' % total)
+        Textbooks.logger.info('Queued %d courses. (2/3)' % total)
         for course in CoursesWorker.all_courses:
             queue.put((course, total))
 
         queue.join()
-        Textbooks.logger.info('Took %.2fs to retreive section info.' % (time.time() - ts))
+        Textbooks.logger.info('Took %.2fs to retreive section info.' % (time() - ts))
 
         # Get book info
-        ts = time.time()
+        ts = time()
         queue = Queue()
 
         for x in range(Textbooks.threads):
@@ -76,15 +76,16 @@ class Textbooks(Scraper):
             worker.start()
 
         total = len(SectionsWorker.all_sections)
-        Textbooks.logger.info('Queued %d sections.' % total)
+        Textbooks.logger.info('Queued %d sections. (3/3)' % total)
         for section in SectionsWorker.all_sections:
             queue.put((section, total))
 
         queue.join()
-        Textbooks.logger.info('Took %.2fs to retreive book info.' % (time.time() - ts))
+        Textbooks.logger.info('Took %.2fs to retreive book info.' % (time() - ts))
 
         books = list(BooksWorker.all_books.values())
 
+        # Sort books and dump the files
         for book in books:
             book['courses'] = sorted(book['courses'], key=itemgetter('id'))
             for i in range(len(book['courses'])):
@@ -124,7 +125,7 @@ class Textbooks(Scraper):
                 'control': 'campus',
                 'campus': campus,
                 'term': term_id,
-                't': int(round(time.time() * 1000))
+                't': int(round(time() * 1000))
             }
             headers = {
                 'Referer': '%s/buy_courselisting.asp' % Textbooks.host
@@ -154,7 +155,7 @@ class Textbooks(Scraper):
             'control': 'department',
             'dept': department['dept_id'],
             'term': department['term_id'],
-            't': int(round(time.time() * 1000))
+            't': int(round(time() * 1000))
         }
         headers = {
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
@@ -182,7 +183,7 @@ class Textbooks(Scraper):
             'control': 'course',
             'course': course['course_id'],
             'term': course['term_id'],
-            't': int(round(time.time() * 1000))
+            't': int(round(time() * 1000))
         }
         headers = {
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
@@ -210,7 +211,7 @@ class Textbooks(Scraper):
         payload = {
             'control': 'section',
             'section': section['section_id'],
-            't': int(round(time.time() * 1000))
+            't': int(round(time() * 1000))
         }
         headers = {
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
