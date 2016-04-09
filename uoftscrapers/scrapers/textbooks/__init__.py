@@ -7,6 +7,23 @@ import os
 import time
 from pprint import pprint
 import re
+from queue import Queue
+from threading import Thread
+
+
+class TextbooksWorker(Thread):
+
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            # Get the work from the queue and expand the tuple
+            directory, link = self.queue.get()
+            download_link(directory, link)
+            self.queue.task_done()
+
 
 class Textbooks(Scraper):
     """A scraper for UofT's book store.
@@ -14,19 +31,41 @@ class Textbooks(Scraper):
     UofT Book Store is located at http://uoftbookstore.com/.
     """
 
+
     def __init__(self, output_location='.'):
         super().__init__('Textbooks', output_location)
 
         self.host = 'http://uoftbookstore.com'
 
+
     def run(self):
         """Update the local JSON files for this scraper."""
 
-        all_departments = []
-        all_courses = []
-        all_sections = []
-        all_books = {}
+        terms = self.retrieve_terms()
+        departments = self.retrieve_departments(terms)[:3]
+        courses = self.retrieve_courses(departments)
+        sections = self.retrieve_sections(courses)
+        books = self.retrieve_books(sections)
 
+        queue = Queue()
+        for x in range(8):
+            worker = TextbooksWorker(queue)
+            worker.daemon = True
+            worker.start()
+
+        for link in links:
+            logger.info('Queueing {}'.format(link))
+            queue.put((download_dir, link))
+        # Causes the main thread to wait for the queue to finish processing all the tasks
+        queue.join()
+
+
+        for book in books:
+            with open('%s/%s.json' % (self.location, book['id']), 'w+') as outfile:
+                json.dump(book, outfile)
+
+
+    def retrieve_terms(self):
         r = requests.get('%s/buy_courselisting.asp' % self.host)
 
         listing = BeautifulSoup(r.text, "html.parser")
@@ -39,10 +78,15 @@ class Textbooks(Scraper):
                 or val.startswith('SCARBOROUGH'):
                 accepted_terms.append(term)
 
-        done = 0
-        count = len(accepted_terms)
+        return accepted_terms
 
-        for term in accepted_terms:
+    def retrieve_departments(self, terms):
+        all_departments = []
+
+        done = 0
+        count = len(terms)
+
+        for term in terms:
             term_name = term.get_text()
             m = re.search('(\d{5})', term_name)
             session = m.group(0)
@@ -76,10 +120,16 @@ class Textbooks(Scraper):
                 term_name
             ))
 
-        done = 0
-        count = len(all_departments)
+        return all_departments
 
-        for department in all_departments:
+
+    def retrieve_courses(self, departments):
+        all_courses = []
+
+        done = 0
+        count = len(departments)
+
+        for department in departments:
             payload = {
                 'control': 'department',
                 'dept': department['dept_id'],
@@ -108,10 +158,16 @@ class Textbooks(Scraper):
                 department['dept_name']
             ))
 
-        done = 0
-        count = len(all_courses)
+        return all_courses
 
-        for course in all_courses:
+
+    def retrieve_sections(self, courses):
+        all_sections = []
+
+        done = 0
+        count = len(courses)
+
+        for course in courses:
             payload = {
                 'control': 'course',
                 'course': course['course_id'],
@@ -141,10 +197,16 @@ class Textbooks(Scraper):
                 course['course_name']
             ))
 
-        count = len(all_sections)
+        return all_sections
+
+
+    def retrieve_books(self, sections):
+        all_books = {}
+
+        count = len(sections)
         done = 0
 
-        for section in all_sections:
+        for section in sections:
             payload = {
                 'control': 'section',
                 'section': section['section_id'],
@@ -244,7 +306,7 @@ class Textbooks(Scraper):
                 if book_id in all_books:
                     index = -1
                     for i in range(len(all_books[book_id]['courses'])):
-                        if courses[0]['id'] == book_id:
+                        if courses[i]['id'] == book_id:
                             index = i
                             break
                     if index >= 0:
@@ -261,11 +323,8 @@ class Textbooks(Scraper):
                 section['section_code']
             ))
 
-        all_books = list(all_books.values())
+        return list(all_books.values())
 
-        for book in all_books:
-            with open('%s/%s.json' % (self.location, book['id']), 'w+') as outfile:
-                json.dump(book, outfile)
 
     def get_text_from_class(self, soup, name):
         obj = soup.find(class_=name)
