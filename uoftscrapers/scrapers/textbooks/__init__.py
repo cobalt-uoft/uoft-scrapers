@@ -11,6 +11,7 @@ from queue import Queue
 from threading import Thread, Lock
 import logging
 from operator import itemgetter
+import sys
 
 class Textbooks(Scraper):
     """A scraper for UofT's book store.
@@ -40,9 +41,10 @@ class Textbooks(Scraper):
             worker.daemon = True
             worker.start()
 
-        Textbooks.logger.info('Queued %d departments.' % len(departments))
+        total = len(departments)
+        Textbooks.logger.info('Queued %d departments.' % total)
         for department in departments:
-            queue.put(department)
+            queue.put((department, total))
 
         queue.join()
         Textbooks.logger.info('Took %.2fs to retreive course info.' % (time.time() - ts))
@@ -56,9 +58,10 @@ class Textbooks(Scraper):
             worker.daemon = True
             worker.start()
 
-        Textbooks.logger.info('Queued %d courses.' % len(CoursesWorker.all_courses))
+        total = len(CoursesWorker.all_courses)
+        Textbooks.logger.info('Queued %d courses.' % total)
         for course in CoursesWorker.all_courses:
-            queue.put(course)
+            queue.put((course, total))
 
         queue.join()
         Textbooks.logger.info('Took %.2fs to retreive section info.' % (time.time() - ts))
@@ -72,9 +75,10 @@ class Textbooks(Scraper):
             worker.daemon = True
             worker.start()
 
-        Textbooks.logger.info('Queued %d sections.' % len(SectionsWorker.all_sections))
+        total = len(SectionsWorker.all_sections)
+        Textbooks.logger.info('Queued %d sections.' % total)
         for section in SectionsWorker.all_sections:
-            queue.put(section)
+            queue.put((section, total))
 
         queue.join()
         Textbooks.logger.info('Took %.2fs to retreive book info.' % (time.time() - ts))
@@ -239,9 +243,9 @@ class Textbooks(Scraper):
 
             url = '%s/buy_book_detail.asp?pf_id=%s' % (Textbooks.host, book_id)
 
-            title = Textbooks.get_text_from_class(book, 'book-title')
+            title = get_text_from_class(book, 'book-title')
 
-            edition = Textbooks.get_text_from_class(book, 'book-edition')
+            edition = get_text_from_class(book, 'book-edition')
             if len(edition) > 0:
                 edition = ''.join(list(filter(str.isdigit, edition)))
                 try:
@@ -251,17 +255,17 @@ class Textbooks(Scraper):
             if edition == '' or 0:
                 edition = 1
 
-            author = Textbooks.get_text_from_class(book, 'book-author')
+            author = get_text_from_class(book, 'book-author')
             m = re.search('([\d]+[E]?)', author)
             if m != None:
                 junk = m.group(0)
                 author = author.replace(junk, '').strip()
 
-            isbn = Textbooks.get_text_from_class(book, 'isbn')
-            requirement = Textbooks.get_text_from_class(book, 'book-req')
+            isbn = get_text_from_class(book, 'isbn')
+            requirement = get_text_from_class(book, 'book-req')
             requirement = requirement.lower()
 
-            price = Textbooks.get_text_from_class(book, 'book-price-list')
+            price = get_text_from_class(book, 'book-price-list')
             try:
                 price = float(price[1:])
             except ValueError:
@@ -303,18 +307,22 @@ class Textbooks(Scraper):
 
         return all_books
 
-    @staticmethod
-    def get_text_from_class(soup, name):
-        obj = soup.find(class_=name)
-        if obj != None:
-            return obj.get_text().replace('\xa0', ' ').strip()
-        else:
-            return ''
 
+def get_text_from_class(soup, name):
+    obj = soup.find(class_=name)
+    if obj != None:
+        return obj.get_text().replace('\xa0', ' ').strip()
+    else:
+        return ''
+
+def flush_percentage(decimal):
+    sys.stdout.write('%.2f%%\r' % (decimal * 100))
+    sys.stdout.flush()
 
 class CoursesWorker(Thread):
 
     all_courses = []
+    done = 0
     lock = Lock()
 
     def __init__(self, queue):
@@ -323,11 +331,13 @@ class CoursesWorker(Thread):
 
     def run(self):
         while True:
-            department = self.queue.get()
+            department, total = self.queue.get()
             courses = Textbooks.retrieve_courses(department)
 
             CoursesWorker.lock.acquire()
             CoursesWorker.all_courses += courses
+            CoursesWorker.done += 1
+            flush_percentage(CoursesWorker.done / total)
             CoursesWorker.lock.release()
 
             self.queue.task_done()
@@ -336,6 +346,7 @@ class CoursesWorker(Thread):
 class SectionsWorker(Thread):
 
     all_sections = []
+    done = 0
     lock = Lock()
 
     def __init__(self, queue):
@@ -344,11 +355,13 @@ class SectionsWorker(Thread):
 
     def run(self):
         while True:
-            course = self.queue.get()
+            course, total = self.queue.get()
             sections = Textbooks.retrieve_sections(course)
 
             SectionsWorker.lock.acquire()
             SectionsWorker.all_sections += sections
+            SectionsWorker.done += 1
+            flush_percentage(SectionsWorker.done / total)
             SectionsWorker.lock.release()
 
             self.queue.task_done()
@@ -357,6 +370,7 @@ class SectionsWorker(Thread):
 class BooksWorker(Thread):
 
     all_books = {}
+    done = 0
     lock = Lock()
 
     def __init__(self, queue):
@@ -365,7 +379,7 @@ class BooksWorker(Thread):
 
     def run(self):
         while True:
-            section = self.queue.get()
+            section, total = self.queue.get()
             books = Textbooks.retrieve_books(section)
 
             BooksWorker.lock.acquire()
@@ -382,6 +396,8 @@ class BooksWorker(Thread):
                         BooksWorker.all_books[book['id']]['courses'] += book['courses']
                 else:
                     BooksWorker.all_books[book['id']] = book
+            BooksWorker.done += 1
+            flush_percentage(BooksWorker.done / total)
             BooksWorker.lock.release()
 
             self.queue.task_done()
