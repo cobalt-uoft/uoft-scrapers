@@ -1,4 +1,5 @@
-# UofT Scrapers
+# UofT Scrapers [![PyPI version](https://badge.fury.io/py/uoftscrapers.svg)](https://badge.fury.io/py/uoftscrapers)
+
 This is a library of scrapers for various University of Toronto websites. It is built to generate up-to-date databases for [Cobalt](https://cobalt.qas.im/), but is distributed as a stand-alone library for anyone to utilize.
 
 ## Table of Contents
