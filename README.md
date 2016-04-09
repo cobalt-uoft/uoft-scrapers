@@ -6,8 +6,9 @@ This is a library of scrapers for various University of Toronto websites. It is 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Library Reference](#library-reference)
-  - [Buildings](#buildings)
   - [Course Finder](#course-finder)
+  - [Buildings](#buildings)
+  - [Textbooks](#textbooks)
   - [Food](#food)
   - [UTSG Timetable](#utsg-timetable)
   - [UTM Timetable](#utm-timetable)
@@ -38,41 +39,6 @@ cf.run()
 ```
 
 ## Library Reference
-
-### Buildings
-
-##### Class name
-```python
-uoftscrapers.Buildings
-```
-
-##### Scraper source
-http://map.utoronto.ca/
-
-##### Output format
-```js
-{
-  id: String,
-  code: String,
-  name: String,
-  short_name: String,
-  campus: String,
-  address: {
-    street: String,
-    city: String,
-    province: String,
-    country: String,
-    postal: String
-  },
-  lat: Number,
-  lng: Number,
-  polygon: [
-    [Number, Number]
-  ]
-}
-```
-
-------
 
 ### Course Finder
 
@@ -111,6 +77,76 @@ http://coursefinder.utoronto.ca/
     }],
     size: Number,
     enrolment: Number
+  }]
+}
+```
+
+------
+
+### Buildings
+
+##### Class name
+```python
+uoftscrapers.Buildings
+```
+
+##### Scraper source
+http://map.utoronto.ca/
+
+##### Output format
+```js
+{
+  id: String,
+  code: String,
+  name: String,
+  short_name: String,
+  campus: String,
+  address: {
+    street: String,
+    city: String,
+    province: String,
+    country: String,
+    postal: String
+  },
+  lat: Number,
+  lng: Number,
+  polygon: [
+    [Number, Number]
+  ]
+}
+```
+
+------
+
+### Textbooks
+
+##### Class name
+```python
+uoftscrapers.Textbooks
+```
+
+##### Scraper source
+http://uoftbookstore.com
+
+##### Output format
+```js
+{  
+  "id": String,
+  "isbn": String,
+  "title": String,
+  "edition": Number,
+  "author": String,
+  "image": String,
+  "price": Number,
+  "url": String,
+  "courses":[{
+    "id": String,
+    "code": String,
+    "requirement": String,
+    "meeting_sections":[{
+      "code": String,
+      "instructors": [String]
+    }]
   }]
 }
 ```
