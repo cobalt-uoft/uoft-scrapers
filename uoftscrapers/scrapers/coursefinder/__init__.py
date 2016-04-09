@@ -1,13 +1,16 @@
-import requests
-import http.cookiejar
+from ..scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import time
-import re
+from queue import Queue
+from threading import Thread, Lock
+from time import time, sleep
+import http.cookiejar
 import json
+import logging
 import os
+import re
+import requests
 import sys
-from ..scraper import Scraper
 
 
 class CourseFinder(Scraper):
@@ -16,44 +19,49 @@ class CourseFinder(Scraper):
     Course Finder is located at http://coursefinder.utoronto.ca/.
     """
 
+    host = 'http://coursefinder.utoronto.ca/course-search/search'
+    logger = logging.getLogger("uoftscrapers")
+    cookies = http.cookiejar.CookieJar()
+    s = requests.Session()
+    threads = 32
+
     def __init__(self, output_location='.'):
         super().__init__('Course Finder', output_location)
-
-        self.host = 'http://coursefinder.utoronto.ca/course-search/search'
-        self.urls = None
-        self.cookies = http.cookiejar.CookieJar()
-        self.s = requests.Session()
 
     def run(self):
         """Update the local JSON files for this scraper."""
 
         urls = self.search()
-
-        completed = 0
         total = len(urls)
 
+        ts = time()
+        queue = Queue()
+
+        for x in range(CourseFinder.threads):
+            worker = CourseFinderWorker(queue)
+            worker.daemon = True
+            worker.start()
+
+        CourseFinder.logger.info('Queued %d courses.' % total)
         for x in urls:
             course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
-            course_code = course_id[:8]
-            url = '%s/courseSearch/coursedetails/%s' % (self.host, course_id)
+            url = '%s/courseSearch/coursedetails/%s' % (CourseFinder.host, course_id)
+            queue.put((course_id, url, total))
 
-            percentage = int((completed / total) * 100) + 1
-            completed += 1
-            self.logger.info('Scraping %s. (%i%%)' % (course_code, percentage))
+        queue.join()
+        CourseFinder.logger.info('Took %.2fs to retreive course info.' % (time() - ts))
 
-            # this needs to be queued with workers
-            html = self.get_course_html(url)
-            data = self.parse_course_html(course_id, html)
-            if data:
-                with open('%s/%s.json' % (self.location, course_id), 'w+') as outfile:
-                    json.dump(data, outfile)
+        for course in CourseFinderWorker.all_courses:
+            if course != False:
+                with open('%s/%s.json' % (self.location, course['id']), 'w+') as outfile:
+                    json.dump(course, outfile)
 
-        self.logger.info('%s completed.' % self.name)
+        CourseFinder.logger.info('%s completed.' % self.name)
 
     def search(self, query='', requirements=''):
         """Perform a search and return the data as a dict."""
 
-        url = '%s/courseSearch/course/search' % self.host
+        url = '%s/courseSearch/course/search' % CourseFinder.host
 
         data = {
             'queryText': query,
@@ -65,25 +73,24 @@ class CourseFinder(Scraper):
         json = None
         while json is None:
             try:
-                r = self.s.get(url, params=data, cookies=self.cookies)
+                r = CourseFinder.s.get(url, params=data, cookies=CourseFinder.cookies)
                 if r.status_code == 200:
                     json = r.json()
                 else:
-                    time.sleep(0.5)
+                    sleep(0.5)
             except requests.exceptions.Timeout:
                 continue
 
-        self.total = len(json['aaData'])
-
         return json['aaData']
 
-    def get_course_html(self, url):
+    @staticmethod
+    def get_course_html(url):
         """Update the locally stored course pages."""
 
         html = None
         while html is None:
             try:
-                r = self.s.get(url, cookies=self.cookies)
+                r = CourseFinder.s.get(url, cookies=CourseFinder.cookies)
                 if r.status_code == 200:
                     html = r.text
             except (requests.exceptions.Timeout,
@@ -92,7 +99,8 @@ class CourseFinder(Scraper):
 
         return html.encode('utf-8')
 
-    def parse_course_html(self, course_id, html):
+    @staticmethod
+    def parse_course_html(course_id, html):
         """Create JSON files from the HTML pages downloaded."""
 
         if "The course you are trying to access does not exist" in \
@@ -253,3 +261,33 @@ class CourseFinder(Scraper):
         ])
 
         return course
+
+
+def flush_percentage(decimal):
+    sys.stdout.write('%.2f%%\r' % (decimal * 100))
+    sys.stdout.flush()
+
+
+class CourseFinderWorker(Thread):
+
+    all_courses = []
+    done = 0
+    lock = Lock()
+
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            course_id, url, total = self.queue.get()
+            html = CourseFinder.get_course_html(url)
+            course = CourseFinder.parse_course_html(course_id, html)
+
+            CourseFinderWorker.lock.acquire()
+            CourseFinderWorker.all_courses.append(course)
+            CourseFinderWorker.done += 1
+            flush_percentage(CourseFinderWorker.done / total)
+            CourseFinderWorker.lock.release()
+
+            self.queue.task_done()
