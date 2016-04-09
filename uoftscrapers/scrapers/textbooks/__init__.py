@@ -8,21 +8,8 @@ import time
 from pprint import pprint
 import re
 from queue import Queue
-from threading import Thread
-
-
-class TextbooksWorker(Thread):
-
-    def __init__(self, queue):
-        Thread.__init__(self)
-        self.queue = queue
-
-    def run(self):
-        while True:
-            # Get the work from the queue and expand the tuple
-            directory, link = self.queue.get()
-            download_link(directory, link)
-            self.queue.task_done()
+from threading import Thread, Lock
+import logging
 
 
 class Textbooks(Scraper):
@@ -31,42 +18,79 @@ class Textbooks(Scraper):
     UofT Book Store is located at http://uoftbookstore.com/.
     """
 
+    host = 'http://uoftbookstore.com'
+    logger = logging.getLogger("uoftscrapers")
+    threads = 32
 
     def __init__(self, output_location='.'):
         super().__init__('Textbooks', output_location)
-
-        self.host = 'http://uoftbookstore.com'
-
 
     def run(self):
         """Update the local JSON files for this scraper."""
 
         terms = self.retrieve_terms()
-        departments = self.retrieve_departments(terms)[:3]
-        courses = self.retrieve_courses(departments)
-        sections = self.retrieve_sections(courses)
-        books = self.retrieve_books(sections)
+        departments = self.retrieve_departments(terms)
 
+        # Get course info
+        ts = time.time()
         queue = Queue()
-        for x in range(8):
-            worker = TextbooksWorker(queue)
+
+        for x in range(Textbooks.threads):
+            worker = CoursesWorker(queue)
             worker.daemon = True
             worker.start()
 
-        for link in links:
-            logger.info('Queueing {}'.format(link))
-            queue.put((download_dir, link))
-        # Causes the main thread to wait for the queue to finish processing all the tasks
-        queue.join()
+        Textbooks.logger.info('Queued %d departments.' % len(departments))
+        for department in departments:
+            queue.put(department)
 
+        queue.join()
+        Textbooks.logger.info('Took %.2fs to retreive course info.' % (time.time() - ts))
+
+        # Get section info
+        ts = time.time()
+        queue = Queue()
+
+        for x in range(Textbooks.threads):
+            worker = SectionsWorker(queue)
+            worker.daemon = True
+            worker.start()
+
+        Textbooks.logger.info('Queued %d courses.' % len(CoursesWorker.all_courses))
+        for course in CoursesWorker.all_courses:
+            queue.put(course)
+
+        queue.join()
+        Textbooks.logger.info('Took %.2fs to retreive section info.' % (time.time() - ts))
+
+        # Get book info
+        ts = time.time()
+        queue = Queue()
+
+        for x in range(Textbooks.threads):
+            worker = BooksWorker(queue)
+            worker.daemon = True
+            worker.start()
+
+        Textbooks.logger.info('Queued %d sections.' % len(SectionsWorker.all_sections))
+        for section in SectionsWorker.all_sections:
+            queue.put(section)
+
+        queue.join()
+        Textbooks.logger.info('Took %.2fs to retreive book info.' % (time.time() - ts))
+
+        books = list(BooksWorker.all_books.values())
+        print(len(books))
 
         for book in books:
             with open('%s/%s.json' % (self.location, book['id']), 'w+') as outfile:
                 json.dump(book, outfile)
 
+        self.logger.info('%s completed.' % self.name)
 
-    def retrieve_terms(self):
-        r = requests.get('%s/buy_courselisting.asp' % self.host)
+    @staticmethod
+    def retrieve_terms():
+        r = requests.get('%s/buy_courselisting.asp' % Textbooks.host)
 
         listing = BeautifulSoup(r.text, "html.parser")
         terms = listing.find(id='fTerm').find_all('option')[1:]
@@ -80,11 +104,9 @@ class Textbooks(Scraper):
 
         return accepted_terms
 
-    def retrieve_departments(self, terms):
+    @staticmethod
+    def retrieve_departments(terms):
         all_departments = []
-
-        done = 0
-        count = len(terms)
 
         for term in terms:
             term_name = term.get_text()
@@ -99,10 +121,10 @@ class Textbooks(Scraper):
                 't': int(round(time.time() * 1000))
             }
             headers = {
-                'Referer': '%s/buy_courselisting.asp' % self.host
+                'Referer': '%s/buy_courselisting.asp' % Textbooks.host
             }
 
-            r = requests.get('%s/textbooks_xml.asp' % self.host,
+            r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
                 params=payload, headers=headers)
 
             departments = BeautifulSoup(r.text, "xml").find_all('department')
@@ -114,221 +136,250 @@ class Textbooks(Scraper):
                     'session': session
                 })
 
-            done += 1
-            self.logger.info('(1/4)\t(%s%%)\tRetreived department info from %s.' % (
-                str(int((done / count) * 100)),
-                term_name
-            ))
+            Textbooks.logger.info('Retreived department info from %s.' % term_name)
 
         return all_departments
 
-
-    def retrieve_courses(self, departments):
+    @staticmethod
+    def retrieve_courses(department):
         all_courses = []
 
-        done = 0
-        count = len(departments)
+        payload = {
+            'control': 'department',
+            'dept': department['dept_id'],
+            'term': department['term_id'],
+            't': int(round(time.time() * 1000))
+        }
+        headers = {
+            'Referer': '%s/buy_courselisting.asp' % Textbooks.host
+        }
 
-        for department in departments:
-            payload = {
-                'control': 'department',
-                'dept': department['dept_id'],
-                'term': department['term_id'],
-                't': int(round(time.time() * 1000))
-            }
-            headers = {
-                'Referer': '%s/buy_courselisting.asp' % self.host
-            }
+        r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+            params=payload, headers=headers)
 
-            r = requests.get('%s/textbooks_xml.asp' % self.host,
-                params=payload, headers=headers)
-
-            courses = BeautifulSoup(r.text, "xml").find_all('course')
-            for course in courses:
-                all_courses.append({
-                    'course_id': course.get('id'),
-                    'course_name': course.get('name'),
-                    'term_id': department['term_id'],
-                    'session': department['session']
-                })
-
-            done += 1
-            self.logger.info('(2/4)\t(%s%%)\tRetreived course info from %s.' % (
-                str(int((done / count) * 100)),
-                department['dept_name']
-            ))
+        courses = BeautifulSoup(r.text, "xml").find_all('course')
+        for course in courses:
+            all_courses.append({
+                'course_id': course.get('id'),
+                'course_name': course.get('name'),
+                'term_id': department['term_id'],
+                'session': department['session']
+            })
 
         return all_courses
 
-
-    def retrieve_sections(self, courses):
+    @staticmethod
+    def retrieve_sections(course):
         all_sections = []
 
-        done = 0
-        count = len(courses)
+        payload = {
+            'control': 'course',
+            'course': course['course_id'],
+            'term': course['term_id'],
+            't': int(round(time.time() * 1000))
+        }
+        headers = {
+            'Referer': '%s/buy_courselisting.asp' % Textbooks.host
+        }
 
-        for course in courses:
-            payload = {
-                'control': 'course',
-                'course': course['course_id'],
-                'term': course['term_id'],
-                't': int(round(time.time() * 1000))
-            }
-            headers = {
-                'Referer': '%s/buy_courselisting.asp' % self.host
-            }
+        r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+            params=payload, headers=headers)
 
-            r = requests.get('%s/textbooks_xml.asp' % self.host,
-                params=payload, headers=headers)
-
-            sections = BeautifulSoup(r.text, "xml").find_all('section')
-            for section in sections:
-                all_sections.append({
-                    'section_id': section.get('id'),
-                    'section_code': section.get('name'),
-                    'section_instructor': section.get('instructor'),
-                    'course_code': course['course_name'],
-                    'session': course['session']
-                })
-
-            done += 1
-            self.logger.info('(3/4)\t(%s%%)\tRetreived section info from %s.' % (
-                str(int((done / count) * 100)),
-                course['course_name']
-            ))
+        sections = BeautifulSoup(r.text, "xml").find_all('section')
+        for section in sections:
+            all_sections.append({
+                'section_id': section.get('id'),
+                'section_code': section.get('name'),
+                'section_instructor': section.get('instructor'),
+                'course_code': course['course_name'],
+                'session': course['session']
+            })
 
         return all_sections
 
+    @staticmethod
+    def retrieve_books(section):
+        all_books = []
 
-    def retrieve_books(self, sections):
-        all_books = {}
+        payload = {
+            'control': 'section',
+            'section': section['section_id'],
+            't': int(round(time.time() * 1000))
+        }
+        headers = {
+            'Referer': '%s/buy_courselisting.asp' % Textbooks.host
+        }
 
-        count = len(sections)
-        done = 0
+        r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+            params=payload, headers=headers)
 
-        for section in sections:
-            payload = {
-                'control': 'section',
-                'section': section['section_id'],
-                't': int(round(time.time() * 1000))
-            }
-            headers = {
-                'Referer': '%s/buy_courselisting.asp' % self.host
-            }
+        soup = BeautifulSoup(r.text, "html.parser")
+        books = soup.find_all('tr', { 'class': 'book' })
 
-            r = requests.get('%s/textbooks_xml.asp' % self.host,
-                params=payload, headers=headers)
+        if books == None:
+            done += 1
+            return []
 
-            soup = BeautifulSoup(r.text, "html.parser")
-            books = soup.find_all('tr', { 'class': 'book' })
-
-            if books == None:
-                done += 1
+        for book in books:
+            if len(book.get_text().strip()) == 0:
                 continue
 
-            for book in books:
-                if len(book.get_text().strip()) == 0:
-                    continue
+            image = book.find(class_='book-cover').img.get('src')
+            image = 'http://uoftbookstore.com/%s' % image
+            image = image.replace('Size=M', 'Size=L')
 
-                image = book.find(class_='book-cover').img.get('src')
-                image = 'http://uoftbookstore.com/%s' % image
-                image = image.replace('Size=M', 'Size=L')
+            # This doesn't mean "avoid textbooks with no image"
+            # This is a case when the textbook is called "No required text"
+            if 'not_available_' in image:
+                continue
 
-                # This doesn't mean "avoid textbooks with no image"
-                # This is a case when the textbook is called "No required text"
-                if 'not_available_' in image:
-                    continue
+            book_id = book.find(class_='product-field-pf_id').get('value')
 
-                book_id = book.find(class_='product-field-pf_id').get('value')
+            url = '%s/buy_book_detail.asp?pf_id=%s' % (Textbooks.host, book_id)
 
-                url = '%s/buy_book_detail.asp?pf_id=%s' % (self.host, book_id)
+            title = Textbooks.get_text_from_class(book, 'book-title')
 
-                title = self.get_text_from_class(book, 'book-title')
-
-                edition = self.get_text_from_class(book, 'book-edition')
-                if len(edition) > 0:
-                    edition = ''.join(list(filter(str.isdigit, edition)))
-                    try:
-                        edition = int(edition)
-                    except ValueError:
-                        edition = 1
-                if edition == '' or 0:
-                    edition = 1
-
-                author = self.get_text_from_class(book, 'book-author')
-                m = re.search('([\d]+[E]?)', author)
-                if m != None:
-                    junk = m.group(0)
-                    author = author.replace(junk, '').strip()
-
-                isbn = self.get_text_from_class(book, 'isbn')
-                requirement = self.get_text_from_class(book, 'book-req')
-                requirement = requirement.lower()
-
-                price = self.get_text_from_class(book, 'book-price-list')
+            edition = Textbooks.get_text_from_class(book, 'book-edition')
+            if len(edition) > 0:
+                edition = ''.join(list(filter(str.isdigit, edition)))
                 try:
-                    price = float(price[1:])
+                    edition = int(edition)
                 except ValueError:
-                    price = 0
+                    edition = 1
+            if edition == '' or 0:
+                edition = 1
 
-                instructor = section['section_instructor'].split(',')
-                if len(instructor) == 2:
-                    instructor = '%s %s' % (instructor[0][:1], instructor[1].strip())
-                else:
-                    instructor = None
+            author = Textbooks.get_text_from_class(book, 'book-author')
+            m = re.search('([\d]+[E]?)', author)
+            if m != None:
+                junk = m.group(0)
+                author = author.replace(junk, '').strip()
 
-                meeting_sections = [OrderedDict([
-                    ("code", section['section_code']),
-                    ("instructors", [instructor])
-                ])]
+            isbn = Textbooks.get_text_from_class(book, 'isbn')
+            requirement = Textbooks.get_text_from_class(book, 'book-req')
+            requirement = requirement.lower()
 
-                course_id = '%s%s' % (section['course_code'], section['session'])
+            price = Textbooks.get_text_from_class(book, 'book-price-list')
+            try:
+                price = float(price[1:])
+            except ValueError:
+                price = 0
 
-                courses = [OrderedDict([
-                    ("id", course_id),
-                    ("code", section['course_code']),
-                    ("requirement", requirement),
-                    ("meeting_sections", meeting_sections)
-                ])]
+            instructor = section['section_instructor'].split(',')
+            if len(instructor) == 2:
+                instructor = '%s %s' % (instructor[0][:1], instructor[1].strip())
+            else:
+                instructor = None
 
-                textbook = OrderedDict([
-                    ("id", book_id),
-                    ("isbn", isbn),
-                    ("title", title),
-                    ("edition", edition),
-                    ("author", author),
-                    ("image", image),
-                    ("price", price),
-                    ("url", url),
-                    ("courses", courses)
-                ])
+            meeting_sections = [OrderedDict([
+                ("code", section['section_code']),
+                ("instructors", [instructor])
+            ])]
 
-                if book_id in all_books:
-                    index = -1
-                    for i in range(len(all_books[book_id]['courses'])):
-                        if courses[i]['id'] == book_id:
-                            index = i
-                            break
-                    if index >= 0:
-                        all_books[book_id]['courses'][index]['meeting_sections'] += meeting_sections
-                    else:
-                        all_books[book_id]['courses'] += courses
-                else:
-                    all_books[book_id] = textbook
+            course_id = '%s%s' % (section['course_code'], section['session'])
 
-            done += 1
-            self.logger.info('(4/4)\t(%s%%)\tScraped %s %s.' % (
-                str(int((done / count) * 100)),
-                section['course_code'],
-                section['section_code']
-            ))
+            courses = [OrderedDict([
+                ("id", course_id),
+                ("code", section['course_code']),
+                ("requirement", requirement),
+                ("meeting_sections", meeting_sections)
+            ])]
 
-        return list(all_books.values())
+            textbook = OrderedDict([
+                ("id", book_id),
+                ("isbn", isbn),
+                ("title", title),
+                ("edition", edition),
+                ("author", author),
+                ("image", image),
+                ("price", price),
+                ("url", url),
+                ("courses", courses)
+            ])
 
+            all_books.append(textbook)
 
-    def get_text_from_class(self, soup, name):
+        return all_books
+
+    @staticmethod
+    def get_text_from_class(soup, name):
         obj = soup.find(class_=name)
         if obj != None:
             return obj.get_text().replace('\xa0', ' ').strip()
         else:
             return ''
+
+
+class CoursesWorker(Thread):
+
+    all_courses = []
+    lock = Lock()
+
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            department = self.queue.get()
+            courses = Textbooks.retrieve_courses(department)
+
+            CoursesWorker.lock.acquire()
+            CoursesWorker.all_courses += courses
+            CoursesWorker.lock.release()
+
+            self.queue.task_done()
+
+
+class SectionsWorker(Thread):
+
+    all_sections = []
+    lock = Lock()
+
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            course = self.queue.get()
+            sections = Textbooks.retrieve_sections(course)
+
+            SectionsWorker.lock.acquire()
+            SectionsWorker.all_sections += sections
+            SectionsWorker.lock.release()
+
+            self.queue.task_done()
+
+
+class BooksWorker(Thread):
+
+    all_books = {}
+    lock = Lock()
+
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            section = self.queue.get()
+            books = Textbooks.retrieve_books(section)
+
+            BooksWorker.lock.acquire()
+            for book in books:
+                if book['id'] in BooksWorker.all_books:
+                    index = -1
+                    for i in range(len(BooksWorker.all_books[book['id']]['courses'])):
+                        if BooksWorker.all_books[book['id']]['courses'][i]['id'] == book['courses'][0]['id']:
+                            index = i
+                            break
+                    if index >= 0:
+                        BooksWorker.all_books[book['id']]['courses'][index]['meeting_sections'] += book['courses'][0]['meeting_sections']
+                    else:
+                        BooksWorker.all_books[book['id']]['courses'] += book['courses']
+                else:
+                    BooksWorker.all_books[book['id']] = book
+            BooksWorker.lock.release()
+
+            self.queue.task_done()
