@@ -10,7 +10,7 @@ import re
 from queue import Queue
 from threading import Thread, Lock
 import logging
-
+from operator import itemgetter
 
 class Textbooks(Scraper):
     """A scraper for UofT's book store.
@@ -80,9 +80,11 @@ class Textbooks(Scraper):
         Textbooks.logger.info('Took %.2fs to retreive book info.' % (time.time() - ts))
 
         books = list(BooksWorker.all_books.values())
-        print(len(books))
 
         for book in books:
+            book['courses'] = sorted(book['courses'], key=itemgetter('id'))
+            for i in range(len(book['courses'])):
+                book['courses'][i]['meeting_sections'] = sorted(book['courses'][i]['meeting_sections'], key=itemgetter('code'))
             with open('%s/%s.json' % (self.location, book['id']), 'w+') as outfile:
                 json.dump(book, outfile)
 
