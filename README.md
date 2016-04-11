@@ -24,7 +24,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
 
 ## Installation
 ```bash
-  pip install uoftscrapers
+pip install uoftscrapers
 ```
 
 ## Usage
