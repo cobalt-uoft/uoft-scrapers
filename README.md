@@ -32,10 +32,10 @@ pip install uoftscrapers
 import uoftscrapers
 
 # Example: scrape http://map.utoronto.ca building data to ./some/path
-uoftscrapers.Buildings("./some/path").run()
+uoftscrapers.Buildings.scrape('./some/path')
 
-# Example: scrape http://coursefinder.utoronto.ca to current location
-uoftscrapers.CourseFinder().run()
+# Example: scrape http://coursefinder.utoronto.ca to current working directory
+uoftscrapers.CourseFinder.scrape()
 ```
 
 ## Library Reference
