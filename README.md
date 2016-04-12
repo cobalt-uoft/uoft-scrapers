@@ -17,9 +17,9 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [UTSG Calendar](#utsg-calendar)
 
 ## Requirements
- - [python3](https://www.python.org/download/releases/3.4.3/)
+ - [python3](https://www.python.org/download/releases/3.5.1)
  - [pip](https://pypi.python.org/pypi/pip#downloads)
- - [tidy](http://tidy.sourceforge.net/#binaries)
+ - [tidy](http://binaries.html-tidy.org/)
  - [lxml](http://lxml.de/installation.html)
 
 ## Installation
