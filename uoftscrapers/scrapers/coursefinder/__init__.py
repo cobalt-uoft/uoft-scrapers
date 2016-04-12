@@ -13,7 +13,7 @@ import requests
 import sys
 
 
-class CourseFinder(Scraper):
+class CourseFinder:
     """A scraper for UofT's Course Finder web service.
 
     Course Finder is located at http://coursefinder.utoronto.ca/.
@@ -25,13 +25,14 @@ class CourseFinder(Scraper):
     s = requests.Session()
     threads = 32
 
-    def __init__(self, output_location='.'):
-        super().__init__('Course Finder', output_location)
-
-    def run(self):
+    @staticmethod
+    def scrape(location='.'):
         """Update the local JSON files for this scraper."""
 
-        urls = self.search()
+        Scraper.logger.info('CourseFinder initialized.')
+        Scraper.ensure_location(location)
+
+        urls = CourseFinder.search()
         total = len(urls)
 
         ts = time()
@@ -43,22 +44,31 @@ class CourseFinder(Scraper):
             worker.start()
 
         CourseFinder.logger.info('Queued %d courses.' % total)
-        for x in urls:
+        for x in urls[:10]:
             course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
-            url = '%s/courseSearch/coursedetails/%s' % (CourseFinder.host, course_id)
+            url = '%s/courseSearch/coursedetails/%s' % (
+                CourseFinder.host,
+                course_id
+            )
             queue.put((course_id, url, total))
 
         queue.join()
-        CourseFinder.logger.info('Took %.2fs to retreive course info.' % (time() - ts))
+        CourseFinder.logger.info('Took %.2fs to retreive course info.' % (
+            time() - ts
+        ))
 
         for course in CourseFinderWorker.all_courses:
             if course != False:
-                with open('%s/%s.json' % (self.location, course['id']), 'w+') as outfile:
+                with open('%s/%s.json' % (
+                    location,
+                    course['id']
+                ),'w+') as outfile:
                     json.dump(course, outfile)
 
-        CourseFinder.logger.info('%s completed.' % self.name)
+        Scraper.logger.info('CourseFinder completed.')
 
-    def search(self, query='', requirements=''):
+    @staticmethod
+    def search(query='', requirements=''):
         """Perform a search and return the data as a dict."""
 
         url = '%s/courseSearch/course/search' % CourseFinder.host
@@ -73,7 +83,8 @@ class CourseFinder(Scraper):
         json = None
         while json is None:
             try:
-                r = CourseFinder.s.get(url, params=data, cookies=CourseFinder.cookies)
+                r = CourseFinder.s.get(url, params=data,
+                    cookies=CourseFinder.cookies)
                 if r.status_code == 200:
                     json = r.json()
                 else:
@@ -193,7 +204,8 @@ class CourseFinder(Scraper):
                 for i in range(0, len(raw_times) - 1, 2):
                     times.append(raw_times[i] + " " + raw_times[i + 1])
 
-                instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"), "html.parser")
+                instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"),
+                    "html.parser")
                 instructors = instructors.get_text().split("\n")
                 instructors = \
                     list(filter(None, [x.strip() for x in instructors]))
@@ -263,11 +275,6 @@ class CourseFinder(Scraper):
         return course
 
 
-def flush_percentage(decimal):
-    sys.stdout.write('%.2f%%\r' % (decimal * 100))
-    sys.stdout.flush()
-
-
 class CourseFinderWorker(Thread):
 
     all_courses = []
@@ -287,7 +294,7 @@ class CourseFinderWorker(Thread):
             CourseFinderWorker.lock.acquire()
             CourseFinderWorker.all_courses.append(course)
             CourseFinderWorker.done += 1
-            flush_percentage(CourseFinderWorker.done / total)
+            Scraper.flush_percentage(CourseFinderWorker.done / total)
             CourseFinderWorker.lock.release()
 
             self.queue.task_done()

@@ -1,18 +1,17 @@
-import requests
+from ..scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
-from ..scraper import Scraper
 import os
+import requests
 
-class UTMTimetable(Scraper):
+class UTMTimetable:
 
-    def __init__(self, output_location='.'):
-        super().__init__('UTM Timetable', output_location)
+    host = 'https://student.utm.utoronto.ca/timetable/'
 
-        self.host = 'https://student.utm.utoronto.ca/timetable/'
-
-    def run(self):
-        self.logger.info('Not implemented')
+    @staticmethod
+    def scrape(location='.'):
+        Scraper.logger.info('UTMTimetable initialized.')
+        Scraper.logger.info('Not implemented.')
         raise NotImplementedError('This scraper has not been implemented yet.')
-        self.logger.info('%s completed.' % self.name)
+        Scraper.logger.info('UTMTimetable completed.')

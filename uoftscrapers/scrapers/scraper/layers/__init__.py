@@ -3,28 +3,30 @@ import json
 from .. import Scraper
 
 
-class LayersScraper(Scraper):
+class LayersScraper:
     """A superclass for scraping Layers of the UofT Map.
 
     Map is located at http://map.utoronto.ca
     """
 
-    def __init__(self, name, output_location):
-        super().__init__(name, output_location)
+    host = 'http://map.utoronto.ca/'
+    s = requests.Session()
 
-        self.host = 'http://map.utoronto.ca/'
-        self.s = requests.Session()
-
-    def get_layers_json(self, campus):
+    @staticmethod
+    def get_layers_json(campus):
         """Retrieve the JSON structure from host."""
 
-        self.logger.info('Scraping map layers for %s.' % campus.upper())
+        Scraper.logger.info('Retrieving map layers for %s.' % campus.upper())
 
         headers = {
-            'Referer': self.host
+            'Referer': LayersScraper.host
         }
-        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
-                          headers=headers).text
+        html = LayersScraper.s.get('%s%s%s' % (
+            LayersScraper.host,
+            'data/map/',
+            campus
+        ), headers=headers).text
+
         data = json.loads(html)
         return data['layers']
 

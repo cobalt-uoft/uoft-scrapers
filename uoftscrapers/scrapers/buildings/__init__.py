@@ -6,42 +6,43 @@ import re
 import json
 from decimal import *
 from ..scraper import Scraper
+from ..scraper.layers import LayersScraper
 
-
-class Buildings(Scraper):
+class Buildings:
     """A scraper for UofT's buildings.
 
     UofT Map is located at http://map.utoronto.ca/.
     """
 
-    def __init__(self, output_location='.'):
-        super().__init__('Buildings', output_location)
+    host = 'http://map.utoronto.ca/'
+    campuses = ['utsg', 'utm', 'utsc']
+    s = requests.Session()
 
-        self.host = 'http://map.utoronto.ca/'
-        self.campuses = ['utsg', 'utm', 'utsc']
-        self.s = requests.Session()
-
-    def run(self):
+    @staticmethod
+    def scrape(location='.'):
         """Update the local JSON files for this scraper."""
 
-        for campus in self.campuses:
-            data = self.get_map_json(campus)
-            regions = self.get_regions_json(campus)['buildings']
+        Scraper.logger.info('Buildings initialized.')
+        Scraper.ensure_location(location)
+
+        for campus in Buildings.campuses:
+            data = Buildings.get_map_json(campus)
+            regions = Buildings.get_regions_json(campus)['buildings']
 
             for building in data['buildings']:
                 _id = building['id']
                 code = building['code']
                 name = building['title']
-                short_name = self.get_value(building, 'short_name')
-                lat = self.get_value(building, 'lat', True)
-                lng = self.get_value(building, 'lng', True)
+                short_name = LayersScraper.get_value(building, 'short_name')
+                lat = LayersScraper.get_value(building, 'lat', True)
+                lng = LayersScraper.get_value(building, 'lng', True)
 
-                street = ' '.join(filter(
-                    None, self.get_value(building, 'street').split(' ')))
-                city = self.get_value(building, 'city')
-                province = self.get_value(building, 'province')
-                country = self.get_value(building, 'country')
-                postal = self.get_value(building, 'postal')
+                street = ' '.join(filter(None,
+                    LayersScraper.get_value(building, 'street').split(' ')))
+                city = LayersScraper.get_value(building, 'city')
+                province = LayersScraper.get_value(building, 'province')
+                country = LayersScraper.get_value(building, 'country')
+                postal = LayersScraper.get_value(building, 'postal')
 
                 polygon = []
                 for region in regions:
@@ -72,41 +73,41 @@ class Buildings(Scraper):
                     ('polygon', polygon)
                 ])
 
-                with open('%s/%s.json' % (self.location, _id), 'w') as fp:
+                with open('%s/%s.json' % (location, _id), 'w') as fp:
                     json.dump(doc, fp)
 
-        self.logger.info('%s completed.' % self.name)
+        Scraper.logger.info('Buildings completed.')
 
-    def get_map_json(self, campus):
+    @staticmethod
+    def get_map_json(campus):
         """Retrieve the JSON structure from host."""
 
-        self.logger.info('Scraping %s.' % campus)
+        Scraper.logger.info('Scraping %s.' % campus.upper())
 
-        self.s.get(self.host)
-        headers = {
-            'Referer': self.host
-        }
-        html = self.s.get('%s%s%s' % (self.host, 'data/map/', campus),
-                          headers=headers).text
+        Buildings.s.get(Buildings.host)
+
+        headers = { 'Referer': Buildings.host }
+        html = Buildings.s.get('%s%s%s' % (
+            Buildings.host,
+            'data/map/',
+            campus
+        ), headers=headers).text
+
         data = json.loads(html)
         return data
 
-    def get_regions_json(self, campus):
+    @staticmethod
+    def get_regions_json(campus):
         """Retrieve the JSON structure from host."""
 
-        self.s.get(self.host)
-        headers = {
-            'Referer': self.host
-        }
-        html = self.s.get('%s%s%s' % (self.host, 'data/regions/', campus),
-                          headers=headers).text
+        Buildings.s.get(Buildings.host)
+
+        headers = { 'Referer': Buildings.host }
+        html = Buildings.s.get('%s%s%s' % (
+            Buildings.host,
+            'data/regions/',
+            campus
+        ), headers=headers).text
+
         data = json.loads(html)
         return data
-
-    def get_value(self, building, val, number=False):
-        """Retrieve the desired value from the parsed response dictionary."""
-
-        if val in building.keys():
-            return building[val]
-        else:
-            return 0 if number else ''

@@ -13,24 +13,24 @@ import re
 import requests
 import sys
 
-class Textbooks(Scraper):
+class Textbooks:
     """A scraper for UofT's book store.
 
     UofT Book Store is located at http://uoftbookstore.com/.
     """
 
     host = 'http://uoftbookstore.com'
-    logger = logging.getLogger("uoftscrapers")
     threads = 32
 
-    def __init__(self, output_location='.'):
-        super().__init__('Textbooks', output_location)
-
-    def run(self):
+    @staticmethod
+    def scrape(location='.'):
         """Update the local JSON files for this scraper."""
 
-        terms = self.retrieve_terms()
-        departments = self.retrieve_departments(terms)
+        Scraper.logger.info('Food initialized.')
+        Scraper.ensure_location(location)
+
+        terms = Textbooks.retrieve_terms()
+        departments = Textbooks.retrieve_departments(terms)
 
         # Get course info
         ts = time()
@@ -42,12 +42,14 @@ class Textbooks(Scraper):
             worker.start()
 
         total = len(departments)
-        Textbooks.logger.info('Queued %d departments. (1/3)' % total)
+        Scraper.logger.info('Queued %d departments. (1/3)' % total)
         for department in departments:
             queue.put((department, total))
 
         queue.join()
-        Textbooks.logger.info('Took %.2fs to retreive course info.' % (time() - ts))
+        Scraper.logger.info('Took %.2fs to retreive course info.' % (
+            time() - ts
+        ))
 
         # Get section info
         ts = time()
@@ -59,12 +61,14 @@ class Textbooks(Scraper):
             worker.start()
 
         total = len(CoursesWorker.all_courses)
-        Textbooks.logger.info('Queued %d courses. (2/3)' % total)
+        Scraper.logger.info('Queued %d courses. (2/3)' % total)
         for course in CoursesWorker.all_courses:
             queue.put((course, total))
 
         queue.join()
-        Textbooks.logger.info('Took %.2fs to retreive section info.' % (time() - ts))
+        Scraper.logger.info('Took %.2fs to retreive section info.' % (
+            time() - ts
+        ))
 
         # Get book info
         ts = time()
@@ -76,12 +80,14 @@ class Textbooks(Scraper):
             worker.start()
 
         total = len(SectionsWorker.all_sections)
-        Textbooks.logger.info('Queued %d sections. (3/3)' % total)
+        Scraper.logger.info('Queued %d sections. (3/3)' % total)
         for section in SectionsWorker.all_sections:
             queue.put((section, total))
 
         queue.join()
-        Textbooks.logger.info('Took %.2fs to retreive book info.' % (time() - ts))
+        Scraper.logger.info('Took %.2fs to retreive book info.' % (
+            time() - ts
+        ))
 
         books = list(BooksWorker.all_books.values())
 
@@ -89,11 +95,17 @@ class Textbooks(Scraper):
         for book in books:
             book['courses'] = sorted(book['courses'], key=itemgetter('id'))
             for i in range(len(book['courses'])):
-                book['courses'][i]['meeting_sections'] = sorted(book['courses'][i]['meeting_sections'], key=itemgetter('code'))
-            with open('%s/%s.json' % (self.location, book['id']), 'w+') as outfile:
+                book['courses'][i]['meeting_sections'] = \
+                sorted(book['courses'][i]['meeting_sections'],
+                    key=itemgetter('code'))
+
+            with open('%s/%s.json' % (
+                location,
+                book['id']
+            ), 'w+') as outfile:
                 json.dump(book, outfile)
 
-        self.logger.info('%s completed.' % self.name)
+        Scraper.logger.info('Textbooks completed.')
 
     @staticmethod
     def retrieve_terms():
@@ -143,7 +155,7 @@ class Textbooks(Scraper):
                     'session': session
                 })
 
-            Textbooks.logger.info('Retreived department info from %s.' % term_name)
+            Scraper.logger.info('Retreived department info from %s.' % term_name)
 
         return all_departments
 
@@ -244,9 +256,9 @@ class Textbooks(Scraper):
 
             url = '%s/buy_book_detail.asp?pf_id=%s' % (Textbooks.host, book_id)
 
-            title = get_text_from_class(book, 'book-title')
+            title = Scraper.get_text_from_class(book, 'book-title')
 
-            edition = get_text_from_class(book, 'book-edition')
+            edition = Scraper.get_text_from_class(book, 'book-edition')
             if len(edition) > 0:
                 edition = ''.join(list(filter(str.isdigit, edition)))
                 try:
@@ -256,17 +268,17 @@ class Textbooks(Scraper):
             if edition == '' or 0:
                 edition = 1
 
-            author = get_text_from_class(book, 'book-author')
+            author = Scraper.get_text_from_class(book, 'book-author')
             m = re.search('([\d]+[E]?)', author)
             if m != None:
                 junk = m.group(0)
                 author = author.replace(junk, '').strip()
 
-            isbn = get_text_from_class(book, 'isbn')
-            requirement = get_text_from_class(book, 'book-req')
+            isbn = Scraper.get_text_from_class(book, 'isbn')
+            requirement = Scraper.get_text_from_class(book, 'book-req')
             requirement = requirement.lower()
 
-            price = get_text_from_class(book, 'book-price-list')
+            price = Scraper.get_text_from_class(book, 'book-price-list')
             try:
                 price = float(price[1:])
             except ValueError:
@@ -274,7 +286,10 @@ class Textbooks(Scraper):
 
             instructor = section['section_instructor'].split(',')
             if len(instructor) == 2:
-                instructor = '%s %s' % (instructor[0][:1], instructor[1].strip())
+                instructor = '%s %s' % (
+                    instructor[0][:1],
+                    instructor[1].strip()
+                )
                 instructor = instructor.strip()
             else:
                 instructor = ''
@@ -314,17 +329,6 @@ class Textbooks(Scraper):
         return all_books
 
 
-def get_text_from_class(soup, name):
-    obj = soup.find(class_=name)
-    if obj != None:
-        return obj.get_text().replace('\xa0', ' ').strip()
-    else:
-        return ''
-
-def flush_percentage(decimal):
-    sys.stdout.write('%.2f%%\r' % (decimal * 100))
-    sys.stdout.flush()
-
 class CoursesWorker(Thread):
 
     all_courses = []
@@ -343,7 +347,7 @@ class CoursesWorker(Thread):
             CoursesWorker.lock.acquire()
             CoursesWorker.all_courses += courses
             CoursesWorker.done += 1
-            flush_percentage(CoursesWorker.done / total)
+            Scraper.flush_percentage(CoursesWorker.done / total)
             CoursesWorker.lock.release()
 
             self.queue.task_done()
@@ -367,7 +371,7 @@ class SectionsWorker(Thread):
             SectionsWorker.lock.acquire()
             SectionsWorker.all_sections += sections
             SectionsWorker.done += 1
-            flush_percentage(SectionsWorker.done / total)
+            Scraper.flush_percentage(SectionsWorker.done / total)
             SectionsWorker.lock.release()
 
             self.queue.task_done()
@@ -403,7 +407,7 @@ class BooksWorker(Thread):
                 else:
                     BooksWorker.all_books[book['id']] = book
             BooksWorker.done += 1
-            flush_percentage(BooksWorker.done / total)
+            Scraper.flush_percentage(BooksWorker.done / total)
             BooksWorker.lock.release()
 
             self.queue.task_done()
