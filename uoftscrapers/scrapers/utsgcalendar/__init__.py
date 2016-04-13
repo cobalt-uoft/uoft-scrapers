@@ -1,18 +1,17 @@
-import requests
+from ..scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
-from ..scraper import Scraper
 import os
+import requests
 
-class UTSGCalendar(Scraper):
+class UTSGCalendar:
 
-    def __init__(self, output_location='.'):
-        super().__init__('UTSG Calendar', output_location)
+    host = 'http://www.artsandscience.utoronto.ca/ofr/calendar/'
 
-        self.host = 'http://www.artsandscience.utoronto.ca/ofr/calendar/'
-
-    def run(self):
-        self.logger.info('Not implemented')
+    @staticmethod
+    def scrape(location='.'):
+        Scraper.logger.info('UTSGCalendar initialized.')
+        Scraper.logger.info('Not implemented.')
         raise NotImplementedError('This scraper has not been implemented yet.')
-        self.logger.info('%s completed.' % self.name)
+        Scraper.logger.info('UTSGCalendar completed.')

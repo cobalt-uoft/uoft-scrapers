@@ -1,52 +1,56 @@
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
+import requests
 from ..scraper.layers import LayersScraper
+from ..scraper import Scraper
 
-
-class Food(LayersScraper):
+class Food:
     """A scraper for UofT restaurants.
 
     UofT Food data is located at http://map.utoronto.ca
     """
 
-    def __init__(self, output_location='.'):
-        super().__init__('Food', output_location)
+    host = 'http://map.utoronto.ca/'
+    campuses = [('utsg', 2), ('utm', 1), ('utsc', 0)]
+    s = requests.Session()
 
-        self.campuses = [('utsg', 2), ('utm', 1), ('utsc', 0)]
-        self.logger.info('%s scraper initialized.' % self.name)
+    @staticmethod
+    def scrape(location='.'):
+        """Update the local JSON files for this scraper."""
 
-    def run(self):
-        for campus, food_index in self.campuses:
-            data = self.get_layers_json(campus)[food_index]
+        Scraper.logger.info('Food initialized.')
+        Scraper.ensure_location(location)
+
+        for campus, food_index in Food.campuses:
+            data = LayersScraper.get_layers_json(campus)[food_index]
 
             for entry in data['markers']:
                 id_ = str(entry['id']).zfill(4)
                 name = entry['title']
-                self.logger.info('Scraping %s @ %s, %s' %
-                                 (name, campus.upper(), id_.lstrip('0')))
 
-                building_id = self.get_value(entry, 'building_code')
+                building_id = LayersScraper.get_value(entry, 'building_code')
 
-                address = ' '.join(
-                    filter(None, self.get_value(entry, 'address').split()))
+                address = ' '.join(filter(None,
+                    LayersScraper.get_value(entry, 'address').split()))
 
-                hours = self.get_hours(id_)
-                short_name = self.get_value(entry, 'slug')
+                hours = Food.get_hours(id_)
+                short_name = LayersScraper.get_value(entry, 'slug')
 
-                desc = BeautifulSoup(self.get_value(entry, 'desc').strip(),
-                                     'html.parser').text
+                desc = BeautifulSoup(
+                    LayersScraper.get_value(entry, 'desc').strip(),
+                    'html.parser').text
 
-                tags = list(filter(
-                    None, self.get_value(entry, 'tags').lower().split(', ')))
+                tags = list(filter(None,
+                    LayersScraper.get_value(entry, 'tags').lower().split(', ')))
 
-                image = self.get_value(entry, 'image')
-                lat = self.get_value(entry, 'lat', True)
-                lng = self.get_value(entry, 'lng', True)
-                url = self.get_value(entry, 'url')
+                image = LayersScraper.get_value(entry, 'image')
+                lat = LayersScraper.get_value(entry, 'lat', True)
+                lng = LayersScraper.get_value(entry, 'lng', True)
+                url = LayersScraper.get_value(entry, 'url')
 
                 if not image == '':
-                    image = '%s%s' % (self.host[:-1], image)
+                    image = '%s%s' % (Food.host[:-1], image)
 
                 doc = OrderedDict([
                     ('id', id_),
@@ -64,12 +68,18 @@ class Food(LayersScraper):
                     ('hours', hours)
                 ])
 
-                with open('%s/%s.json' % (self.location, id_), 'w') as fp:
+                Scraper.logger.info('Scraped %s @ %s.' % (
+                    name,
+                    campus.upper()
+                ))
+
+                with open('%s/%s.json' % (location, id_), 'w') as fp:
                     json.dump(doc, fp)
 
-        self.logger.info('%s scraper completed.' % self.name)
+        Scraper.logger.info('Food completed.')
 
-    def get_hours(self, food_id):
+    @staticmethod
+    def get_hours(food_id):
         """Parse and return the restaurant's opening and closing times."""
 
         def conv_time(t):
@@ -92,10 +102,10 @@ class Food(LayersScraper):
             return h + (m / 60)
 
         headers = {
-            'Referer': self.host
+            'Referer': Food.host
         }
-        html = self.s.get('%s%s%s' % (self.host, 'json/hours/', food_id),
-                          headers=headers).text
+        html = Food.s.get('%s%s%s' % (Food.host, 'json/hours/', food_id),
+            headers=headers).text
         soup = BeautifulSoup(html, 'html.parser')
 
         hours = OrderedDict()

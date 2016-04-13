@@ -1,36 +1,38 @@
-import requests
-import http.cookiejar
+from ..scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import re
-import os
+import http.cookiejar
 import json
-import tidylib
+import os
+import re
+import requests
 import shutil
-from ..scraper import Scraper
+import tidylib
 
+class UTSGTimetable:
 
-class UTSGTimetable(Scraper):
+    host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
+    day_map = {
+        'M': 'MONDAY',
+        'T': 'TUESDAY',
+        'W': 'WEDNESDAY',
+        'R': 'THURSDAY',
+        'F': 'FRIDAY',
+        'S': 'SATURDAY'
+    }
+    s = requests.Session()
+    terms = ['summer', 'winter']
 
-    def __init__(self, output_location='.'):
-        super().__init__('UTSG Timetable', output_location)
+    @staticmethod
+    def scrape(location):
+        """Update the local JSON files for this scraper."""
 
-        self.host = 'http://www.artsandscience.utoronto.ca/ofr/timetable/'
-        self.day_map = {
-            'M': 'MONDAY',
-            'T': 'TUESDAY',
-            'W': 'WEDNESDAY',
-            'R': 'THURSDAY',
-            'F': 'FRIDAY',
-            'S': 'SATURDAY'
-        }
-        self.s = requests.Session()
-        self.terms = ["summer", "winter"]
+        Scraper.logger.info('UTSGTimetable initialized.')
+        Scraper.ensure_location(location)
 
-    def run(self):
-        for term in self.terms:
+        for term in UTSGTimetable.terms:
             year = 0
-            data = self.get_sponsors(term)
+            data = UTSGTimetable.get_sponsors(term)
             sponsors = data["sponsors"]
 
             if term == "summer":
@@ -40,24 +42,37 @@ class UTSGTimetable(Scraper):
                 year = data["year"]
 
             for sponsor in sponsors:
-                self.logger.info('Scraping %s/%s.' % (term, sponsor.split('.')[0]))
-                html = self.s.get('%s/%s/%s' % (self.host, term, sponsor)).text
-                self.save('.html/%s/%s' % (str(year), sponsor),
-                          html.encode('utf-8'))
+                Scraper.logger.info('Scraping %s/%s.' % (
+                    term,
+                    sponsor.split('.')[0]
+                ))
+                html = UTSGTimetable.s.get('%s/%s/%s' % (
+                    UTSGTimetable.host,
+                    term,
+                    sponsor
+                )).text
+                UTSGTimetable.save('.html/%s/%s' % (
+                    str(year),
+                    sponsor
+                ), html.encode('utf-8'))
 
-                data = self.parse_sponsor(html, year, term, sponsor)
+                data = UTSGTimetable.parse_sponsor(html, year, term, sponsor)
 
                 for course in data:
-                    self.save_json('%s/%s/%s' % (self.location, str(year),
-                                   course["id"] + ".json"), course)
-        shutil.rmtree('.html')
-        self.logger.info('%s completed.' % self.name)
+                    UTSGTimetable.save_json('%s/%s' % (
+                        location,
+                        course["id"] + ".json"
+                    ), course)
 
-    def parse_sponsor(self, html, year, term, sponsor=''):
+        shutil.rmtree('.html')
+        Scraper.logger.info('UTSGTimetable completed.')
+
+    @staticmethod
+    def parse_sponsor(html, year, term, sponsor=''):
         document, errors = \
             tidylib.tidy_document(html, options={'numeric-entities': 1})
 
-        soup = BeautifulSoup(document)
+        soup = BeautifulSoup(document, "html.parser")
 
         table = soup.table
 
@@ -96,16 +111,16 @@ class UTSGTimetable(Scraper):
 
             if len(tds) >= 9:
 
-                course_code = self.format_data(tds[0].get_text(),
-                                               "([A-Z]{3}[0-9]{3}[HY]1)")
+                course_code = UTSGTimetable.format_data(tds[0].get_text(),
+                    "([A-Z]{3}[0-9]{3}[HY]1)")
 
                 if len(course_code) > 0:
                     course_info.append(current_course)
 
                     current_course = [
-                        None,   # course code
-                        None,   # name
-                        OrderedDict([]),    # sections
+                        None,            # course code
+                        None,            # name
+                        OrderedDict([]), # sections
                         []
                     ]
 
@@ -115,18 +130,18 @@ class UTSGTimetable(Scraper):
                     name = tds[2].get_text().split("\n")[0].strip()
                     current_course[1] = name
 
-                section = self.format_data(tds[3].get_text(),
-                                           "([LTP][0-9]{4})")
+                section = UTSGTimetable.format_data(tds[3].get_text(),
+                    "([LTP][0-9]{4})")
 
                 if len(section) > 0:
                     current_section = section
 
-                time = self.format_data(tds[5].get_text(),
-                                        "([MTWRFS]{1,3}[0-9]{1,2}(?::[0-9]" +
-                                        "{2})?(?:-[0-9]{1,2}(?::[0-9]{2})?)?)")
+                time = UTSGTimetable.format_data(tds[5].get_text(),
+                    "([MTWRFS]{1,3}[0-9]{1,2}(?::[0-9]" +
+                    "{2})?(?:-[0-9]{1,2}(?::[0-9]{2})?)?)")
 
-                location = self.format_data(tds[6].get_text(),
-                                            "([A-Z]{2,4}[ ]?[0-9]{1,8})")
+                location = UTSGTimetable.format_data(tds[6].get_text(),
+                    "([A-Z]{2,4}[ ]?[0-9]{1,8})")
 
                 instructors = tds[7].get_text().strip()
 
@@ -143,8 +158,7 @@ class UTSGTimetable(Scraper):
                     instructors = []
 
                 try:
-                    if not isinstance(current_course[2][current_section],
-                                      list):
+                    if not isinstance(current_course[2][current_section], list):
                         current_course[2][current_section] = []
                 except KeyError:
                     current_course[2][current_section] = []
@@ -159,15 +173,15 @@ class UTSGTimetable(Scraper):
                 if tds[0].get('colspan') == '6':
 
                     course_code = \
-                        self.format_data(tds[0].get_text(),
-                                         "([A-Z]{3}[0-9]{3}[HY]{1}1[YFS]{1})")
+                        UTSGTimetable.format_data(tds[0].get_text(),
+                            "([A-Z]{3}[0-9]{3}[HY]{1}1[YFS]{1})")
                     breadths = [int(x) for x in
                                 re.findall("(?:\()([12345])(?:\))",
                                 tds[0].get_text().strip())]
                     name = ''.join(tds[0].get_text()
-                                   .replace("Categories ", ":")
-                                   .replace("Categories:", ":").split(':')[1:]) \
-                        .split(', Count')[0].strip()
+                        .replace("Categories ", ":")
+                        .replace("Categories:", ":")
+                        .split(':')[1:]).split(', Count')[0].strip()
 
                     if len(course_code) > 0:
                         course_info.append(current_course)
@@ -178,19 +192,19 @@ class UTSGTimetable(Scraper):
                             breadths
                         ]
                 else:
-                    section = self.format_data(tds[0].get_text(),
-                                               "([LTP][0-9]{4})")
+                    section = UTSGTimetable.format_data(tds[0].get_text(),
+                        "([LTP][0-9]{4})")
 
                     if len(section) > 0:
                         current_section = section
 
-                    time = self.format_data(tds[3].get_text(),
-                                            "([MTWRFS]{1,3}[0-9]{1,2}" +
-                                            "(?::[0-9]{2})?(?:-[0-9]{1,2}" +
-                                            "(?::[0-9]{2})?)?)")
+                    time = UTSGTimetable.format_data(tds[3].get_text(),
+                        "([MTWRFS]{1,3}[0-9]{1,2}" +
+                        "(?::[0-9]{2})?(?:-[0-9]{1,2}" +
+                        "(?::[0-9]{2})?)?)")
 
-                    location = self.format_data(tds[4].get_text(),
-                                                "([A-Z]{2,4}[ ]?[0-9]{1,8})")
+                    location = UTSGTimetable.format_data(tds[4].get_text(),
+                        "([A-Z]{2,4}[ ]?[0-9]{1,8})")
 
                     instructors = tds[5].get_text().strip()
 
@@ -206,7 +220,7 @@ class UTSGTimetable(Scraper):
 
                     try:
                         if not isinstance(current_course[2][current_section],
-                                          list):
+                            list):
                             current_course[2][current_section] = []
                     except KeyError:
                         current_course[2][current_section] = []
@@ -252,8 +266,6 @@ class UTSGTimetable(Scraper):
 
             level = int(course_code[3] + "00")
 
-
-
             sections = []
             for k in course[2]:
 
@@ -297,7 +309,7 @@ class UTSGTimetable(Scraper):
                                 hours[i] += 12
 
                         for day_key in days:
-                            day = self.day_map[day_key]
+                            day = UTSGTimetable.day_map[day_key]
 
                             time_data.append(OrderedDict([
                                 ("day", day),
@@ -331,7 +343,8 @@ class UTSGTimetable(Scraper):
 
         return courses
 
-    def format_data(self, text, regex):
+    @staticmethod
+    def format_data(text, regex):
         text = re.search(regex, text.strip())
         if text is None:
             text = ""
@@ -339,29 +352,36 @@ class UTSGTimetable(Scraper):
             text = text.group(1)
         return text
 
-    def save(self, name, data):
+    @staticmethod
+    def save(name, data):
         if not os.path.exists(os.path.dirname(name)):
             os.makedirs(os.path.dirname(name))
         with open(name, "wb") as file:
             file.write(data)
 
-    def save_json(self, name, data):
+    @staticmethod
+    def save_json(name, data):
         if not os.path.exists(os.path.dirname(name)):
             os.makedirs(os.path.dirname(name))
         with open(name, "w+") as file:
             json.dump(data, file)
 
-    def get_sponsors(self, term):
-        html = self.s.get('%s/%s/index.html' % (self.host, term)).text
+    @staticmethod
+    def get_sponsors(term):
+        html = UTSGTimetable.s.get('%s/%s/index.html' % (
+            UTSGTimetable.host,
+            term
+        )).text
 
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "html.parser")
 
         title = soup.title.get_text().strip()
 
         year = -1
         year = int(re.search("([0-9]{4})", title).group(0))
 
-        self.save('.html/%s/sponsors.html' % str(year), html.encode('utf-8'))
+        UTSGTimetable.save('.html/%s/sponsors.html' % str(year),
+            html.encode('utf-8'))
 
         sponsors = []
         for x in soup.find_all('a'):
