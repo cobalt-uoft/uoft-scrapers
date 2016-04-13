@@ -45,8 +45,8 @@ class Exams:
                 data = [x.text.strip() for x in row.find_all('td')]
 
                 course, section, location_ = data[0], data[1], data[4]
-                date_ = Exams.parse_date(data[2], m[-2:])
-                start, end = Exams.parse_time(data[3])
+                date_ = Exams.parse_date(data[2], m[-2:]) or ''
+                start, end = Exams.parse_time(data[3]) or (0, 0)
 
                 if course not in exams:
                     exams[course] = OrderedDict([
@@ -71,22 +71,32 @@ class Exams:
 
     @staticmethod
     def parse_date(date_, year):
-        day, date_, month = date_.split(' ')
-        return datetime.strptime('%s %s %s %s' % (day, date_, month, year),
-                                 '%a %d %b %y').isoformat()
+        """Convert date of form `D DD MMM` to ISO 8601 format."""
+
+        date_ = date_.split(' ')
+        if len(date_) >= 3:
+            day, date_, month = date_
+
+            # TODO add EST offset
+            return datetime.strptime('%s %s %s %s' % (day, date_, month, year),
+                                     '%a %d %b %y').isoformat()
 
     @staticmethod
     def parse_time(time):
+        """Convert time range of form `pd hh:mm - hh:mm` to start and end
+        decimal hours."""
 
         def convert_time(t, is_pm=False):
             h, m = [int(x) for x in t.split(':')]
             h += 12 if is_pm else 0
             return h + (m / 60)
 
-        period, start, _, end = time.split(' ')
+        time = list(filter(None, time.replace('-', '').split(' ')))
+        if len(time) >= 3:
+            period, start, end = time
 
-        after_12 = period == 'PM' or period == 'EV'
-        return convert_time(start, after_12), convert_time(end, after_12)
+            after_12 = period == 'PM' or period == 'EV'
+            return convert_time(start, after_12), convert_time(end, after_12)
 
     @staticmethod
     def get_exam_months(year):
