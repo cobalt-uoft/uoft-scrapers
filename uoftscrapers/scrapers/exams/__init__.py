@@ -47,7 +47,26 @@ class Exams:
                 course, section, location_ = data[0], data[1], data[4]
                 date_ = Exams.parse_date(data[2], m[-2:])
                 start, end = Exams.parse_time(data[3])
+
+                if course not in exams:
+                    exams[course] = OrderedDict([
+                        ('date', date_),
+                        ('start_time', start),
+                        ('end_time', end),
+                        ('sections', [])
+                    ])
+
+                exams[course]['sections'].append(OrderedDict([
+                    ('section', section),
+                    ('location', location_)
+                ]))
+
             all_exams[m] = exams
+
+        for m in all_exams:
+            with open('%s/%s.json' % (location, m.upper()), 'w+') as outfile:
+                json.dump(all_exams[m], outfile)
+
         Scraper.logger.info('Exams completed.')
 
     @staticmethod
