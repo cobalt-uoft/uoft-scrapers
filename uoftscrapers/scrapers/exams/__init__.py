@@ -1,9 +1,9 @@
+from ..scraper import Scraper
 from bs4 import BeautifulSoup
+from datetime import datetime, date
 from collections import OrderedDict
 import json
 import requests
-from datetime import datetime, date
-from ..scraper import Scraper
 import pytz
 
 
