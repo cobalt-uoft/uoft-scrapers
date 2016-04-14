@@ -21,7 +21,6 @@ class Exams:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Exams initialized.')
-        Scraper.ensure_location(location)
 
         exams = OrderedDict()
 
@@ -37,7 +36,7 @@ class Exams:
 
             if not soup.find('table', class_='vertical listing'):
                 # no exam data available
-                Scraper.logger.info('No exams for %s.' % p.upper())
+                Scraper.logger.info('No %s exams.' % p.upper())
                 continue
 
             rows = soup.find('table', class_='vertical listing').find_all('tr')
@@ -72,6 +71,9 @@ class Exams:
                     ('location', location_)
                 ]))
 
+        if exams:
+            Scraper.ensure_location(location)
+
         for id_, doc in exams.items():
             with open('%s/%s.json' % (location, id_), 'w+') as outfile:
                 json.dump(doc, outfile)
@@ -102,12 +104,11 @@ class Exams:
             }
         }
 
-        try:
+        exam_id = course_id = None
+        if month in endings and season in endings[month]:
             course_id = '%s20%s' % (course_code, endings[month][season])
-        except KeyError:
-            return None, None, None
+            exam_id = '%s%s' % (course_id, period.upper())
 
-        exam_id = '%s%s' % (course_id, period.upper())
         return exam_id, course_id, course_code
 
     @staticmethod
@@ -118,40 +119,36 @@ class Exams:
         if len(date_) == 3:
             day, date_, month = date_
 
-            # TODO add EST offset
             return datetime.strptime('%s %s %s %s' % (day, date_, month, year),
                                      '%a %d %b %y').date().isoformat()
 
     @staticmethod
-    def parse_time(time, date_):
-        """Convert time range of form `pd hh:mm - hh:mm` to start and end
-        decimal hours."""
+    def parse_time(time, d):
+        """Convert time from `pd HH:MM - HH:MM` to start & end datetime."""
 
-        def convert_time_to_iso(t, is_pm=False):
+        def convert_time(t, is_pm=False):
+            """Convert time from `HH:MM` to an ISO 8601 datetime."""
             h, m = [int(x) for x in t.split(':')]
             h += 12 if is_pm else 0
-            m //= 60
 
-            return datetime.strptime('%s %s %s' % (date_, h, m),
-                                     '%Y-%m-%d %H %M').replace(
-                tzinfo=pytz.timezone('US/Eastern')).isoformat()
+            date_ = datetime.strptime('%s %s %s' % (d, h, m), '%Y-%m-%d %H %M')
+            return date_.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
 
         time = list(filter(None, time.replace('-', '').split(' ')))
         if len(time) == 3:
             period, start, end = time
             after_12 = period == 'PM' or period == 'EV'
 
-            return convert_time_to_iso(start, after_12), \
-                   convert_time_to_iso(end, after_12)
+            return convert_time(start, after_12), convert_time(end, after_12)
 
     @staticmethod
     def get_exam_periods(year):
         if not year:
             year = date.today().year
 
-        months = []
+        periods = []
         for m in ('dec', 'apr', 'june', 'aug'):
             y = year if not m == 'dec' else int(year) - 1
-            months.append('%s%s' % (m, str(y)[2:]))
+            periods.append('%s%s' % (m, str(y)[2:]))
 
-        return months
+        return periods
