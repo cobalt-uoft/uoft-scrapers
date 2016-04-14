@@ -1,4 +1,4 @@
-from ..scraper import Scraper
+from ...scraper import Scraper
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 from collections import OrderedDict
@@ -7,10 +7,10 @@ import requests
 import pytz
 
 
-class Exams:
-    """A scraper for UofT exams.
+class UTSGExams:
+    """A scraper for UTSG exams.
 
-    Exam data is scraped from http://www.artsci.utoronto.ca/current/exams/
+    Data is scraped from http://www.artsci.utoronto.ca/current/exams/
     """
 
     host = 'http://www.artsci.utoronto.ca/current/exams/'
@@ -20,18 +20,19 @@ class Exams:
     def scrape(year=None, location='.'):
         """Update the local JSON files for this scraper."""
 
-        Scraper.logger.info('Exams initialized.')
+        Scraper.logger.info('UTSGExams initialized.')
 
         exams = OrderedDict()
 
-        for p in Exams.get_exam_periods(year):
+        for p in UTSGExams.get_exam_periods(year):
 
             Scraper.logger.info('Scraping %s exams.' % p.upper())
 
             headers = {
-                'Referer': Exams.host
+                'Referer': UTSGExams.host
             }
-            html = Exams.s.get('%s%s' % (Exams.host, p), headers=headers).text
+            html = UTSGExams.s.get('%s%s' % (UTSGExams.host, p),
+                                   headers=headers).text
             soup = BeautifulSoup(html, 'html.parser')
 
             if not soup.find('table', class_='vertical listing'):
@@ -43,14 +44,14 @@ class Exams:
             for row in rows[1:]:
                 data = [x.text.strip() for x in row.find_all('td')]
 
-                id_, course_id, course_code = Exams.parse_course_info(p, data[0])
+                id_, course_id, course_code = UTSGExams.parse_course_info(p, data[0])
 
                 if id_ is None:
                     continue
 
                 section, location_ = data[1], data[4]
-                date_ = Exams.parse_date(data[2], p[-2:]) or ''
-                start, end = Exams.parse_time(data[3], date_) or (0, 0)
+                date_ = UTSGExams.parse_date(data[2], p[-2:]) or ''
+                start, end = UTSGExams.parse_time(data[3], date_) or (0, 0)
 
                 doc = OrderedDict([
                     ('id', id_),
@@ -78,7 +79,7 @@ class Exams:
             with open('%s/%s.json' % (location, id_), 'w+') as outfile:
                 json.dump(doc, outfile)
 
-        Scraper.logger.info('Exams completed.')
+        Scraper.logger.info('UTSGExams completed.')
 
     @staticmethod
     def parse_course_info(period, course_code):
