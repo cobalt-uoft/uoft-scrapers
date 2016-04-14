@@ -45,7 +45,7 @@ class CourseFinder:
 
         CourseFinder.logger.info('Queued %d courses.' % total)
         for x in urls:
-            course_id = re.search('offImg(.*)', x[0]).group(1)[:14]
+            course_id = re.search('offImg(.*)', x[0]).group(1).split('"')[0]
             url = '%s/courseSearch/coursedetails/%s' % (
                 CourseFinder.host,
                 course_id
