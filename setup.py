@@ -8,6 +8,9 @@ setup(
         'uoftscrapers.scrapers.buildings',
         'uoftscrapers.scrapers.calendar.utsg',
         'uoftscrapers.scrapers.coursefinder',
+        'uoftscrapers.scrapers.exams.utm',
+        'uoftscrapers.scrapers.exams.utsc',
+        'uoftscrapers.scrapers.exams.utsg',
         'uoftscrapers.scrapers.food',
         'uoftscrapers.scrapers.textbooks',
         'uoftscrapers.scrapers.timetable.utm',
@@ -26,6 +29,6 @@ setup(
     package_dir={'uoftscrapers': 'uoftscrapers'},
     include_package_data=True,
     keywords = ['uoft', 'scraper', 'toronto', 'university of toronto', 'cobalt'],
-    install_requires = ['requests>=2.6.2', 'beautifulsoup4>=4.3.2', 'pytidylib>=0.2.4', 'lxml>=3.6.0'],
+    install_requires = ['requests>=2.6.2', 'beautifulsoup4>=4.3.2', 'pytidylib>=0.2.4', 'lxml>=3.6.0', 'pytz>=2016.3'],
     classifiers = [],
 )
