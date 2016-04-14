@@ -7,3 +7,4 @@ dist
 README.rst
 data
 test.py
+*.pyc
