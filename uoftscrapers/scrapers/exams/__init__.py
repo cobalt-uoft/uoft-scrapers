@@ -57,7 +57,7 @@ class Exams:
                     ('id', id_),
                     ('course_id', course_id),
                     ('course_code', course_code),
-                    ('period', p),
+                    ('period', p.upper()),
                     ('date', date_),
                     ('start_time', start),
                     ('end_time', end),
