@@ -11,7 +11,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [Buildings](#buildings)
   - [Textbooks](#textbooks)
   - [Food](#food)
-  - [Exams](#exams)
+  - [UTSG Exams](#utsg-exams)
   - [UTSG Timetable](#utsg-timetable)
   - [UTM Timetable](#utm-timetable)
   - [UTSC Timetable](#utsc-timetable)
@@ -221,7 +221,7 @@ http://map.utoronto.ca/
 
 ------
 
-### Exams
+### UTSG Exams
 
 ##### Class name
 ```python
