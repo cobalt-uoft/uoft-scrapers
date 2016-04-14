@@ -1,4 +1,4 @@
-from ..scraper import Scraper
+from ...scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
