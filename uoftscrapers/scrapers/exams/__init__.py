@@ -85,7 +85,7 @@ class Exams:
 
         endings = {
             'dec': {
-                'F': '%s9' % str(int(year) - 1),
+                'F': '%s9' % str(int(year)),
                 'Y': '%s9' % str(int(year) - 1)
             },
             'apr': {
