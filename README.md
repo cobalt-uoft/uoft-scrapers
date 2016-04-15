@@ -16,6 +16,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [UTM Timetable](#utm-timetable)
   - [UTSC Timetable](#utsc-timetable)
   - [UTSG Calendar](#utsg-calendar)
+  - [UTM Shuttle Bus Schedule](#utm-shuttle)
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.5.1)
@@ -131,7 +132,7 @@ http://uoftbookstore.com
 
 ##### Output format
 ```js
-{  
+{
   "id": String,
   "isbn": String,
   "title": String,
@@ -330,3 +331,41 @@ http://www.artsandscience.utoronto.ca/ofr/calendar/
 
 ##### Output format
 Not implemented.
+
+------
+
+### UTM Shuttle
+
+##### Class name
+```python
+uoftscrapers.UTMShuttle
+```
+
+##### Scraper source
+https://m.utm.utoronto.ca/shuttle.php
+
+##### Output format
+```js
+{
+  date: String,
+  routes: [
+    {
+      id: String,
+      name: String,
+      stops: [
+        {
+          location: String,
+          building_id: String,
+          times: [
+            {
+              time: String,
+              rush_hour: Boolean,
+              no_overload: Boolean
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
