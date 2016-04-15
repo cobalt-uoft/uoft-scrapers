@@ -28,7 +28,7 @@ class UTMShuttle:
     }
 
     @staticmethod
-    def scrape(location=".", month=3):
+    def scrape(location=".", month=None):
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info("UTMShuttle initialized.")
