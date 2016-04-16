@@ -1,4 +1,5 @@
 requests
 beautifulsoup4
 pytidylib
+lxml
 pytz
