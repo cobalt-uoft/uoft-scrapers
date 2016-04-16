@@ -303,7 +303,10 @@ http://www.utsc.utoronto.ca/registrar/examination-schedule
   date: String,
   start_time: String,
   end_time: String,
-  location: String
+  sections: [{
+    section: String,
+    location: String
+  }]
 }
 ```
 
