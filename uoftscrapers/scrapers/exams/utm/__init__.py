@@ -18,16 +18,32 @@ class UTMExams:
     def scrape(location='.'):
         Scraper.logger.info('UTMExams initialized.')
 
-        dept_links = UTMExams.get_page_links('list_dept.php?type=2')
-        Scraper.logger.info('Got department links (1/3).')
+        depts = UTMExams.get_page_links('list_dept.php?type=2')
+        Scraper.logger.info('Got departments (1/3).')
 
-        course_links = []
-        for dept in dept_links:
-            course_links.extend(UTMExams.get_page_links(dept))
-        Scraper.logger.info('Got course links (2/3).')
+        courses = []
+        for dept in depts:
+            courses.extend(UTMExams.get_page_links(dept))
+        Scraper.logger.info('Got courses (2/3).')
+
+        exams = UTMExams.retrieve_exams(courses)
+        Scraper.logger.info('Got exams (3/3).')
+
+        if exams:
+            Scraper.ensure_location(location)
+
+        for id_, doc in exams.items():
+            with open('%s/%s.json' % (location, id_), 'w+') as outfile:
+                json.dump(doc, outfile)
+
+        Scraper.logger.info('UTMExams completed.')
+
+    @staticmethod
+    def retrieve_exams(courses):
 
         exams = OrderedDict()
-        for course in course_links:
+
+        for course in courses:
             headers = {
                 'Referer': UTMExams.host
             }
@@ -80,17 +96,18 @@ class UTMExams:
                     'section': section['section'],
                     'locaton': section['room']
                 })
+        return exams
 
-        Scraper.logger.info('Got exam data (3/3).')
-
-        if exams:
-            Scraper.ensure_location(location)
-
-        for id_, doc in exams.items():
-            with open('%s/%s.json' % (location, id_), 'w+') as outfile:
-                json.dump(doc, outfile)
-
-        Scraper.logger.info('UTMExams completed.')
+    @staticmethod
+    def get_page_links(endpoint):
+        headers = {
+            'Referer': UTMExams.host
+        }
+        html = UTMExams.s.get('%s%s' % (UTMExams.host, endpoint),
+                              headers=headers).text
+        soup = BeautifulSoup(html, 'html.parser')
+        return [li.find('a')['href']
+                for li in soup.find('ul', class_='link').find_all('li')]
 
     @staticmethod
     def parse_course(course_code):
@@ -131,17 +148,6 @@ class UTMExams:
             room, section = [x.strip()
                              for x in re.sub('[()]', ' ', room).split('  ')]
         return {'section': section, 'room': room}
-
-    @staticmethod
-    def get_page_links(endpoint):
-        headers = {
-            'Referer': UTMExams.host
-        }
-        html = UTMExams.s.get('%s%s' % (UTMExams.host, endpoint),
-                              headers=headers).text
-        soup = BeautifulSoup(html, 'html.parser')
-        return [li.find('a')['href']
-                for li in soup.find('ul', class_='link').find_all('li')]
 
     @staticmethod
     def parse_time(start, end, date_):
