@@ -5,8 +5,6 @@ from collections import OrderedDict
 import json
 import requests
 
-from pprint import pprint
-
 
 class UTMAthletics:
     """A scraper for the UTM athletics schedule.
@@ -54,6 +52,7 @@ class UTMAthletics:
                     events.append(OrderedDict([
                         ('title', title),
                         ('location', location_),
+                        ('building_id', '332'),
                         ('start_time', start),
                         ('end_time', end)
                     ]))
