@@ -6,6 +6,7 @@ import requests
 import pytz
 import re
 
+
 class UTMExams:
     """A scraper for UTM exams."""
 

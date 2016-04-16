@@ -1,11 +1,7 @@
-from ..utils import Scraper, LayersScraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import http.cookiejar
-import os
 import re
-import requests
-import shutil
 import tidylib
 
 
@@ -21,7 +17,6 @@ class UTSGTimetable:
         'S': 'SATURDAY'
     }
     terms = ['summer', 'winter']
-    s = requests.Session()
 
     @staticmethod
     def scrape(location):
@@ -32,35 +27,31 @@ class UTSGTimetable:
         for term in UTSGTimetable.terms:
             year = 0
             data = UTSGTimetable.get_sponsors(term)
-            sponsors = data["sponsors"]
+            sponsors = data['sponsors']
 
-            if term == "summer":
+            if term == 'summer':
                 # 2015 summer counts as 2014 term
-                year = data["year"] - 1
+                year = data['year'] - 1
             else:
-                year = data["year"]
+                year = data['year']
 
             for sponsor in sponsors:
                 Scraper.logger.info('Scraping %s/%s.' % (
                     term,
                     sponsor.split('.')[0]
                 ))
-                html = UTSGTimetable.s.get('%s/%s/%s' % (
+
+                html = Scraper.get_html('%s/%s/%s' % (
                     UTSGTimetable.host,
                     term,
                     sponsor
-                )).text
-                UTSGTimetable.save('.html/%s/%s' % (
-                    str(year),
-                    sponsor
-                ), html.encode('utf-8'))
+                ))
 
                 data = UTSGTimetable.parse_sponsor(html, year, term, sponsor)
 
                 for course in data:
                     Scraper.save_json(course, location, course['id'])
 
-        shutil.rmtree('.html')
         Scraper.logger.info('UTSGTimetable completed.')
 
     @staticmethod
@@ -68,29 +59,24 @@ class UTSGTimetable:
         document, errors = \
             tidylib.tidy_document(html, options={'numeric-entities': 1})
 
-        soup = BeautifulSoup(document, "html.parser")
+        soup = BeautifulSoup(document, 'html.parser')
 
         table = soup.table
 
-        trs = table.find_all("tr")[2:] \
-            if 'assem' in sponsor else table.find_all("tr")[2:]
+        trs = table.find_all('tr')[2:] \
+            if 'assem' in sponsor else table.find_all('tr')[2:]
 
         course_info = []
-
         current_course = []
-
-        current_code = ""
-
+        current_code = ''
         current_breadths = []
-
         current_section = None
 
         for tr in trs:
-
-            if "Cancel" in tr.get_text():
+            if 'Cancel' in tr.get_text():
                 continue
 
-            tds = tr.find_all("td")
+            tds = tr.find_all('td')
 
             i = 0
             while i < len(tds):
@@ -102,13 +88,12 @@ class UTSGTimetable:
                     colspan = int(colspan) - 1
                     if colspan > 0:
                         for x in range(colspan):
-                            tds.insert(i+1, soup.new_tag("td"))
+                            tds.insert(i + 1, soup.new_tag('td'))
                             i += 1
 
             if len(tds) >= 9:
-
                 course_code = UTSGTimetable.format_data(tds[0].get_text(),
-                    "([A-Z]{3}[0-9]{3}[HY]1)")
+                    '([A-Z]{3}[0-9]{3}[HY]1)')
 
                 if len(course_code) > 0:
                     course_info.append(current_course)
@@ -123,33 +108,31 @@ class UTSGTimetable:
                     semester = tds[1].get_text().strip()
                     current_course[0] = course_code + semester
 
-                    name = tds[2].get_text().split("\n")[0].strip()
+                    name = tds[2].get_text().split('\n')[0].strip()
                     current_course[1] = name
 
                 section = UTSGTimetable.format_data(tds[3].get_text(),
-                    "([LTP][0-9]{4})")
+                    '([LTP][0-9]{4})')
 
                 if len(section) > 0:
                     current_section = section
 
                 time = UTSGTimetable.format_data(tds[5].get_text(),
-                    "([MTWRFS]{1,3}[0-9]{1,2}(?::[0-9]" +
-                    "{2})?(?:-[0-9]{1,2}(?::[0-9]{2})?)?)")
+                    '([MTWRFS]{1,3}[0-9]{1,2}(?::[0-9]' +
+                    '{2})?(?:-[0-9]{1,2}(?::[0-9]{2})?)?)')
 
                 location = UTSGTimetable.format_data(tds[6].get_text(),
-                    "([A-Z]{2,4}[ ]?[0-9]{1,8})")
+                    '([A-Z]{2,4}[ ]?[0-9]{1,8})')
 
                 instructors = tds[7].get_text().strip()
 
-                if instructors.lower() == "tba":
-                    instructors = ""
+                if instructors.lower() == 'tba':
+                    instructors = ''
 
                 if len(instructors) > 0:
-                    instructors = instructors.split("/")
+                    instructors = instructors.split('/')
                     for i in range(len(instructors)):
-                        instructors[i] = instructors[i].split(".")
-                        instructors[i] = [x.strip() for x in instructors[i]]
-                        instructors[i] = ' '.join(instructors[i])
+                        instructors[i] = ' '.join([x.strip() for x in instructors[i].split('.')])
                 else:
                     instructors = []
 
@@ -167,50 +150,49 @@ class UTSGTimetable:
 
             elif len(tds) == 6:
                 if tds[0].get('colspan') == '6':
-
                     course_code = \
                         UTSGTimetable.format_data(tds[0].get_text(),
-                            "([A-Z]{3}[0-9]{3}[HY]{1}1[YFS]{1})")
+                            '([A-Z]{3}[0-9]{3}[HY]{1}1[YFS]{1})')
                     breadths = [int(x) for x in
-                                re.findall("(?:\()([12345])(?:\))",
+                                re.findall('(?:\()([12345])(?:\))',
                                 tds[0].get_text().strip())]
                     name = ''.join(tds[0].get_text()
-                        .replace("Categories ", ":")
-                        .replace("Categories:", ":")
+                        .replace('Categories ', ':')
+                        .replace('Categories:', ':')
                         .split(':')[1:]).split(', Count')[0].strip()
 
                     if len(course_code) > 0:
                         course_info.append(current_course)
                         current_course = [
-                            course_code,    # course code
-                            name,   # name
-                            OrderedDict([]),    # sections
+                            course_code,     # course code
+                            name,            # name
+                            OrderedDict([]), # sections
                             breadths
                         ]
                 else:
                     section = UTSGTimetable.format_data(tds[0].get_text(),
-                        "([LTP][0-9]{4})")
+                        '([LTP][0-9]{4})')
 
                     if len(section) > 0:
                         current_section = section
 
                     time = UTSGTimetable.format_data(tds[3].get_text(),
-                        "([MTWRFS]{1,3}[0-9]{1,2}" +
-                        "(?::[0-9]{2})?(?:-[0-9]{1,2}" +
-                        "(?::[0-9]{2})?)?)")
+                        '([MTWRFS]{1,3}[0-9]{1,2}' +
+                        '(?::[0-9]{2})?(?:-[0-9]{1,2}' +
+                        '(?::[0-9]{2})?)?)')
 
                     location = UTSGTimetable.format_data(tds[4].get_text(),
-                        "([A-Z]{2,4}[ ]?[0-9]{1,8})")
+                        '([A-Z]{2,4}[ ]?[0-9]{1,8})')
 
                     instructors = tds[5].get_text().strip()
 
-                    if instructors.lower() == "tba":
-                        instructors = ""
+                    if instructors.lower() == 'tba':
+                        instructors = ''
                     else:
-                        instructors = instructors.replace(".", "")
+                        instructors = instructors.replace('.', '')
 
                     if len(instructors) > 0:
-                        instructors = instructors.split("/")
+                        instructors = instructors.split('/')
                     else:
                         instructors = []
 
@@ -232,63 +214,61 @@ class UTSGTimetable:
         courses = []
 
         for course in course_info:
-
             if len(course) == 0:
                 continue
 
             course_id = course[0]
-            course_term = ""
-            if term == "winter":
-                if course[0][-1] in "FY":
-                    course_id += str(year) + "9"
-                    course_term = str(year) + " Fall"
-                    if course[0][-1] == "Y":
-                        course_term += " +"
-                elif course[0][-1] == "S":
-                    course_id += str(year + 1) + "1"
-                    course_term = str(year + 1) + " Winter"
-            elif term == "summer":
-                if course[0][-1] == "Y":
-                    course_id += str(year + 1) + "5"
-                    course_term = str(year + 1) + " Summer Y"
-                elif course[0][-1] in "FS":
-                    course_id += str(year + 1) + "5" + course[0][-1]
-                    if course_id[0][-1] == "F":
-                        course_term = str(year + 1) + " Summer F"
-                    elif course_id[0][-1] == "S":
-                        course_term = str(year + 1) + " Summer S"
+            course_term = ''
+
+            if term == 'winter':
+                if course[0][-1] in 'FY':
+                    course_id += str(year) + '9'
+                    course_term = str(year) + ' Fall'
+                    if course[0][-1] == 'Y':
+                        course_term += ' +'
+                elif course[0][-1] == 'S':
+                    course_id += str(year + 1) + '1'
+                    course_term = str(year + 1) + ' Winter'
+            elif term == 'summer':
+                if course[0][-1] == 'Y':
+                    course_id += str(year + 1) + '5'
+                    course_term = str(year + 1) + ' Summer Y'
+                elif course[0][-1] in 'FS':
+                    course_id += str(year + 1) + '5' + course[0][-1]
+                    if course_id[0][-1] == 'F':
+                        course_term = str(year + 1) + ' Summer F'
+                    elif course_id[0][-1] == 'S':
+                        course_term = str(year + 1) + ' Summer S'
 
             course_code = course[0]
 
-            level = int(course_code[3] + "00")
+            level = int(course_code[3] + '00')
 
             sections = []
             for k in course[2]:
-
                 code = k
                 instructors = []
                 time_data = []
+
                 for x in course[2][k]:
+                    if x['time'] != '':
+                        instructors += x['instructors']
 
-                    if x["time"] != "":
-
-                        instructors += x["instructors"]
-
-                        location = x["location"]
+                        location = x['location']
 
                         # magic
 
-                        days = re.findall("[MTWRFS]", x["time"])
+                        days = re.findall('[MTWRFS]', x['time'])
 
-                        time = ""
-                        mob = re.search('\d', x["time"])
+                        time = ''
+                        mob = re.search('\d', x['time'])
                         if mob:
-                            time = x["time"][mob.start():]
+                            time = x['time'][mob.start():]
 
                         hours = []
                         time = time.split('-')
                         for t in time:
-                            if ":" in t:
+                            if ':' in t:
                                 t = t.split(':')
                                 t = int(t[0]) + (int(t[1]) / 60)
                             else:
@@ -308,31 +288,31 @@ class UTSGTimetable:
                             day = UTSGTimetable.day_map[day_key]
 
                             time_data.append(OrderedDict([
-                                ("day", day),
-                                ("start", hours[0]),
-                                ("end", hours[1]),
-                                ("duration", hours[1] - hours[0]),
-                                ("location", location)
+                                ('day', day),
+                                ('start', hours[0]),
+                                ('end', hours[1]),
+                                ('duration', hours[1] - hours[0]),
+                                ('location', location)
                             ]))
 
                 instructors = list(set(instructors))
 
                 course[2][k]
                 data = OrderedDict([
-                    ("code", code),
-                    ("instructors", instructors),
-                    ("times", time_data)
+                    ('code', code),
+                    ('instructors', instructors),
+                    ('times', time_data)
                 ])
 
                 sections.append(data)
 
             course = OrderedDict([
-                ("id", course_id),
-                ("code", course_code),
-                ("level", level),
-                ("campus", "UTSG"),
-                ("term", course_term),
-                ("meeting_sections", sections)
+                ('id', course_id),
+                ('code', course_code),
+                ('level', level),
+                ('campus', 'UTSG'),
+                ('term', course_term),
+                ('meeting_sections', sections)
             ])
 
             courses.append(course)
@@ -343,42 +323,33 @@ class UTSGTimetable:
     def format_data(text, regex):
         text = re.search(regex, text.strip())
         if text is None:
-            text = ""
+            text = ''
         else:
             text = text.group(1)
         return text
 
     @staticmethod
-    def save(name, data):
-        if not os.path.exists(os.path.dirname(name)):
-            os.makedirs(os.path.dirname(name))
-        with open(name, "wb") as file:
-            file.write(data)
-
-    @staticmethod
     def get_sponsors(term):
-        html = UTSGTimetable.s.get('%s/%s/index.html' % (
+        html = Scraper.get_html('%s/%s/index.html' % (
             UTSGTimetable.host,
             term
-        )).text
+        ))
 
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, 'html.parser')
 
         title = soup.title.get_text().strip()
 
         year = -1
-        year = int(re.search("([0-9]{4})", title).group(0))
-
-        UTSGTimetable.save('.html/%s/sponsors.html' % str(year),
-            html.encode('utf-8'))
+        year = int(re.search('([0-9]{4})', title).group(0))
 
         sponsors = []
         for x in soup.find_all('a'):
             url = x.get('href')
-            if ".htm" in url and "/" not in url:
-                if "intensive" not in url:
+            if '.htm' in url and '/' not in url:
+                if 'intensive' not in url:
                     sponsors.append(url)
+
         return {
-            "year": year,
-            "sponsors": sponsors
+            'year': year,
+            'sponsors': sponsors
         }

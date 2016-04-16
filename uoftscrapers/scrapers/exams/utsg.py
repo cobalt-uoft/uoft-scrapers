@@ -5,6 +5,7 @@ from collections import OrderedDict
 import requests
 import pytz
 
+
 class UTSGExams:
     """A scraper for UTSG exams.
 
