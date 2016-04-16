@@ -25,7 +25,6 @@ class UTMShuttle:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('UTMShuttle initialized.')
-        Scraper.ensure_location(location)
 
         now = datetime.datetime.now()
         year = now.strftime('%Y')

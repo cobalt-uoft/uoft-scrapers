@@ -27,9 +27,6 @@ class UTMExams:
         exams = UTMExams.retrieve_exams(courses)
         Scraper.logger.info('Got exams (3/3).')
 
-        if exams:
-            Scraper.ensure_location(location)
-
         for id_, doc in exams.items():
             Scraper.save_json(doc, location, id_)
 

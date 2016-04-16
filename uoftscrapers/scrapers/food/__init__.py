@@ -19,7 +19,6 @@ class Food:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Food initialized.')
-        Scraper.ensure_location(location)
 
         for campus, food_index in Food.campuses:
             data = LayersScraper.get_layers_json(campus)[food_index]

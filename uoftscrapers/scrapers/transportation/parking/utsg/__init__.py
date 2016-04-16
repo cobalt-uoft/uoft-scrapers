@@ -22,7 +22,6 @@ class UTSGParking:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('UTSGParking initialized.')
-        Scraper.ensure_location(location)
 
         data = LayersScraper.get_layers_json('utsg')
 
