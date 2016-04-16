@@ -17,7 +17,7 @@ setup(
         'uoftscrapers.scrapers.timetable.utsc',
         'uoftscrapers.scrapers.timetable.utsg',
         'uoftscrapers.scrapers.utmshuttle',
-        'uoftscrapers.scrapers.parking.utsg',
+        'uoftscrapers.scrapers.parking',
         'uoftscrapers.scrapers.scraper',
         'uoftscrapers.scrapers.scraper.layers'
     ],

@@ -469,6 +469,7 @@ http://map.utoronto.ca
   "id": String,
   "title": String,
   "building_id": String,
+  "campus": String,
   "type": String,
   "description": String,
   "lat": Number,
