@@ -19,11 +19,9 @@ class Scraper:
             os.makedirs(location)
 
     @staticmethod
-    def flush_percentage(decimal):
-        """Update the last line in stdout to a percentage formatted value."""
-
-        sys.stdout.write('%.2f%%\r' % (decimal * 100))
-        sys.stdout.flush()
+    def write_json_file(data, location, filename):
+        with open('%s/%s.json' % (location, filename),'w') as outfile:
+            json.dump(data, outfile)
 
     @staticmethod
     def get_html(url, headers=None):
@@ -42,9 +40,11 @@ class Scraper:
         return html.encode('utf-8')
 
     @staticmethod
-    def write_json_file(data, location, filename):
-        with open('%s/%s.json' % (location, filename),'w+') as outfile:
-            json.dump(data, outfile)
+    def flush_percentage(decimal):
+        """Update the last line in stdout to a percentage formatted value."""
+
+        sys.stdout.write('%.2f%%\r' % (decimal * 100))
+        sys.stdout.flush()
 
     @staticmethod
     def get_text_from_class(soup, name):
