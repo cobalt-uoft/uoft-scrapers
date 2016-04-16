@@ -3,6 +3,7 @@ import os
 import sys
 
 from .scrapers.athletics.utm import UTMAthletics
+from .scrapers.athletics.utsc import UTSCAthletics
 from .scrapers.buildings import Buildings
 from .scrapers.calendar.utsg import UTSGCalendar
 from .scrapers.coursefinder import CourseFinder
