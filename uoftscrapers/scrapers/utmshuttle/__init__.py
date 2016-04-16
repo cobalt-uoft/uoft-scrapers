@@ -94,12 +94,12 @@ class UTMShuttle:
                     time_rush_hour = "rush hour" in html_time_text
                     time_no_overload = "no overload" in html_time_text
 
-                    html_time_clean = re.sub(' \*.*\*| (a|p)m', '', html_time_text).strip()
+                    html_time_clean = re.sub(' \*.*\*', '', html_time_text).strip()
 
                     times.append(OrderedDict([
-                        ("time", "%sT%s" % (
+                        ("time", "%sT%s:00-04:00" % (
                             date,
-                            time.strftime("%H:%M:00-04:00", time.strptime(html_time_clean, "%I:%M"))
+                            time.strftime("%H:%M %p", time.strptime(html_time_clean, "%I:%M %p"))[:-3]
                         )),
                         ("rush_hour", time_rush_hour),
                         ("no_overload", time_no_overload)
