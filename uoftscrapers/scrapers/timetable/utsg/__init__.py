@@ -2,7 +2,6 @@ from ...scraper import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import http.cookiejar
-import json
 import os
 import re
 import requests
@@ -59,10 +58,7 @@ class UTSGTimetable:
                 data = UTSGTimetable.parse_sponsor(html, year, term, sponsor)
 
                 for course in data:
-                    UTSGTimetable.save_json('%s/%s' % (
-                        location,
-                        course["id"] + ".json"
-                    ), course)
+                    Scraper.save_json(course, location, course['id'])
 
         shutil.rmtree('.html')
         Scraper.logger.info('UTSGTimetable completed.')
@@ -358,13 +354,6 @@ class UTSGTimetable:
             os.makedirs(os.path.dirname(name))
         with open(name, "wb") as file:
             file.write(data)
-
-    @staticmethod
-    def save_json(name, data):
-        if not os.path.exists(os.path.dirname(name)):
-            os.makedirs(os.path.dirname(name))
-        with open(name, "w+") as file:
-            json.dump(data, file)
 
     @staticmethod
     def get_sponsors(term):

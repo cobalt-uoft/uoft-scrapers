@@ -6,7 +6,6 @@ from pprint import pprint
 from queue import Queue
 from threading import Thread, Lock
 from time import time
-import json
 import logging
 import os
 import re
@@ -99,11 +98,7 @@ class Textbooks:
                 sorted(book['courses'][i]['meeting_sections'],
                     key=itemgetter('code'))
 
-            with open('%s/%s.json' % (
-                location,
-                book['id']
-            ), 'w+') as outfile:
-                json.dump(book, outfile)
+            Scraper.save_json(book, location, book['id'])
 
         Scraper.logger.info('Textbooks completed.')
 

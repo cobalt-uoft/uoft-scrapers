@@ -38,7 +38,7 @@ class UTMShuttle:
             html = Scraper.get_html(UTMShuttle.host % (year, month, day))
             schedule = UTMShuttle.parse_schedule_html(html)
 
-            Scraper.write_json_file(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
+            Scraper.save_json(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
 
         Scraper.logger.info('UTMShuttle completed.')
 

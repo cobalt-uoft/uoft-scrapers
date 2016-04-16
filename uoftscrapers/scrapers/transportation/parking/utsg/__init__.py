@@ -50,8 +50,7 @@ class UTSGParking:
                 ('address', address)
             ])
 
-            with open('%s/%s.json' % (location, _id), 'w') as fp:
-                json.dump(doc, fp)
+            Scraper.save_json(doc, location, _id)
 
         for entry in data[UTSGParking.rack_index]['markers']:
             if 64 in entry['attribs']:
@@ -83,7 +82,6 @@ class UTSGParking:
                 ('address', address)
             ])
 
-            with open('%s/%s.json' % (location, _id), 'w') as fp:
-                json.dump(doc, fp)
+            Scraper.save_json(doc, location, _id)
 
         Scraper.logger.info('UTSGParking completed.')
