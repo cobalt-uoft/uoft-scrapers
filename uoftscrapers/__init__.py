@@ -15,7 +15,6 @@ from .scrapers.timetable.utsc import UTSCTimetable
 from .scrapers.timetable.utsg import UTSGTimetable
 from .scrapers.utmshuttle import UTMShuttle
 from .scrapers.parking.utsg import UTSGParking
-from .scrapers.utmathletics import UTMAthletics
 
 
 class NullHandler(logging.Handler):
