@@ -13,7 +13,6 @@ class UTMAthletics:
     """
 
     host = 'http://www.utm.utoronto.ca/athletics/schedule/month/'
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.', month=None):
@@ -21,16 +20,13 @@ class UTMAthletics:
         month = month or UTMAthletics.get_month(month)
 
         Scraper.logger.info('UTMAthletics initialized.')
-        headers = {
-            'Referer': UTMAthletics.host
-        }
-        html = UTMAthletics.s.get('%s%s' % (UTMAthletics.host, month),
-                                  headers=headers).text
+        html = Scraper.get_html('%s%s' % (UTMAthletics.host, month))
         soup = BeautifulSoup(html, 'html.parser')
 
         athletics = OrderedDict()
 
-        for tr in soup.find('div', class_='month-view').find_all('tr', class_='single-day'):
+        calendar = soup.find('div', class_='month-view')
+        for tr in calendar.find_all('tr', class_='single-day'):
             for td in tr.find_all('td'):
                 date = td.get('data-date')
 
@@ -41,7 +37,10 @@ class UTMAthletics:
                 for item in td.find(class_='inner').find_all(class_='item'):
 
                     # event cancelled or athletic center closed
-                    if item.find(class_='cancelled-item') or item.find(class_='athletics-calendar-note'):
+                    if item.find(class_='cancelled-item'):
+                        continue
+
+                    if item.find(class_='athletics-calendar-note'):
                         continue
 
                     title = item.find(class_='athletics-calendar-title').text

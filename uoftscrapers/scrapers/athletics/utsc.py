@@ -13,7 +13,6 @@ class UTSCAthletics:
     """
 
     host = 'http://www.utsc.utoronto.ca/athletics/calendar-node-field-date-time/month/'
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.', month=None):
@@ -21,16 +20,13 @@ class UTSCAthletics:
         month = month or UTSCAthletics.get_month(month)
 
         Scraper.logger.info('UTSCAthletics initialized.')
-        headers = {
-            'Referer': UTSCAthletics.host
-        }
-        html = UTSCAthletics.s.get('%s%s' % (UTSCAthletics.host, month),
-                                   headers=headers).text
+        html = Scraper.get_html('%s%s' % (UTSCAthletics.host, month))
         soup = BeautifulSoup(html, 'html.parser')
 
         athletics = OrderedDict()
 
-        for tr in soup.find('div', class_='month-view').find_all('tr', class_='single-day'):
+        calendar = soup.find('div', class_='month-view')
+        for tr in calendar.find_all('tr', class_='single-day'):
             for td in tr.find_all('td'):
                 date = td.get('data-date')
 
