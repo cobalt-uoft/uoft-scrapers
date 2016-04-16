@@ -8,3 +8,4 @@ README.rst
 data
 test.py
 *.pyc
+.html

@@ -1,12 +1,12 @@
-import requests
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
+from decimal import *
+import json
 import os
 import re
-import json
-from decimal import *
-from ..scraper import Scraper
-from ..scraper.layers import LayersScraper
+import requests
+
 
 class Buildings:
     """A scraper for UofT's buildings.

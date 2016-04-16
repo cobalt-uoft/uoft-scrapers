@@ -1,8 +1,8 @@
-from ..scraper import Scraper
-from ..scraper.layers import LayersScraper
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import requests
+
 
 class Food:
     """A scraper for UofT restaurants.

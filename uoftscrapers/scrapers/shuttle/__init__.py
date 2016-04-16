@@ -1,4 +1,4 @@
-from ...scraper import Scraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup
 from calendar import monthrange
 from collections import OrderedDict
@@ -6,8 +6,9 @@ import datetime
 import re
 import time
 
-class UTMShuttle:
-    """A scraper for the UTM shuttle bus schedule.
+
+class Shuttle:
+    """A scraper for UofT's shuttle bus schedule.
 
     The schedule is located at https://m.utm.utoronto.ca/shuttle.php.
     """
@@ -24,7 +25,7 @@ class UTMShuttle:
     def scrape(location='.', month=None):
         """Update the local JSON files for this scraper."""
 
-        Scraper.logger.info('UTMShuttle initialized.')
+        Scraper.logger.info('Shuttle initialized.')
 
         now = datetime.datetime.now()
         year = now.strftime('%Y')
@@ -34,12 +35,12 @@ class UTMShuttle:
         Scraper.logger.info('Fetching schedules for %s-%s.' % (year, month))
 
         for day in range(1, days + 1):
-            html = Scraper.get_html(UTMShuttle.host % (year, month, day))
-            schedule = UTMShuttle.parse_schedule_html(html)
+            html = Scraper.get_html(Shuttle.host % (year, month, day))
+            schedule = Shuttle.parse_schedule_html(html)
 
             Scraper.save_json(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
 
-        Scraper.logger.info('UTMShuttle completed.')
+        Scraper.logger.info('Shuttle completed.')
 
     @staticmethod
     def parse_schedule_html(html):
@@ -79,7 +80,7 @@ class UTMShuttle:
                     ]))
 
                 # TODO: fetch this dynamically
-                route_building_id = UTMShuttle.building_ids[route_location] if route_location in UTMShuttle.building_ids else ''
+                route_building_id = Shuttle.building_ids[route_location] if route_location in Shuttle.building_ids else ''
 
                 route_stops = OrderedDict([
                     ('location', route_location),
