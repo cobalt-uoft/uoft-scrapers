@@ -5,10 +5,11 @@ import requests
 import shutil
 import sys
 
+
 class Scraper:
     """Scraper class."""
 
-    logger = logging.getLogger("uoftscrapers")
+    logger = logging.getLogger('uoftscrapers')
     s = requests.Session()
 
     @staticmethod

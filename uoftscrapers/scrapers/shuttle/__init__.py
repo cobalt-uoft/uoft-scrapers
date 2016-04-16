@@ -32,13 +32,13 @@ class Shuttle:
         month = now.strftime('%m') if month is None else str(month).zfill(2)
         days = monthrange(int(year), int(month))[1]
 
-        Scraper.logger.info('Fetching schedules for %s-%s.' % (year, month))
+        Scraper.logger.info('Fetching schedules for {0}-{1}-01 to {0}-{1}-{2}.'.format(year, month, days))
 
         for day in range(1, days + 1):
             html = Scraper.get_html(Shuttle.host % (year, month, day))
             schedule = Shuttle.parse_schedule_html(html)
 
-            Scraper.save_json(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
+            Scraper.save_json(schedule, location, schedule['date'])
 
         Scraper.logger.info('Shuttle completed.')
 

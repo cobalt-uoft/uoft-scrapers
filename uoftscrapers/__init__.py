@@ -34,4 +34,4 @@ class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
-logging.getLogger("uoftscrapers").addHandler(NullHandler())
+logging.getLogger('uoftscrapers').addHandler(NullHandler())
