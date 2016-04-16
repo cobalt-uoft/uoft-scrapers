@@ -2,10 +2,8 @@ from ...scraper import Scraper
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 from collections import OrderedDict
-import json
 import requests
 import pytz
-
 
 class UTSGExams:
     """A scraper for UTSG exams.
@@ -25,7 +23,6 @@ class UTSGExams:
         exams = OrderedDict()
 
         for p in UTSGExams.get_exam_periods(year):
-
             Scraper.logger.info('Scraping %s exams.' % p.upper())
 
             headers = {
@@ -76,8 +73,7 @@ class UTSGExams:
             Scraper.ensure_location(location)
 
         for id_, doc in exams.items():
-            with open('%s/%s.json' % (location, id_), 'w+') as outfile:
-                json.dump(doc, outfile)
+            Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('UTSGExams completed.')
 

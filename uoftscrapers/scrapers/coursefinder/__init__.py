@@ -12,7 +12,6 @@ import re
 import requests
 import sys
 
-
 class CourseFinder:
     """A scraper for UofT's Course Finder web service.
 
@@ -20,7 +19,6 @@ class CourseFinder:
     """
 
     host = 'http://coursefinder.utoronto.ca/course-search/search'
-    logger = logging.getLogger("uoftscrapers")
     cookies = http.cookiejar.CookieJar()
     s = requests.Session()
     threads = 32
@@ -43,7 +41,7 @@ class CourseFinder:
             worker.daemon = True
             worker.start()
 
-        CourseFinder.logger.info('Queued %d courses.' % total)
+        Scraper.logger.info('Queued %d courses.' % total)
         for x in urls:
             course_id = re.search('offImg(.*)', x[0]).group(1).split('"')[0]
             url = '%s/courseSearch/coursedetails/%s' % (
@@ -53,17 +51,13 @@ class CourseFinder:
             queue.put((course_id, url, total))
 
         queue.join()
-        CourseFinder.logger.info('Took %.2fs to retreive course info.' % (
+        Scraper.logger.info('Took %.2fs to retreive course info.' % (
             time() - ts
         ))
 
         for course in CourseFinderWorker.all_courses:
             if course != False:
-                with open('%s/%s.json' % (
-                    location,
-                    course['id']
-                ),'w+') as outfile:
-                    json.dump(course, outfile)
+                Scraper.save_json(course, location, course['id'])
 
         Scraper.logger.info('CourseFinder completed.')
 

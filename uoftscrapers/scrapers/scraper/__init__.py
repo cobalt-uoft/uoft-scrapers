@@ -19,12 +19,15 @@ class Scraper:
             os.makedirs(location)
 
     @staticmethod
-    def write_json_file(data, location, filename):
-        with open('%s/%s.json' % (location, filename),'w') as outfile:
+    def save_json(data, location, filename):
+        if not os.path.exists(os.path.dirname(location)):
+            os.makedirs(os.path.dirname(location))
+
+        with open('%s/%s.json' % (location, filename),'w+') as outfile:
             json.dump(data, outfile)
 
     @staticmethod
-    def get_html(url, headers=None):
+    def get_html(url, params=None, cookies=None, headers=None):
         """Fetches the HTML page source, automatically retrying if it times out."""
 
         html = None
