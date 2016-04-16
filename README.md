@@ -23,6 +23,9 @@ This is a library of scrapers for various University of Toronto websites. It is 
     - [UTSG Exams](#utsg-exams)
     - [UTM Exams](#utm-exams)
     - [UTSC Exams](#utsc-exams)
+  - [Athletics](#athletics)
+    - [UTM Athletics](#utm-exams)
+    - [UTSC Athletics](#utsc-athletics)
   - [Parking](#parking)
   - [Shuttle Bus Schedule](#shuttle)
 
@@ -508,6 +511,63 @@ http://www.utsc.utoronto.ca/registrar/examination-schedule
 
 ##### Output format
 Refer to [Exams](#exams)
+
+--------------------------------------------------------------------------------
+
+### Athletics
+
+##### Class name
+```python
+uoftscrapers.Athletics
+```
+
+##### Scraper source
+ - [UTM Athletics](#utm-athletics)
+ - [UTSC Athletics](#utsc-athletics)
+
+##### Output format
+```js
+{  
+  "date": String,
+  "events":[{  
+    "title": String,
+    "location": String,
+    "building_id": String,
+    "start_time": String,
+    "end_time": String
+  }]
+}
+```
+
+----------------------------------------
+
+### UTM Athletics
+
+##### Class name
+```python
+uoftscrapers.UTMAthletics
+```
+
+##### Scraper source
+http://www.utm.utoronto.ca/athletics/schedule/month/
+
+##### Output format
+Refer to [Athletics](#athletics)
+
+--------------------
+
+### UTSC Athletics
+
+##### Class name
+```python
+uoftscrapers.UTSCAthletics
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/athletics/calendar-node-field-date-time/month/
+
+##### Output format
+Refer to [Athletics](#athletics)
 
 --------------------------------------------------------------------------------
 
