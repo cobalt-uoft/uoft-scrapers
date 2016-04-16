@@ -23,11 +23,13 @@ class Scraper:
         sys.stdout.flush()
 
     @staticmethod
-    def get_html(s, url):
+    def get_html(s, url, headers=None):
+        """Fetches the HTML page source, automatically retrying if it times out."""
+
         html = None
         while html is None:
             try:
-                r = s.get(url)
+                r = s.get(url, headers=headers)
                 if r.status_code == 200:
                     html = r.text
             except (requests.exceptions.Timeout,
