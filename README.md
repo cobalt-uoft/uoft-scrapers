@@ -7,17 +7,24 @@ This is a library of scrapers for various University of Toronto websites. It is 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Library Reference](#library-reference)
-  - [Course Finder](#course-finder)
+  - [Courses](#courses)
   - [Buildings](#buildings)
   - [Textbooks](#textbooks)
   - [Food](#food)
-  - [UTSG Exams](#utsg-exams)
-  - [UTSG Timetable](#utsg-timetable)
-  - [UTM Timetable](#utm-timetable)
-  - [UTSC Timetable](#utsc-timetable)
-  - [UTSG Calendar](#utsg-calendar)
-  - [UTSG Parking](#utsg-parking)
-  - [UTM Shuttle Bus Schedule](#utm-shuttle)
+  - [Calendar](#calendar)
+    - [UTSG Calendar](#utsg-calendar)
+    - [UTM Calendar](#utm-calendar)
+    - [UTSC Calendar](#utsc-calendar)
+  - [Timetable](#timetable)
+    - [UTSG Timetable](#utsg-timetable)
+    - [UTM Timetable](#utm-timetable)
+    - [UTSC Timetable](#utsc-timetable)
+  - [Exams](#exams)
+    - [UTSG Exams](#utsg-exams)
+    - [UTM Exams](#utm-exams)
+    - [UTSC Exams](#utsc-exams)
+  - [Parking](#parking)
+  - [Shuttle Bus Schedule](#shuttle)
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.5.1)
@@ -38,53 +45,53 @@ import uoftscrapers
 uoftscrapers.Buildings.scrape('./some/path')
 
 # Example: scrape http://coursefinder.utoronto.ca to current working directory
-uoftscrapers.CourseFinder.scrape()
+uoftscrapers.Courses.scrape()
 ```
 
 ## Library Reference
 
-### Course Finder
+### Courses
 
 ##### Class name
 ```python
-uoftscrapers.CourseFinder
+uoftscrapers.Courses
 ```
 
 ##### Scraper source
-http://coursefinder.utoronto.ca/
+http://coursefinder.utoronto.ca
 
 #### Output format
 ```js
 {
-  id: String,
-  code: String,
-  name: String,
-  description: String,
-  division: String,
-  department: String,
-  prerequisites: String,
-  exclusions: String,
-  level: Number,
-  campus: String,
-  term: String,
-  breadths: [Number],
-  meeting_sections: [{
-    code: String,
-    instructors: [String],
-    times: [{
-      day: String,
-      start: Number,
-      end: Number,
-      duration: Number,
-      location: String
+  "id": String,
+  "code": String,
+  "name": String,
+  "description": String,
+  "division": String,
+  "department": String,
+  "prerequisites": String,
+  "exclusions": String,
+  "level": Number,
+  "campus": String,
+  "term": String,
+  "breadths": [Number],
+  "meeting_sections": [{
+    "code": String,
+    "instructors": [String],
+    "times": [{
+      "day": String,
+      "start": Number,
+      "end": Number,
+      "duration": Number,
+      "location": String
     }],
-    size: Number,
-    enrolment: Number
+    "size": Number,
+    "enrolment": Number
   }]
 }
 ```
 
-------
+--------------------------------------------------------------------------------
 
 ### Buildings
 
@@ -94,32 +101,32 @@ uoftscrapers.Buildings
 ```
 
 ##### Scraper source
-http://map.utoronto.ca/
+http://map.utoronto.ca
 
 ##### Output format
 ```js
 {
-  id: String,
-  code: String,
-  name: String,
-  short_name: String,
-  campus: String,
-  address: {
-    street: String,
-    city: String,
-    province: String,
-    country: String,
-    postal: String
+  "id": String,
+  "code": String,
+  "name": String,
+  "short_name": String,
+  "campus": String,
+  "address": {
+    "street": String,
+    "city": String,
+    "province": String,
+    "country": String,
+    "postal": String
   },
-  lat: Number,
-  lng: Number,
-  polygon: [
+  "lat": Number,
+  "lng": Number,
+  "polygon": [
     [Number, Number]
   ]
 }
 ```
 
-------
+--------------------------------------------------------------------------------
 
 ### Textbooks
 
@@ -154,7 +161,7 @@ http://uoftbookstore.com
 }
 ```
 
-------
+--------------------------------------------------------------------------------
 
 ### Food
 
@@ -164,161 +171,81 @@ uoftscrapers.Food
 ```
 
 ##### Scraper source
-http://map.utoronto.ca/
+http://map.utoronto.ca
 
 ##### Output format
 ```js
 {
-  id: String,
-  building_id: String,
-  name: String,
-  short_name: String,
-  description: String,
-  url: String,
-  tags: [String],
-  image: String,
-  campus: String,
-  lat: Number,
-  lng: Number,
-  address: String,
-  hours: {
-    sunday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+  "id": String,
+  "building_id": String,
+  "name": String,
+  "short_name": String,
+  "description": String,
+  "url": String,
+  "tags": [String],
+  "image": String,
+  "campus": String,
+  "lat": Number,
+  "lng": Number,
+  "address": String,
+  "hours": {
+    "sunday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     },
-    monday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+    "monday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     }
-    tuesday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+    "tuesday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     },
-    wednesday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+    "wednesday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     },
-    thursday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+    "thursday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     },
-    friday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+    "friday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     },
-    saturday: {
-      closed: Boolean,
-      open: Number,
-      close: Number
+    "saturday": {
+      "closed": Boolean,
+      "open": Number,
+      "close": Number
     }
   }
 }
 ```
 
-------
+--------------------------------------------------------------------------------
 
-### UTSG Exams
-
-##### Class name
-```python
-uoftscrapers.Exams
-```
-
-##### Scraper source
-http://www.artsci.utoronto.ca/current/exams/
-
-##### Output format
-```js
-{
-  id: String,
-  course_id: String,
-  course_code: String
-  period: String,
-  date: String,
-  start_time: String,
-  end_time: String,
-  sections: [{
-    section: String,
-    location: String
-  }]
-}
-```
-
-------
-
-### UTSG Timetable
+### Calendar
 
 ##### Class name
 ```python
-uoftscrapers.UTSGTimetable
+uoftscrapers.Calendar
 ```
 
 ##### Scraper source
-http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
-
-##### Output format
-```js
-{
-  id: String,
-  code: String,
-  name: String,
-  level: Number,
-  campus: String,
-  term: String,
-  breadths: [Number],
-  meeting_sections: [{
-    code: String,
-    instructors: [String],
-    times: [{
-      day: String,
-      start: Number,
-      end: Number,
-      duration: Number,
-      location: String
-    }],
-    size: Number,
-    enrolment: Number
-  }]
-}
-```
-
-------
-
-### UTM Timetable
-
-##### Class name
-```python
-uoftscrapers.UTMTimetable
-```
-
-##### Scraper source
-https://student.utm.utoronto.ca/timetable/
+ - [UTSG Calendar](#utsg-calendar)
+ - [UTM Calendar](#utm-calendar)
+ - [UTSC Calendar](#utsc-calendar)
 
 ##### Output format
 Not implemented.
 
-------
-
-### UTSC Timetable
-
-##### Class name
-```python
-uoftscrapers.UTSCTimetable
-```
-
-##### Scraper source
-http://www.utsc.utoronto.ca/~registrar/scheduling/timetable
-
-##### Output format
-Not implemented.
-
-------
+----------------------------------------
 
 ### UTSG Calendar
 
@@ -331,19 +258,210 @@ uoftscrapers.UTSGCalendar
 http://www.artsandscience.utoronto.ca/ofr/calendar/
 
 ##### Output format
-Not implemented.
+Refer to [Calendar](#calendar)
 
-------
+--------------------
 
-### UTSG Parking
+### UTM Calendar
 
 ##### Class name
 ```python
-uoftscrapers.UTSGParking
+uoftscrapers.UTMCalendar
 ```
 
 ##### Scraper source
-http://map.utoronto.ca/
+https://student.utm.utoronto.ca/calendar/calendar.pl
+
+##### Output format
+Refer to [Calendar](#calendar)
+
+--------------------
+
+### UTSC Calendar
+
+##### Class name
+```python
+uoftscrapers.UTSCCalendar
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/~registrar/calendars/calendar/index.html
+
+##### Output format
+Refer to [Calendar](#calendar)
+
+--------------------------------------------------------------------------------
+
+### Timetable
+
+##### Class name
+```python
+uoftscrapers.Timetable
+```
+
+##### Scraper source
+ - [UTSG Timetable](#utsg-timetable)
+ - [UTM Timetable](#utm-timetable)
+ - [UTSC Timetable](#utsc-timetable)
+
+##### Output format
+```js
+{
+  "id": String,
+  "code": String,
+  "name": String,
+  "level": Number,
+  "campus": String,
+  "term": String,
+  "breadths": [Number],
+  "meeting_sections": [{
+    "code": String,
+    "instructors": [String],
+    "times": [{
+      "day": String,
+      "start": Number,
+      "end": Number,
+      "duration": Number,
+      "location": String
+    }],
+    "size": Number,
+    "enrolment": Number
+  }]
+}
+```
+
+----------------------------------------
+
+### UTSG Timetable
+
+##### Class name
+```python
+uoftscrapers.UTSGTimetable
+```
+
+##### Scraper source
+http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
+
+##### Output format
+Refer to [Timetable](#timetable)
+
+--------------------
+
+### UTM Timetable
+
+##### Class name
+```python
+uoftscrapers.UTMTimetable
+```
+
+##### Scraper source
+https://student.utm.utoronto.ca/timetable
+
+##### Output format
+Refer to [Timetable](#timetable)
+
+--------------------
+
+### UTSC Timetable
+
+##### Class name
+```python
+uoftscrapers.UTSCTimetable
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/~registrar/scheduling/timetable
+
+##### Output format
+Refer to [Timetable](#timetable)
+
+--------------------------------------------------------------------------------
+
+### Exams
+
+##### Class name
+```python
+uoftscrapers.Exams
+```
+
+##### Scraper source
+ - [UTSG Exams](#utsg-exams)
+ - [UTM Exams](#utm-exams)
+ - [UTSC Exams](#utsc-exams)
+
+##### Output format
+```js
+{
+  "id": String,
+  "course_id": String,
+  "course_code": String
+  "period": String,
+  "date": String,
+  "start_time": String,
+  "end_time": String,
+  "sections": [{
+    "section": String,
+    "location": String
+  }]
+}
+```
+
+----------------------------------------
+
+### UTSG Exams
+
+##### Class name
+```python
+uoftscrapers.UTSGExams
+```
+
+##### Scraper source
+http://www.artsci.utoronto.ca/current/exams
+
+##### Output format
+Refer to [Exams](#exams)
+
+--------------------
+
+### UTM Exams
+
+##### Class name
+```python
+uoftscrapers.UTMExams
+```
+
+##### Scraper source
+https://student.utm.utoronto.ca/examschedule/finalexams.php
+
+##### Output format
+Refer to [Exams](#exams)
+
+--------------------
+
+### UTSC Exams
+
+##### Class name
+```python
+uoftscrapers.UTSCExams
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/registrar/examination-schedule
+
+##### Output format
+Refer to [Exams](#exams)
+
+--------------------------------------------------------------------------------
+
+### Parking
+
+##### Class name
+```python
+uoftscrapers.Parking
+```
+
+##### Scraper source
+http://map.utoronto.ca
 
 ##### Output format
 ```js
@@ -359,13 +477,13 @@ http://map.utoronto.ca/
 }
 ```
 
-------
+--------------------------------------------------------------------------------
 
-### UTM Shuttle
+### Shuttle
 
 ##### Class name
 ```python
-uoftscrapers.UTMShuttle
+uoftscrapers.Shuttle
 ```
 
 ##### Scraper source
@@ -374,17 +492,17 @@ https://m.utm.utoronto.ca/shuttle.php
 ##### Output format
 ```js
 {
-  date: String,
-  routes: [{
-    id: String,
-    name: String,
-    stops: [{
-      location: String,
-      building_id: String,
-      times: [{
-        time: String,
-        rush_hour: Boolean,
-        no_overload: Boolean
+  "date": String,
+  "routes": [{
+    "id": String,
+    "name": String,
+    "stops": [{
+      "location": String,
+      "building_id": String,
+      "times": [{
+        "time": String,
+        "rush_hour": Boolean,
+        "no_overload": Boolean
       }]
     }]
   }]
