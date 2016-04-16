@@ -26,6 +26,7 @@ from .scrapers.exams.utm import UTMExams
 from .scrapers.exams.utsc import UTSCExams
 
 from .scrapers.athletics import Athletics
+from .scrapers.athletics.utsg import UTSGAthletics
 from .scrapers.athletics.utm import UTMAthletics
 from .scrapers.athletics.utsc import UTSCAthletics
 
