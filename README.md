@@ -24,6 +24,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
     - [UTM Exams](#utm-exams)
     - [UTSC Exams](#utsc-exams)
   - [Athletics](#athletics)
+    - [UTSG Athletics](#utsg-athletics)
     - [UTM Athletics](#utm-exams)
     - [UTSC Athletics](#utsc-athletics)
   - [Parking](#parking)
@@ -335,64 +336,6 @@ uoftscrapers.Timetable
 
 ----------------------------------------
 
-### UTM Exams
-
-##### Class name
-```python
-uoftscrapers.UTMExams
-```
-
-##### Scraper source
-https://student.utm.utoronto.ca/examschedule/finalexams.php
-
-##### Output format
-```js
-{
-  id: String,
-  course_id: String,
-  course_code: String
-  period: String,
-  date: String,
-  start_time: String,
-  end_time: String,
-  sections: [{
-    section: String,
-    location: String
-  }]
-}
-```
-
-------
-
-### UTSC Exams
-
-##### Class name
-```python
-uoftscrapers.UTSCExams
-```
-
-##### Scraper source
-http://www.utsc.utoronto.ca/registrar/examination-schedule
-
-##### Output format
-```js
-{
-  id: String,
-  course_id: String,
-  course_code: String
-  period: String,
-  date: String,
-  start_time: String,
-  end_time: String,
-  sections: [{
-    section: String,
-    location: String
-  }]
-}
-```
-
-------
-
 ### UTSG Timetable
 
 ##### Class name
@@ -522,6 +465,7 @@ uoftscrapers.Athletics
 ```
 
 ##### Scraper source
+ - [UTSG Athletics](#utsg-athletics)
  - [UTM Athletics](#utm-athletics)
  - [UTSC Athletics](#utsc-athletics)
 
@@ -529,7 +473,7 @@ uoftscrapers.Athletics
 ```js
 {  
   "date": String,
-  "events":[{  
+  "events":[{
     "title": String,
     "location": String,
     "building_id": String,
@@ -540,6 +484,21 @@ uoftscrapers.Athletics
 ```
 
 ----------------------------------------
+
+### UTSG Athletics
+
+##### Class name
+```python
+uoftscrapers.UTSGAthletics
+```
+
+##### Scraper source
+_Not yet implemented_
+
+##### Output format
+Refer to [Athletics](#athletics)
+
+--------------------
 
 ### UTM Athletics
 
