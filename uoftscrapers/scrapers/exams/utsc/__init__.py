@@ -48,16 +48,11 @@ class UTSCExams:
                     ('date', date_),
                     ('start_time', start),
                     ('end_time', end),
-                    ('sections', [])
+                    ('location', location_)
                 ])
 
                 if id_ not in exams:
                     exams[id_] = doc
-
-                exams[id_]['sections'].append(OrderedDict([
-                    ('section', ''),
-                    ('location', location_)
-                ]))
 
         if exams:
             Scraper.ensure_location(location)
