@@ -1,10 +1,10 @@
+from ....scraper import Scraper
+from ....scraper.layers import LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
+from pprint import pprint
 import json
 import requests
-from ...scraper.layers import LayersScraper
-from ...scraper import Scraper
-from pprint import pprint
 
 class UTSGParking:
     """A scraper for UTSG parking lots / bicycle racks.

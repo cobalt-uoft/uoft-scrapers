@@ -1,5 +1,7 @@
+import json
 import logging
 import os
+import requests
 import shutil
 import sys
 
@@ -7,6 +9,7 @@ class Scraper:
     """Scraper class."""
 
     logger = logging.getLogger("uoftscrapers")
+    s = requests.Session()
 
     @staticmethod
     def ensure_location(location):
@@ -14,6 +17,27 @@ class Scraper:
 
         if not os.path.exists(location):
             os.makedirs(location)
+
+    @staticmethod
+    def write_json_file(data, location, filename):
+        with open('%s/%s.json' % (location, filename),'w') as outfile:
+            json.dump(data, outfile)
+
+    @staticmethod
+    def get_html(url, headers=None):
+        """Fetches the HTML page source, automatically retrying if it times out."""
+
+        html = None
+        while html is None:
+            try:
+                r = Scraper.s.get(url, headers=headers)
+                if r.status_code == 200:
+                    html = r.text
+            except (requests.exceptions.Timeout,
+                    requests.exceptions.ConnectionError):
+                continue
+
+        return html.encode('utf-8')
 
     @staticmethod
     def flush_percentage(decimal):
