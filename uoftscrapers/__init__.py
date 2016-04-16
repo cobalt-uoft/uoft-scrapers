@@ -13,8 +13,8 @@ from .scrapers.textbooks import Textbooks
 from .scrapers.timetable.utm import UTMTimetable
 from .scrapers.timetable.utsc import UTSCTimetable
 from .scrapers.timetable.utsg import UTSGTimetable
-from .scrapers.utmshuttle import UTMShuttle
-from .scrapers.parking.utsg import UTSGParking
+from .scrapers.transportation.parking.utsg import UTSGParking
+from .scrapers.transportation.utmshuttle import UTMShuttle
 
 
 class NullHandler(logging.Handler):
