@@ -1,6 +1,6 @@
 from ...scraper import Scraper
 from bs4 import BeautifulSoup
-from datetime import datetime, date
+from datetime import datetime
 from collections import OrderedDict
 import json
 import requests
@@ -53,36 +53,41 @@ class UTMExams:
 
             course_code = soup.find('div', class_='title').text.strip()
 
-            # some course names include lecture code (e.g. CHI200Y5Y)
+            # some course names include lecture code (see CHI200Y5Y)
             if ' ' in course_code:
                 course_code, lecture_code = course_code.split(' ')
             else:
                 lecture_code = None
 
-            id_, course_id = UTMExams.parse_course(course_code)
-
             data = [br.previous_sibling.string.strip()
                     for br in soup.find('div', class_='info').find_all('br')]
 
-            date_ = data[0].split(': ')[1]
+            date = data[0].split(': ')[1]
+
+            id_, course_id = UTMExams.get_course_id(course_code, date)
+
+            period = UTMExams.get_period(date)
+
+            if not id_ or not period:
+                continue
 
             start, end = UTMExams.parse_time(data[1].split(': ')[1],
-                                             data[2].split(': ')[1], date_)
+                                             data[2].split(': ')[1], date)
 
             sections = [UTMExams.parse_sections(room.split(': ')[1])
                         for room in [x for x in data[3:] if 'Room:' in x]]
 
             # append lecture code to section range if it exists
             if lecture_code:
-                sections[0]['section'] = '%s%s' % (lecture_code,
-                                                   sections[0]['section'])
+                sections[0]['section'] = '%s %s' % (lecture_code,
+                                                    sections[0]['section'])
 
             doc = OrderedDict([
                 ('id', id_),
                 ('course_id', course_id),
                 ('course_code', course_code),
-                ('period', 'APR16'),
-                ('date', date_),
+                ('period', period),
+                ('date', date),
                 ('start_time', start),
                 ('end_time', end),
                 ('sections', [])
@@ -93,7 +98,7 @@ class UTMExams:
 
             for section in sections:
                 exams[id_]['sections'].append({
-                    'section': section['section'],
+                    'section': section['section'].strip(),
                     'locaton': section['room']
                 })
         return exams
@@ -110,9 +115,34 @@ class UTMExams:
                 for li in soup.find('ul', class_='link').find_all('li')]
 
     @staticmethod
-    def parse_course(course_code):
-        # TODO dynamic month/year values
-        month, year, period = 'apr', 2016, 'apr16'
+    def get_period(d):
+        def get_date(month, date, year):
+            months = {
+                'dec': 12,
+                'apr': 4,
+                'june': 6,
+                'aug': 8
+            }
+            return datetime.strptime('%s-%d-%d' % (year, months[month], date),
+                                     '%Y-%m-%d')
+
+        d = datetime.strptime(d, '%Y-%m-%d')
+
+        year = d.year
+        month = None
+
+        for m, ld in (('dec', 31), ('apr', 30), ('june', 30), ('aug', 31)):
+            if get_date(m, 1, year) <= d <= get_date(m, ld, year):
+                month = m
+                break
+
+        if month:
+            return '%s%s' % (month.upper(), str(year)[2:])
+
+    @staticmethod
+    def get_course_id(course_code, date):
+        d = datetime.strptime(date, '%Y-%m-%d')
+        month, year, period = d.strftime("%b").lower(), d.year, UTMExams.get_period(date)
         endings = {
             'dec': {
                 'F': '%s9' % str(year),
@@ -137,7 +167,7 @@ class UTMExams:
 
         if month in endings and season in endings[month]:
             course_id = '%s%s' % (course_code, endings[month][season])
-            exam_id = '%s%s' % (course_id, period.upper())
+            exam_id = '%s%s' % (course_id, period)
 
         return exam_id, course_id
 
@@ -150,10 +180,10 @@ class UTMExams:
         return {'section': section, 'room': room}
 
     @staticmethod
-    def parse_time(start, end, date_):
+    def parse_time(start, end, date):
         def convert_time(t):
             h, m, s = [int(x) for x in t.split(':')]
-            d = datetime.strptime('%s %s %s %s' % (date_, h, m, s), '%Y-%m-%d %H %M %S')
+            d = datetime.strptime('%s %s %s %s' % (date, h, m, s), '%Y-%m-%d %H %M %S')
             return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
 
         return convert_time(start), convert_time(end)

@@ -1,6 +1,6 @@
 from ...scraper import Scraper
 from bs4 import BeautifulSoup
-from datetime import datetime, date
+from datetime import datetime
 from collections import OrderedDict
 import json
 import requests
@@ -35,23 +35,24 @@ class UTSCExams:
                 else:
                     lecture_code = None
 
-                id_, course_id = UTSCExams.parse_course_id(course_code)
+                date = data[1]
+                start, end = UTSCExams.parse_time(data[2], data[3], date)
+                location_ = data[4]
 
-                if not id_:
+                id_, course_id = UTSCExams.get_course_id(course_code, date)
+
+                period = UTSCExams.get_period(date)
+
+                if not id_ or not period:
                     continue
 
-                # TODO dynamic period value
-                period = 'APR16'
-                date_ = data[1]
-                start, end = UTSCExams.parse_time(data[2], data[3], date_)
-                location_ = data[4]
 
                 doc = OrderedDict([
                     ('id', id_),
                     ('course_id', course_id),
                     ('course_code', course_code),
                     ('period', period),
-                    ('date', date_),
+                    ('date', date),
                     ('start_time', start),
                     ('end_time', end),
                     ('sections', [])
@@ -75,9 +76,34 @@ class UTSCExams:
         Scraper.logger.info('UTSCExams completed.')
 
     @staticmethod
-    def parse_course_id(course_code):
-        # TODO dynamic month/year values
-        month, year, period = 'apr', 2016, 'apr16'
+    def get_period(d):
+        def get_date(month, date, year):
+            months = {
+                'dec': 12,
+                'apr': 4,
+                'june': 6,
+                'aug': 8
+            }
+            return datetime.strptime('%s-%d-%d' % (year, months[month], date),
+                                     '%Y-%m-%d')
+
+        d = datetime.strptime(d, '%Y-%m-%d')
+
+        year = d.year
+        month = None
+
+        for m, ld in (('dec', 31), ('apr', 30), ('june', 30), ('aug', 31)):
+            if get_date(m, 1, year) <= d <= get_date(m, ld, year):
+                month = m
+                break
+
+        if month:
+            return '%s%s' % (month.upper(), str(year)[2:])
+
+    @staticmethod
+    def get_course_id(course_code, date):
+        d = datetime.strptime(date, '%Y-%m-%d')
+        month, year, period = d.strftime("%b").lower(), d.year, UTSCExams.get_period(date)
         endings = {
             'dec': {
                 'F': '%s9' % str(year),
@@ -102,14 +128,14 @@ class UTSCExams:
 
         if month in endings and season in endings[month]:
             course_id = '%s%s' % (course_code, endings[month][season])
-            exam_id = '%s%s' % (course_id, period.upper())
+            exam_id = '%s%s' % (course_id, period)
 
         return exam_id, course_id
 
     @staticmethod
-    def parse_time(start, end, date_):
+    def parse_time(start, end, date):
         def convert_time(t):
             h, m = [int(x) for x in t.split(':')]
-            d = datetime.strptime('%s %s %s' % (date_, h, m), '%Y-%m-%d %H %M')
+            d = datetime.strptime('%s %s %s' % (date, h, m), '%Y-%m-%d %H %M')
             return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
         return convert_time(start), convert_time(end)
