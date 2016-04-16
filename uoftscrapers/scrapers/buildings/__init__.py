@@ -23,7 +23,6 @@ class Buildings:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Buildings initialized.')
-        Scraper.ensure_location(location)
 
         for campus in Buildings.campuses:
             data = Buildings.get_map_json(campus)

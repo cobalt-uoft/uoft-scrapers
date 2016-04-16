@@ -27,7 +27,6 @@ class Textbooks:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Textbooks initialized.')
-        Scraper.ensure_location(location)
 
         terms = Textbooks.retrieve_terms()
         departments = Textbooks.retrieve_departments(terms)

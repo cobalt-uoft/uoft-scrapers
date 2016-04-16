@@ -63,9 +63,6 @@ class UTSCExams:
                     'location': location_
                 })
 
-        if exams:
-            Scraper.ensure_location(location)
-
         for id_, doc in exams.items():
             Scraper.save_json(doc, location, id_)
 

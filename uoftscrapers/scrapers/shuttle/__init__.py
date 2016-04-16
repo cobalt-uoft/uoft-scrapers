@@ -26,7 +26,6 @@ class Shuttle:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Shuttle initialized.')
-        Scraper.ensure_location(location)
 
         now = datetime.datetime.now()
         year = now.strftime('%Y')

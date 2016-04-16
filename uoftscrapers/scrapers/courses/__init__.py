@@ -29,7 +29,6 @@ class Courses:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Courses initialized.')
-        Scraper.ensure_location(location)
 
         urls = Courses.search()
         total = len(urls)
