@@ -19,15 +19,14 @@ class UTSGTimetable:
         'F': 'FRIDAY',
         'S': 'SATURDAY'
     }
-    s = requests.Session()
     terms = ['summer', 'winter']
+    s = requests.Session()
 
     @staticmethod
     def scrape(location):
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('UTSGTimetable initialized.')
-        Scraper.ensure_location(location)
 
         for term in UTSGTimetable.terms:
             year = 0

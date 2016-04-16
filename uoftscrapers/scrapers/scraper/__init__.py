@@ -36,13 +36,12 @@ class Scraper:
                 r = Scraper.s.get(url, params=params, cookies=cookies, headers=headers)
                 if r.status_code == 200:
                     html = r.text
-                return html.encode('utf-8')
             except (requests.exceptions.Timeout,
                     requests.exceptions.ConnectionError):
                 attempts += 1
                 continue
 
-        return html
+        return html.encode('utf-8') if html else None
 
     @staticmethod
     def flush_percentage(decimal):
