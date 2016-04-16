@@ -29,7 +29,13 @@ class UTSCExams:
             for tr in table.find_all('tr')[1:]:
                 data = [x.text.strip() for x in tr.find_all('td')]
 
-                id_, course_id, course_code = UTSCExams.parse_course(data[0])
+                course_code = data[0]
+                if ' ' in course_code:
+                    course_code, lecture_code = course_code.split(' ')
+                else:
+                    lecture_code = None
+
+                id_, course_id = UTSCExams.parse_course_id(course_code)
 
                 if not id_:
                     continue
@@ -48,11 +54,16 @@ class UTSCExams:
                     ('date', date_),
                     ('start_time', start),
                     ('end_time', end),
-                    ('location', location_)
+                    ('sections', [])
                 ])
 
                 if id_ not in exams:
                     exams[id_] = doc
+
+                exams[id_]['sections'].append({
+                    'section': lecture_code or '',
+                    'location': location_
+                })
 
         if exams:
             Scraper.ensure_location(location)
@@ -64,7 +75,7 @@ class UTSCExams:
         Scraper.logger.info('UTSCExams completed.')
 
     @staticmethod
-    def parse_course(course_code):
+    def parse_course_id(course_code):
         # TODO dynamic month/year values
         month, year, period = 'apr', 2016, 'apr16'
         endings = {
@@ -93,7 +104,7 @@ class UTSCExams:
             course_id = '%s%s' % (course_code, endings[month][season])
             exam_id = '%s%s' % (course_id, period.upper())
 
-        return exam_id, course_id, course_code
+        return exam_id, course_id
 
     @staticmethod
     def parse_time(start, end, date_):
