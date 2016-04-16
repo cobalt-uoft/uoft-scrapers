@@ -7,8 +7,6 @@ import requests
 import pytz
 import re
 
-from pprint import pprint
-
 
 class UTMExams:
     """A scraper for UTM exams."""
@@ -20,17 +18,16 @@ class UTMExams:
     def scrape(location='.'):
         Scraper.logger.info('UTMExams initialized.')
 
-        depts = UTMExams.get_page_links('list_dept.php?type=2')
+        dept_links = UTMExams.get_page_links('list_dept.php?type=2')
         Scraper.logger.info('Got department links (1/3).')
 
-        courses = []
-        for dept in depts:
-            courses.extend(UTMExams.get_page_links(dept))
+        course_links = []
+        for dept in dept_links:
+            course_links.extend(UTMExams.get_page_links(dept))
         Scraper.logger.info('Got course links (2/3).')
 
         exams = OrderedDict()
-        count = 1
-        for course in courses:
+        for course in course_links:
             headers = {
                 'Referer': UTMExams.host
             }
@@ -59,7 +56,7 @@ class UTMExams:
             sections = [UTMExams.parse_sections(room.split(': ')[1])
                         for room in [x for x in data[3:] if 'Room:' in x]]
 
-            # add the lecture code to the section range if applicable
+            # append lecture code to section range if it exists
             if lecture_code:
                 sections[0]['section'] = '%s%s' % (lecture_code,
                                                    sections[0]['section'])
@@ -133,11 +130,7 @@ class UTMExams:
         if '(' in room:
             room, section = [x.strip()
                              for x in re.sub('[()]', ' ', room).split('  ')]
-
-        return {
-            'section': section,
-            'room': room
-        }
+        return {'section': section, 'room': room}
 
     @staticmethod
     def get_page_links(endpoint):
@@ -158,4 +151,3 @@ class UTMExams:
             return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
 
         return convert_time(start), convert_time(end)
-
