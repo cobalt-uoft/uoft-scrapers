@@ -12,6 +12,8 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [Textbooks](#textbooks)
   - [Food](#food)
   - [UTSG Exams](#utsg-exams)
+  - [UTM Exams](#utm-exams)
+  - [UTSC Exams](#utsc-exams)
   - [UTSG Timetable](#utsg-timetable)
   - [UTM Timetable](#utm-timetable)
   - [UTSC Timetable](#utsc-timetable)
@@ -227,11 +229,69 @@ http://map.utoronto.ca/
 
 ##### Class name
 ```python
-uoftscrapers.Exams
+uoftscrapers.UTSGExams
 ```
 
 ##### Scraper source
 http://www.artsci.utoronto.ca/current/exams/
+
+##### Output format
+```js
+{
+  id: String,
+  course_id: String,
+  course_code: String
+  period: String,
+  date: String,
+  start_time: String,
+  end_time: String,
+  sections: [{
+    section: String,
+    location: String
+  }]
+}
+```
+
+------
+
+### UTM Exams
+
+##### Class name
+```python
+uoftscrapers.UTMExams
+```
+
+##### Scraper source
+https://student.utm.utoronto.ca/examschedule/finalexams.php
+
+##### Output format
+```js
+{
+  id: String,
+  course_id: String,
+  course_code: String
+  period: String,
+  date: String,
+  start_time: String,
+  end_time: String,
+  sections: [{
+    section: String,
+    location: String
+  }]
+}
+```
+
+------
+
+### UTSC Exams
+
+##### Class name
+```python
+uoftscrapers.UTSCExams
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/registrar/examination-schedule
 
 ##### Output format
 ```js
