@@ -96,9 +96,9 @@ class UTSCExams:
         return exam_id, course_id, course_code
 
     @staticmethod
-    def parse_time(start, end, date):
+    def parse_time(start, end, date_):
         def convert_time(t):
             h, m = [int(x) for x in t.split(':')]
-            d = datetime.strptime('%s %s %s' % (date, h, m), '%Y-%m-%d %H %M')
+            d = datetime.strptime('%s %s %s' % (date_, h, m), '%Y-%m-%d %H %M')
             return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
         return convert_time(start), convert_time(end)
