@@ -16,6 +16,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [UTM Timetable](#utm-timetable)
   - [UTSC Timetable](#utsc-timetable)
   - [UTSG Calendar](#utsg-calendar)
+  - [UTSG Parking](#utsg-parking)
   - [UTM Shuttle Bus Schedule](#utm-shuttle)
 
 ## Requirements
@@ -331,6 +332,32 @@ http://www.artsandscience.utoronto.ca/ofr/calendar/
 
 ##### Output format
 Not implemented.
+
+------
+
+### UTSG Parking
+
+##### Class name
+```python
+uoftscrapers.UTSGParking
+```
+
+##### Scraper source
+http://map.utoronto.ca/
+
+##### Output format
+```js
+{
+  "id": String,
+  "title": String,
+  "building_id": String,
+  "type": String,
+  "description": String,
+  "lat": Number,
+  "lng": Number,
+  "address": String
+}
+```
 
 ------
 
