@@ -23,6 +23,20 @@ class Scraper:
         sys.stdout.flush()
 
     @staticmethod
+    def get_html(s, url):
+        html = None
+        while html is None:
+            try:
+                r = s.get(url)
+                if r.status_code == 200:
+                    html = r.text
+            except (requests.exceptions.Timeout,
+                    requests.exceptions.ConnectionError):
+                continue
+
+        return html.encode('utf-8')
+
+    @staticmethod
     def get_text_from_class(soup, name):
         obj = soup.find(class_=name)
         if obj != None:
