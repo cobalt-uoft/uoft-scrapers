@@ -26,8 +26,9 @@ class UTSGParking:
 
         data = LayersScraper.get_layers_json('utsg')
 
-        for entry in data['markers'][UTSGParking.lot_index]:
-            _id = str(entry['id'])
+        for entry in data[UTSGParking.lot_index]['markers']:
+            _id = str(entry['id']).zfill(4)
+            title = LayersScraper.get_value(entry, 'title')
             building_id = LayersScraper.get_value(entry, 'building_code')
             _type = 'vehicle'
             access = LayersScraper.get_value(entry, 'access')
@@ -40,6 +41,7 @@ class UTSGParking:
 
             doc = OrderedDict([
                 ('id', _id),
+                ('title', title),
                 ('building_id', building_id),
                 ('type', _type),
                 ('description', description),
@@ -47,5 +49,41 @@ class UTSGParking:
                 ('lng', lng),
                 ('address', address)
             ])
+
+            with open('%s/%s.json' % (location, _id), 'w') as fp:
+                json.dump(doc, fp)
+
+        for entry in data[UTSGParking.rack_index]['markers']:
+            if 64 in entry['attribs']:
+                # Ignore Bikeshare (third party)
+                continue
+
+            _id = str(entry['id']).zfill(4)
+            title = LayersScraper.get_value(entry, 'title')
+            building_id = LayersScraper.get_value(entry, 'building_code')
+            _type = 'bicycle'
+            access = LayersScraper.get_value(entry, 'access')
+            description = BeautifulSoup(
+                LayersScraper.get_value(entry, 'desc').strip(),
+                'html.parser').text
+            if len(description) > 0 and description[-1] == '.':
+                description = description[:-1]
+            lat = LayersScraper.get_value(entry, 'lat', True)
+            lng = LayersScraper.get_value(entry, 'lng', True)
+            address = LayersScraper.get_value(entry, 'address')
+
+            doc = OrderedDict([
+                ('id', _id),
+                ('title', title),
+                ('building_id', building_id),
+                ('type', _type),
+                ('description', description),
+                ('lat', lat),
+                ('lng', lng),
+                ('address', address)
+            ])
+
+            with open('%s/%s.json' % (location, _id), 'w') as fp:
+                json.dump(doc, fp)
 
         Scraper.logger.info('UTSGParking completed.')
