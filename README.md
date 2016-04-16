@@ -332,6 +332,64 @@ uoftscrapers.Timetable
 
 ----------------------------------------
 
+### UTM Exams
+
+##### Class name
+```python
+uoftscrapers.UTMExams
+```
+
+##### Scraper source
+https://student.utm.utoronto.ca/examschedule/finalexams.php
+
+##### Output format
+```js
+{
+  id: String,
+  course_id: String,
+  course_code: String
+  period: String,
+  date: String,
+  start_time: String,
+  end_time: String,
+  sections: [{
+    section: String,
+    location: String
+  }]
+}
+```
+
+------
+
+### UTSC Exams
+
+##### Class name
+```python
+uoftscrapers.UTSCExams
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/registrar/examination-schedule
+
+##### Output format
+```js
+{
+  id: String,
+  course_id: String,
+  course_code: String
+  period: String,
+  date: String,
+  start_time: String,
+  end_time: String,
+  sections: [{
+    section: String,
+    location: String
+  }]
+}
+```
+
+------
+
 ### UTSG Timetable
 
 ##### Class name

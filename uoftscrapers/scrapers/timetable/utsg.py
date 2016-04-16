@@ -1,4 +1,4 @@
-from ...scraper import Scraper
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import http.cookiejar
@@ -8,6 +8,7 @@ import re
 import requests
 import shutil
 import tidylib
+
 
 class UTSGTimetable:
 

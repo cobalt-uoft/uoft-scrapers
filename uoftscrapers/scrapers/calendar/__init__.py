@@ -1,12 +1,13 @@
-from ..scraper import Scraper
-from .utsg import UTSGCalendar
+from ..utils import Scraper
 from .utm import UTMCalendar
 from .utsc import UTSCCalendar
+from .utsg import UTSGCalendar
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
 import os
 import requests
+
 
 class Calendar:
 

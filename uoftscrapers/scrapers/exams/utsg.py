@@ -1,4 +1,4 @@
-from ...scraper import Scraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 from collections import OrderedDict
@@ -17,7 +17,7 @@ class UTSGExams:
     s = requests.Session()
 
     @staticmethod
-    def scrape(year=None, location='.'):
+    def scrape(location='.', year=None):
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('UTSGExams initialized.')

@@ -1,4 +1,4 @@
-from ..scraper import Scraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from operator import itemgetter
@@ -13,6 +13,7 @@ import re
 import requests
 import sys
 
+
 class Textbooks:
     """A scraper for UofT's book store.
 
@@ -26,7 +27,7 @@ class Textbooks:
     def scrape(location='.'):
         """Update the local JSON files for this scraper."""
 
-        Scraper.logger.info('Food initialized.')
+        Scraper.logger.info('Textbooks initialized.')
         Scraper.ensure_location(location)
 
         terms = Textbooks.retrieve_terms()

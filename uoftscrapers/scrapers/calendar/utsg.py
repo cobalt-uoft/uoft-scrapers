@@ -1,9 +1,10 @@
-from ..scraper import Scraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
 import os
 import requests
+
 
 class UTSGCalendar:
 

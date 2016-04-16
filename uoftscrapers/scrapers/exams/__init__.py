@@ -1,4 +1,4 @@
-from ..scraper import Scraper
+from ..utils import Scraper
 from .utsg import UTSGExams
 from .utm import UTMExams
 from .utsc import UTSCExams
@@ -7,6 +7,7 @@ from collections import OrderedDict
 import json
 import os
 import requests
+
 
 class Exams:
 

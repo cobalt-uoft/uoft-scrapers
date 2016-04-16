@@ -2,8 +2,7 @@ import logging
 import os
 import sys
 
-
-from .scrapers.coursefinder import CourseFinder
+from .scrapers.courses import Courses
 
 from .scrapers.buildings import Buildings
 
@@ -16,6 +15,7 @@ from .scrapers.calendar.utsg import UTSGCalendar
 from .scrapers.calendar.utm import UTMCalendar
 from .scrapers.calendar.utsc import UTSCCalendar
 
+from .scrapers.timetable import Timetable
 from .scrapers.timetable.utm import UTMTimetable
 from .scrapers.timetable.utsc import UTSCTimetable
 from .scrapers.timetable.utsg import UTSGTimetable
@@ -27,7 +27,7 @@ from .scrapers.exams.utsc import UTSCExams
 
 from .scrapers.parking import Parking
 
-from .scrapers.utmshuttle import UTMShuttle
+from .scrapers.shuttle import Shuttle
 
 
 class NullHandler(logging.Handler):
