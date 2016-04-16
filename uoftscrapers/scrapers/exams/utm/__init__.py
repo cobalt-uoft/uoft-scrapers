@@ -86,7 +86,7 @@ class UTMExams:
                 ('id', id_),
                 ('course_id', course_id),
                 ('course_code', course_code),
-                ('period', 'APR16'),
+                ('period', period),
                 ('date', date),
                 ('start_time', start),
                 ('end_time', end),
