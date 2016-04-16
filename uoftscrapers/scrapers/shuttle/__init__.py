@@ -8,7 +8,7 @@ import time
 
 
 class Shuttle:
-    """A scraper for the UTM shuttle bus schedule.
+    """A scraper for UofT's shuttle bus schedule.
 
     The schedule is located at https://m.utm.utoronto.ca/shuttle.php.
     """
@@ -39,7 +39,7 @@ class Shuttle:
             html = Scraper.get_html(Shuttle.host % (year, month, day))
             schedule = Shuttle.parse_schedule_html(html)
 
-            Scraper.write_json_file(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
+            Scraper.save_json(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
 
         Scraper.logger.info('Shuttle completed.')
 

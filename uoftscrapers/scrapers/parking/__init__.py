@@ -55,8 +55,7 @@ class Parking:
                 ('address', address)
             ])
 
-            with open('%s/%s.json' % (location, _id), 'w') as fp:
-                json.dump(doc, fp)
+            Scraper.save_json(doc, location, _id)
 
         # UTSG bicycle parking
         for entry in data[Parking.indices['utsg'][1]]['markers']:
@@ -91,8 +90,7 @@ class Parking:
                 ('address', address)
             ])
 
-            with open('%s/%s.json' % (location, _id), 'w') as fp:
-                json.dump(doc, fp)
+            Scraper.save_json(doc, location, _id)
 
         # UTM / UTSC car parking
         for campus in ('utm', 'utsc'):

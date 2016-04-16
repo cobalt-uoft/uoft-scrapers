@@ -19,25 +19,30 @@ class Scraper:
             os.makedirs(location)
 
     @staticmethod
-    def write_json_file(data, location, filename):
-        with open('%s/%s.json' % (location, filename),'w') as outfile:
+    def save_json(data, location, filename):
+        Scraper.ensure_location(location)
+
+        with open('%s/%s.json' % (location, filename),'w+') as outfile:
             json.dump(data, outfile)
 
     @staticmethod
-    def get_html(url, headers=None):
+    def get_html(url, params=None, cookies=None, headers=None, max_attempts=10):
         """Fetches the HTML page source, automatically retrying if it times out."""
 
         html = None
-        while html is None:
+        attempts = 0
+        while html is None and attempts < max_attempts:
             try:
-                r = Scraper.s.get(url, headers=headers)
+                r = Scraper.s.get(url, params=params, cookies=cookies, headers=headers)
                 if r.status_code == 200:
                     html = r.text
+                return html.encode('utf-8')
             except (requests.exceptions.Timeout,
                     requests.exceptions.ConnectionError):
+                attempts += 1
                 continue
 
-        return html.encode('utf-8')
+        return html
 
     @staticmethod
     def flush_percentage(decimal):

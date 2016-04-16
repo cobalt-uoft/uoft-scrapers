@@ -73,8 +73,7 @@ class Buildings:
                     ('polygon', polygon)
                 ])
 
-                with open('%s/%s.json' % (location, _id), 'w') as fp:
-                    json.dump(doc, fp)
+                Scraper.save_json(doc, location, _id)
 
         Scraper.logger.info('Buildings completed.')
 

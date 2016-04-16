@@ -1,7 +1,6 @@
 from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import json
 import requests
 
 
@@ -73,8 +72,7 @@ class Food:
                     campus.upper()
                 ))
 
-                with open('%s/%s.json' % (location, id_), 'w') as fp:
-                    json.dump(doc, fp)
+                Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('Food completed.')
 
