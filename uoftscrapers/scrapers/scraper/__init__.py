@@ -20,8 +20,7 @@ class Scraper:
 
     @staticmethod
     def save_json(data, location, filename):
-        if not os.path.exists(os.path.dirname(location)):
-            os.makedirs(os.path.dirname(location))
+        Scraper.ensure_location(location)
 
         with open('%s/%s.json' % (location, filename),'w+') as outfile:
             json.dump(data, outfile)
