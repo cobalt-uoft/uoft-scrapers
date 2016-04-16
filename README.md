@@ -23,6 +23,10 @@ This is a library of scrapers for various University of Toronto websites. It is 
     - [UTSG Exams](#utsg-exams)
     - [UTM Exams](#utm-exams)
     - [UTSC Exams](#utsc-exams)
+  - [Athletics](#athletics)
+    - [UTSG Athletics](#utsg-athletics)
+    - [UTM Athletics](#utm-exams)
+    - [UTSC Athletics](#utsc-athletics)
   - [Parking](#parking)
   - [Shuttle Bus Schedule](#shuttle)
 
@@ -332,64 +336,6 @@ uoftscrapers.Timetable
 
 ----------------------------------------
 
-### UTM Exams
-
-##### Class name
-```python
-uoftscrapers.UTMExams
-```
-
-##### Scraper source
-https://student.utm.utoronto.ca/examschedule/finalexams.php
-
-##### Output format
-```js
-{
-  id: String,
-  course_id: String,
-  course_code: String
-  period: String,
-  date: String,
-  start_time: String,
-  end_time: String,
-  sections: [{
-    section: String,
-    location: String
-  }]
-}
-```
-
-------
-
-### UTSC Exams
-
-##### Class name
-```python
-uoftscrapers.UTSCExams
-```
-
-##### Scraper source
-http://www.utsc.utoronto.ca/registrar/examination-schedule
-
-##### Output format
-```js
-{
-  id: String,
-  course_id: String,
-  course_code: String
-  period: String,
-  date: String,
-  start_time: String,
-  end_time: String,
-  sections: [{
-    section: String,
-    location: String
-  }]
-}
-```
-
-------
-
 ### UTSG Timetable
 
 ##### Class name
@@ -508,6 +454,79 @@ http://www.utsc.utoronto.ca/registrar/examination-schedule
 
 ##### Output format
 Refer to [Exams](#exams)
+
+--------------------------------------------------------------------------------
+
+### Athletics
+
+##### Class name
+```python
+uoftscrapers.Athletics
+```
+
+##### Scraper source
+ - [UTSG Athletics](#utsg-athletics)
+ - [UTM Athletics](#utm-athletics)
+ - [UTSC Athletics](#utsc-athletics)
+
+##### Output format
+```js
+{  
+  "date": String,
+  "events":[{
+    "title": String,
+    "location": String,
+    "building_id": String,
+    "start_time": String,
+    "end_time": String
+  }]
+}
+```
+
+----------------------------------------
+
+### UTSG Athletics
+
+##### Class name
+```python
+uoftscrapers.UTSGAthletics
+```
+
+##### Scraper source
+_Not yet implemented_
+
+##### Output format
+Refer to [Athletics](#athletics)
+
+--------------------
+
+### UTM Athletics
+
+##### Class name
+```python
+uoftscrapers.UTMAthletics
+```
+
+##### Scraper source
+http://www.utm.utoronto.ca/athletics/schedule/month/
+
+##### Output format
+Refer to [Athletics](#athletics)
+
+--------------------
+
+### UTSC Athletics
+
+##### Class name
+```python
+uoftscrapers.UTSCAthletics
+```
+
+##### Scraper source
+http://www.utsc.utoronto.ca/athletics/calendar-node-field-date-time/month/
+
+##### Output format
+Refer to [Athletics](#athletics)
 
 --------------------------------------------------------------------------------
 
