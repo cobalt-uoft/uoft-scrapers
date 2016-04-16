@@ -4,7 +4,6 @@ from datetime import datetime
 from collections import OrderedDict
 import json
 import requests
-import pytz
 
 from pprint import pprint
 
@@ -12,59 +11,56 @@ from pprint import pprint
 class UTMAthletics:
     """A scraper for the UTM athletics schedule.
 
-    The schedule is located at https://m.utm.utoronto.ca/physed.php.
+    The schedule is located at http://www.utm.utoronto.ca/athletics/schedule
     """
 
-    host = 'https://m.utm.utoronto.ca/physed.php'
+    host = 'http://www.utm.utoronto.ca/athletics/schedule/month/'
     s = requests.Session()
 
     @staticmethod
-    def scrape(location='.'):
+    def scrape(location='.', month=None):
         """Update the local JSON files for this scraper."""
+        month = month or UTMAthletics.get_month(month)
 
         Scraper.logger.info('UTMAthletics initialized.')
         headers = {
             'Referer': UTMAthletics.host
         }
-        html = UTMAthletics.s.get('%s' % UTMAthletics.host,
+        html = UTMAthletics.s.get('%s%s' % (UTMAthletics.host, month),
                                   headers=headers).text
         soup = BeautifulSoup(html, 'html.parser')
 
         athletics = OrderedDict()
 
-        date = None
+        for tr in soup.find('div', class_='month-view').find_all('tr', class_='single-day'):
+            for td in tr.find_all('td'):
+                date = td.get('data-date')
 
-        div = soup.find('div', id='all')
-        for child in div.children:
+                if not UTMAthletics.date_in_month(date, month):
+                    continue
 
-            if child.name == 'br':
-                continue
+                events = []
+                for item in td.find(class_='inner').find_all(class_='item'):
 
-            if child.name == 'h2':
-                date = UTMAthletics.parse_date(child.text)
+                    # event cancelled or athletic center closed
+                    if item.find(class_='cancelled-item') or item.find(class_='athletics-calendar-note'):
+                        continue
 
-                if date not in athletics:
-                    athletics[date] = OrderedDict([
-                        ('date', date),
-                        ('activities', [])
-                    ])
+                    title = item.find(class_='athletics-calendar-title').text
+                    location_ = item.find(class_='athletics-calendar-location').text
+                    start = item.find(class_='date-display-start').get('content')
+                    end = item.find(class_='date-display-end').get('content')
 
-                continue
+                    events.append(OrderedDict([
+                        ('title', title),
+                        ('location', location_),
+                        ('start_time', start),
+                        ('end_time', end)
+                    ]))
 
-            if 'title' in child.get('class'):
-                title = child.find('b').text
-                location_ = child.find('span').text
-
-                athletics[date]['activities'].append(OrderedDict([
-                    ('title', title),
-                    ('location', location_)
-                ]))
-
-            elif 'info' in child.get('class'):
-                start, end = UTMAthletics.parse_time(child.text, date)
-                athletics[date]['activities'][-1].update([
-                    ('start_time', start),
-                    ('end_time', end)
+                athletics[date] = OrderedDict([
+                    ('date', date),
+                    ('events', events)
                 ])
 
         if athletics:
@@ -77,20 +73,13 @@ class UTMAthletics:
         Scraper.logger.info('UTMAthletics completed.')
 
     @staticmethod
-    def parse_date(d):
-        month, date_, year = [x.strip() for x in d.split(' ')]
-        return datetime.strptime('%s %s %s' % (date_.zfill(2), month, year),
-                                 '%d %B %Y').date().isoformat()
+    def get_month(m):
+        now = datetime.now()
+        return '%s-%s' % (now.year, now.month)
 
     @staticmethod
-    def parse_time(time_range, d):
+    def date_in_month(d, m):
+        d = datetime.strptime(d, '%Y-%m-%d')
+        m = datetime.strptime(m, '%Y-%m')
 
-        def convert_time(time):
-            t, p = time.split(' ')
-            h, m = t.split(':')
-            date = datetime.strptime('%s %s %s %s' % (d, h, m, p),
-                                     '%Y-%m-%d %I %M %p')
-            return date.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
-
-        start, end = [x.strip() for x in time_range.split(' - ')]
-        return convert_time(start), convert_time(end)
+        return d.month == m.month
