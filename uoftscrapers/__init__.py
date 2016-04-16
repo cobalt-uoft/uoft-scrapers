@@ -25,6 +25,10 @@ from .scrapers.exams.utsg import UTSGExams
 from .scrapers.exams.utm import UTMExams
 from .scrapers.exams.utsc import UTSCExams
 
+from .scrapers.athletics import Athletics
+from .scrapers.athletics.utm import UTMAthletics
+from .scrapers.athletics.utsc import UTSCAthletics
+
 from .scrapers.parking import Parking
 
 from .scrapers.shuttle import Shuttle
