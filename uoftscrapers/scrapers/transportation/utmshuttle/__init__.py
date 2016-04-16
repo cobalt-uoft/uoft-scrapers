@@ -3,12 +3,7 @@ from bs4 import BeautifulSoup
 from calendar import monthrange
 from collections import OrderedDict
 import datetime
-import json
-import logging
-import os
 import re
-import requests
-import sys
 import time
 
 class UTMShuttle:
@@ -18,8 +13,6 @@ class UTMShuttle:
     """
 
     host = 'https://m.utm.utoronto.ca/shuttleByDate.php?year=%s&month=%s&day=%s'
-    logger = logging.getLogger('uoftscrapers')
-    s = requests.Session()
 
     building_ids = {
         'Instructional Centre Layby': '334',
@@ -42,14 +35,10 @@ class UTMShuttle:
         Scraper.logger.info('Fetching schedules for %s-%s.' % (year, month))
 
         for day in range(1, days + 1):
-            html = Scraper.get_html(UTMShuttle.s, UTMShuttle.host % (year, month, day))
+            html = Scraper.get_html(UTMShuttle.host % (year, month, day))
             schedule = UTMShuttle.parse_schedule_html(html)
 
-            with open('%s/%s.json' % (
-                location,
-                '%s-%s-%s' % (year, month, '{0:02d}'.format(day))
-            ),'w+') as outfile:
-                json.dump(schedule, outfile)
+            Scraper.write_json_file(schedule, location, '%s-%s-%s' % (year, month, '{0:02d}'.format(day)))
 
         Scraper.logger.info('UTMShuttle completed.')
 
