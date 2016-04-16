@@ -348,24 +348,18 @@ https://m.utm.utoronto.ca/shuttle.php
 ```js
 {
   date: String,
-  routes: [
-    {
-      id: String,
-      name: String,
-      stops: [
-        {
-          location: String,
-          building_id: String,
-          times: [
-            {
-              time: String,
-              rush_hour: Boolean,
-              no_overload: Boolean
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  routes: [{
+    id: String,
+    name: String,
+    stops: [{
+      location: String,
+      building_id: String,
+      times: [{
+        time: String,
+        rush_hour: Boolean,
+        no_overload: Boolean
+      }]
+    }]
+  }]
 }
 ```
