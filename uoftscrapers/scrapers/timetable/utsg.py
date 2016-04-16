@@ -1,13 +1,13 @@
-from ...scraper import Scraper
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import http.cookiejar
-import json
 import os
 import re
 import requests
 import shutil
 import tidylib
+
 
 class UTSGTimetable:
 
@@ -20,15 +20,14 @@ class UTSGTimetable:
         'F': 'FRIDAY',
         'S': 'SATURDAY'
     }
-    s = requests.Session()
     terms = ['summer', 'winter']
+    s = requests.Session()
 
     @staticmethod
     def scrape(location):
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('UTSGTimetable initialized.')
-        Scraper.ensure_location(location)
 
         for term in UTSGTimetable.terms:
             year = 0
@@ -59,10 +58,7 @@ class UTSGTimetable:
                 data = UTSGTimetable.parse_sponsor(html, year, term, sponsor)
 
                 for course in data:
-                    UTSGTimetable.save_json('%s/%s' % (
-                        location,
-                        course["id"] + ".json"
-                    ), course)
+                    Scraper.save_json(course, location, course['id'])
 
         shutil.rmtree('.html')
         Scraper.logger.info('UTSGTimetable completed.')
@@ -358,13 +354,6 @@ class UTSGTimetable:
             os.makedirs(os.path.dirname(name))
         with open(name, "wb") as file:
             file.write(data)
-
-    @staticmethod
-    def save_json(name, data):
-        if not os.path.exists(os.path.dirname(name)):
-            os.makedirs(os.path.dirname(name))
-        with open(name, "w+") as file:
-            json.dump(data, file)
 
     @staticmethod
     def get_sponsors(term):

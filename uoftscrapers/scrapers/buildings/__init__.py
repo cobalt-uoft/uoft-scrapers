@@ -1,12 +1,12 @@
-import requests
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
+from decimal import *
+import json
 import os
 import re
-import json
-from decimal import *
-from ..scraper import Scraper
-from ..scraper.layers import LayersScraper
+import requests
+
 
 class Buildings:
     """A scraper for UofT's buildings.
@@ -23,7 +23,6 @@ class Buildings:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Buildings initialized.')
-        Scraper.ensure_location(location)
 
         for campus in Buildings.campuses:
             data = Buildings.get_map_json(campus)
@@ -73,8 +72,7 @@ class Buildings:
                     ('polygon', polygon)
                 ])
 
-                with open('%s/%s.json' % (location, _id), 'w') as fp:
-                    json.dump(doc, fp)
+                Scraper.save_json(doc, location, _id)
 
         Scraper.logger.info('Buildings completed.')
 

@@ -1,9 +1,10 @@
-from ...scraper import Scraper
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 import json
 import os
 import requests
+
 
 class UTSCTimetable:
 
@@ -13,5 +14,4 @@ class UTSCTimetable:
     def scrape(location='.'):
         Scraper.logger.info('UTSCTimetable initialized.')
         Scraper.logger.info('Not implemented.')
-        raise NotImplementedError('This scraper has not been implemented yet.')
         Scraper.logger.info('UTSCTimetable completed.')

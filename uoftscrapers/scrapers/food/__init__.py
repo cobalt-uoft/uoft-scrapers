@@ -1,9 +1,8 @@
+from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import json
 import requests
-from ..scraper.layers import LayersScraper
-from ..scraper import Scraper
+
 
 class Food:
     """A scraper for UofT restaurants.
@@ -20,7 +19,6 @@ class Food:
         """Update the local JSON files for this scraper."""
 
         Scraper.logger.info('Food initialized.')
-        Scraper.ensure_location(location)
 
         for campus, food_index in Food.campuses:
             data = LayersScraper.get_layers_json(campus)[food_index]
@@ -73,8 +71,7 @@ class Food:
                     campus.upper()
                 ))
 
-                with open('%s/%s.json' % (location, id_), 'w') as fp:
-                    json.dump(doc, fp)
+                Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('Food completed.')
 

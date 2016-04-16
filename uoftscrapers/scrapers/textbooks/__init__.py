@@ -1,4 +1,4 @@
-from ..scraper import Scraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from operator import itemgetter
@@ -6,12 +6,12 @@ from pprint import pprint
 from queue import Queue
 from threading import Thread, Lock
 from time import time
-import json
 import logging
 import os
 import re
 import requests
 import sys
+
 
 class Textbooks:
     """A scraper for UofT's book store.
@@ -26,8 +26,7 @@ class Textbooks:
     def scrape(location='.'):
         """Update the local JSON files for this scraper."""
 
-        Scraper.logger.info('Food initialized.')
-        Scraper.ensure_location(location)
+        Scraper.logger.info('Textbooks initialized.')
 
         terms = Textbooks.retrieve_terms()
         departments = Textbooks.retrieve_departments(terms)
@@ -99,11 +98,7 @@ class Textbooks:
                 sorted(book['courses'][i]['meeting_sections'],
                     key=itemgetter('code'))
 
-            with open('%s/%s.json' % (
-                location,
-                book['id']
-            ), 'w+') as outfile:
-                json.dump(book, outfile)
+            Scraper.save_json(book, location, book['id'])
 
         Scraper.logger.info('Textbooks completed.')
 
