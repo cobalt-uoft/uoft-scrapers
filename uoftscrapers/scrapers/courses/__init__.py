@@ -253,7 +253,7 @@ class CourseFinderWorker(Thread):
     def run(self):
         while True:
             course_id, url, total = self.queue.get()
-            html = Scraper.get(url)
+            html = Scraper.get(url, Courses.cookies)
             course = Courses.parse_course_html(course_id, html)
 
             CourseFinderWorker.lock.acquire()
