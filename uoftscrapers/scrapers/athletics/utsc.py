@@ -20,7 +20,7 @@ class UTSCAthletics:
         month = month or UTSCAthletics.get_month(month)
 
         Scraper.logger.info('UTSCAthletics initialized.')
-        html = Scraper.get_html('%s%s' % (UTSCAthletics.host, month))
+        html = Scraper.get('%s%s' % (UTSCAthletics.host, month))
         soup = BeautifulSoup(html, 'html.parser')
 
         athletics = OrderedDict()

@@ -1,7 +1,6 @@
 from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-import requests
 
 
 class Food:
@@ -12,7 +11,6 @@ class Food:
 
     host = 'http://map.utoronto.ca/'
     campuses = [('utsg', 2), ('utm', 1), ('utsc', 0)]
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.'):
@@ -101,8 +99,8 @@ class Food:
         headers = {
             'Referer': Food.host
         }
-        html = Food.s.get('%s%s%s' % (Food.host, 'json/hours/', food_id),
-            headers=headers).text
+        html = Scraper.get('%s%s%s' % (Food.host, 'json/hours/', food_id),
+            headers=headers)
         soup = BeautifulSoup(html, 'html.parser')
 
         hours = OrderedDict()

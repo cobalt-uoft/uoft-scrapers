@@ -35,7 +35,7 @@ class Shuttle:
         Scraper.logger.info('Fetching schedules for {0}-{1}-01 to {0}-{1}-{2}.'.format(year, month, days))
 
         for day in range(1, days + 1):
-            html = Scraper.get_html(Shuttle.host % (year, month, day))
+            html = Scraper.get(Shuttle.host % (year, month, day))
             schedule = Shuttle.parse_schedule_html(html)
 
             Scraper.save_json(schedule, location, schedule['date'])

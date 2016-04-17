@@ -1,8 +1,7 @@
 from ..utils import Scraper
 from bs4 import BeautifulSoup
-from datetime import datetime, date
 from collections import OrderedDict
-import requests
+from datetime import datetime, date
 import pytz
 
 
@@ -13,7 +12,6 @@ class UTSGExams:
     """
 
     host = 'http://www.artsci.utoronto.ca/current/exams/'
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.', year=None):
@@ -29,8 +27,8 @@ class UTSGExams:
             headers = {
                 'Referer': UTSGExams.host
             }
-            html = UTSGExams.s.get('%s%s' % (UTSGExams.host, p),
-                                   headers=headers).text
+            html = Scraper.get('%s%s' % (UTSGExams.host, p),
+                                   headers=headers)
             soup = BeautifulSoup(html, 'html.parser')
 
             if not soup.find('table', class_='vertical listing'):

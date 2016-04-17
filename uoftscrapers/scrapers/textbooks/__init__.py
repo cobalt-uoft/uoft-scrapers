@@ -6,10 +6,8 @@ from pprint import pprint
 from queue import Queue
 from threading import Thread, Lock
 from time import time
-import logging
 import os
 import re
-import requests
 import sys
 
 
@@ -104,9 +102,9 @@ class Textbooks:
 
     @staticmethod
     def retrieve_terms():
-        r = requests.get('%s/buy_courselisting.asp' % Textbooks.host)
+        html = Scraper.get('%s/buy_courselisting.asp' % Textbooks.host)
 
-        listing = BeautifulSoup(r.text, "html.parser")
+        listing = BeautifulSoup(html, "html.parser")
         terms = listing.find(id='fTerm').find_all('option')[1:]
 
         accepted_terms = []
@@ -138,10 +136,10 @@ class Textbooks:
                 'Referer': '%s/buy_courselisting.asp' % Textbooks.host
             }
 
-            r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+            xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
                 params=payload, headers=headers)
 
-            departments = BeautifulSoup(r.text, "xml").find_all('department')
+            departments = BeautifulSoup(xml, "xml").find_all('department')
             for department in departments:
                 all_departments.append({
                     'dept_id': department.get('id'),
@@ -168,10 +166,10 @@ class Textbooks:
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
         }
 
-        r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+        xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
             params=payload, headers=headers)
 
-        courses = BeautifulSoup(r.text, "xml").find_all('course')
+        courses = BeautifulSoup(xml, "xml").find_all('course')
         for course in courses:
             all_courses.append({
                 'course_id': course.get('id'),
@@ -196,10 +194,10 @@ class Textbooks:
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
         }
 
-        r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+        xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
             params=payload, headers=headers)
 
-        sections = BeautifulSoup(r.text, "xml").find_all('section')
+        sections = BeautifulSoup(xml, "xml").find_all('section')
         for section in sections:
             all_sections.append({
                 'section_id': section.get('id'),
@@ -224,10 +222,10 @@ class Textbooks:
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
         }
 
-        r = requests.get('%s/textbooks_xml.asp' % Textbooks.host,
+        xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
             params=payload, headers=headers)
 
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(xml, "html.parser")
         books = soup.find_all('tr', { 'class': 'book' })
 
         if books == None:

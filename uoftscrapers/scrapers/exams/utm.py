@@ -1,8 +1,7 @@
 from ..utils import Scraper
 from bs4 import BeautifulSoup
-from datetime import datetime
 from collections import OrderedDict
-import requests
+from datetime import datetime
 import pytz
 import re
 
@@ -11,7 +10,6 @@ class UTMExams:
     """A scraper for UTM exams."""
 
     host = 'https://m.utm.utoronto.ca/'
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.'):
@@ -42,8 +40,8 @@ class UTMExams:
             headers = {
                 'Referer': UTMExams.host
             }
-            html = UTMExams.s.get('%s%s' % (UTMExams.host, course),
-                                  headers=headers).text
+            html = Scraper.get('%s%s' % (UTMExams.host, course),
+                                  headers=headers)
             soup = BeautifulSoup(html, 'html.parser')
 
             course_code = soup.find('div', class_='title').text.strip()
@@ -103,8 +101,8 @@ class UTMExams:
         headers = {
             'Referer': UTMExams.host
         }
-        html = UTMExams.s.get('%s%s' % (UTMExams.host, endpoint),
-                              headers=headers).text
+        html = Scraper.get('%s%s' % (UTMExams.host, endpoint),
+                              headers=headers)
         soup = BeautifulSoup(html, 'html.parser')
         return [li.find('a')['href']
                 for li in soup.find('ul', class_='link').find_all('li')]

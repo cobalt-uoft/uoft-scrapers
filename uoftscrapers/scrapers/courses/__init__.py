@@ -3,13 +3,11 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 from queue import Queue
 from threading import Thread, Lock
-from time import time, sleep
+from time import time
 import http.cookiejar
 import json
-import logging
 import os
 import re
-import requests
 import sys
 
 
@@ -21,7 +19,6 @@ class Courses:
 
     host = 'http://coursefinder.utoronto.ca/course-search/search'
     cookies = http.cookiejar.CookieJar()
-    s = requests.Session()
     threads = 32
 
     @staticmethod
@@ -74,36 +71,9 @@ class Courses:
             'campusParam': 'St. George,Scarborough,Mississauga'
         }
 
-        # Keep trying to get data until a proper response is given
-        json = None
-        while json is None:
-            try:
-                r = Courses.s.get(url, params=data,
-                    cookies=Courses.cookies)
-                if r.status_code == 200:
-                    json = r.json()
-                else:
-                    sleep(0.5)
-            except requests.exceptions.Timeout:
-                continue
+        json = Scraper.get(url, params=data, cookies=Courses.cookies, json=True)
 
         return json['aaData']
-
-    @staticmethod
-    def get_course_html(url):
-        """Update the locally stored course pages."""
-
-        html = None
-        while html is None:
-            try:
-                r = Courses.s.get(url, cookies=Courses.cookies)
-                if r.status_code == 200:
-                    html = r.text
-            except (requests.exceptions.Timeout,
-                    requests.exceptions.ConnectionError):
-                continue
-
-        return html.encode('utf-8')
 
     @staticmethod
     def parse_course_html(course_id, html):
@@ -283,7 +253,7 @@ class CourseFinderWorker(Thread):
     def run(self):
         while True:
             course_id, url, total = self.queue.get()
-            html = Courses.get_course_html(url)
+            html = Scraper.get(url, Courses.cookies)
             course = Courses.parse_course_html(course_id, html)
 
             CourseFinderWorker.lock.acquire()
