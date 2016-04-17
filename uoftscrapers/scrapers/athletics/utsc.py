@@ -59,6 +59,7 @@ class UTSCAthletics:
                 athletics[id_] = OrderedDict([
                     ('id', id_),
                     ('date', date),
+                    ('campus', 'UTSC'),
                     ('events', events)
                 ])
 

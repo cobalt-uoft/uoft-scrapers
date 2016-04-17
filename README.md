@@ -474,6 +474,7 @@ uoftscrapers.Athletics
 {
   "id": String,
   "date": String,
+  "campus": String,
   "events":[{
     "title": String,
     "location": String,
