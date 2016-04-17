@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 from pprint import pprint
 import json
-import requests
 
 
 class Parking:
@@ -18,7 +17,6 @@ class Parking:
         'utm': 6,
         'utsc': 5
     }
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.'):

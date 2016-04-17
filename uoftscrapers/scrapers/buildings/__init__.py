@@ -5,7 +5,6 @@ from decimal import *
 import json
 import os
 import re
-import requests
 
 
 class Buildings:
@@ -16,7 +15,6 @@ class Buildings:
 
     host = 'http://map.utoronto.ca/'
     campuses = ['utsg', 'utm', 'utsc']
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.'):
@@ -82,14 +80,14 @@ class Buildings:
 
         Scraper.logger.info('Scraping %s.' % campus.upper())
 
-        Buildings.s.get(Buildings.host)
+        Scraper.get(Buildings.host)
 
         headers = { 'Referer': Buildings.host }
-        html = Buildings.s.get('%s%s%s' % (
+        html = Scraper.get('%s%s%s' % (
             Buildings.host,
             'data/map/',
             campus
-        ), headers=headers).text
+        ), headers=headers)
 
         data = json.loads(html)
         return data
@@ -98,14 +96,14 @@ class Buildings:
     def get_regions_json(campus):
         """Retrieve the JSON structure from host."""
 
-        Buildings.s.get(Buildings.host)
+        Scraper.get(Buildings.host)
 
         headers = { 'Referer': Buildings.host }
-        html = Buildings.s.get('%s%s%s' % (
+        html = Scraper.get('%s%s%s' % (
             Buildings.host,
             'data/regions/',
             campus
-        ), headers=headers).text
+        ), headers=headers)
 
         data = json.loads(html)
         return data

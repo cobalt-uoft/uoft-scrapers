@@ -41,7 +41,7 @@ class UTSGTimetable:
                     sponsor.split('.')[0]
                 ))
 
-                html = Scraper.get_html('%s/%s/%s' % (
+                html = Scraper.get('%s/%s/%s' % (
                     UTSGTimetable.host,
                     term,
                     sponsor
@@ -330,7 +330,7 @@ class UTSGTimetable:
 
     @staticmethod
     def get_sponsors(term):
-        html = Scraper.get_html('%s/%s/index.html' % (
+        html = Scraper.get('%s/%s/index.html' % (
             UTSGTimetable.host,
             term
         ))

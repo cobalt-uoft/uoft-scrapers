@@ -1,3 +1,4 @@
+from time import sleep
 import json
 import logging
 import os
@@ -27,22 +28,30 @@ class Scraper:
             json.dump(data, outfile)
 
     @staticmethod
-    def get_html(url, params=None, cookies=None, headers=None, max_attempts=10):
-        """Fetches the HTML page source, automatically retrying if it times out."""
+    def get(url, params=None, cookies=None, headers=None, json=False, max_attempts=10):
+        """Fetches an Internet document, automatically retrying if it times out."""
 
-        html = None
+        doc = None
         attempts = 0
-        while html is None and attempts < max_attempts:
+        while doc is None and attempts < max_attempts:
             try:
                 r = Scraper.s.get(url, params=params, cookies=cookies, headers=headers)
                 if r.status_code == 200:
-                    html = r.text
+                    doc = r
+                else:
+                    sleep(0.5)
             except (requests.exceptions.Timeout,
                     requests.exceptions.ConnectionError):
                 attempts += 1
                 continue
 
-        return html.encode('utf-8') if html else None
+        if doc is None:
+            return None
+
+        if json:
+            return doc.json()
+        else:
+            return doc.text.encode('utf-8')
 
     @staticmethod
     def flush_percentage(decimal):
