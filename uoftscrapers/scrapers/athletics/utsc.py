@@ -29,6 +29,7 @@ class UTSCAthletics:
         for tr in calendar.find_all('tr', class_='single-day'):
             for td in tr.find_all('td'):
                 date = td.get('data-date')
+                id_ = UTSCAthletics.get_id(date)
 
                 if not UTSCAthletics.date_in_month(date, month):
                     continue
@@ -55,13 +56,14 @@ class UTSCAthletics:
                         ('end_time', end)
                     ]))
 
-                athletics[date] = OrderedDict([
+                athletics[id_] = OrderedDict([
+                    ('id', id_),
                     ('date', date),
                     ('events', events)
                 ])
 
-        for date, doc in athletics.items():
-            Scraper.save_json(doc, location, date)
+        for id_, doc in athletics.items():
+            Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('UTSCAthletics completed.')
 
@@ -69,6 +71,11 @@ class UTSCAthletics:
     def get_month(m):
         now = datetime.now()
         return '%s-%s' % (now.year, now.month)
+
+    @staticmethod
+    def get_id(d):
+        day = datetime.strptime(d, '%Y-%m-%d').day
+        return '%s%s' % (str(day).zfill(2), 'SC')
 
     @staticmethod
     def date_in_month(d, m):

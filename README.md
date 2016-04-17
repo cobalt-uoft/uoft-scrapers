@@ -471,7 +471,8 @@ uoftscrapers.Athletics
 
 ##### Output format
 ```js
-{  
+{
+  "id": String,
   "date": String,
   "events":[{
     "title": String,
