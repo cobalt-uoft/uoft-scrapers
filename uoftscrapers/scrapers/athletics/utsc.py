@@ -49,7 +49,7 @@ class UTSCAthletics:
                     end = item.find(class_='date-display-end').get('content')
 
                     events.append(OrderedDict([
-                        ('title', title),
+                        ('title', title.replace('/ ', '/')),
                         ('location', location_),
                         ('building_id', '208'),
                         ('start_time', start),
