@@ -1,34 +1,23 @@
-from ..scraper import Scraper
+from ..utils import Scraper
 from bs4 import BeautifulSoup, NavigableString
 from datetime import datetime, date
 from collections import OrderedDict
 import urllib.parse as urlparse
 from urllib.parse import urlencode
-import requests
-import pytz
-import json
 import re
 
 class Events:
     """A scraper for Events at the University of Toronto."""
     host = 'https://www.events.utoronto.ca/'
-    s = requests.Session()
 
     @staticmethod
     def scrape(location='.'):
         Scraper.logger.info('Events initialized.')
         Scraper.ensure_location(location)
-
-        def scrape_event(doc):
-            Scraper.logger.info('Scraped event: %s ' % (
-                doc['id'],
-            ))
-            with open('%s/%s.json' % (location, doc['id']), 'w') as fp: 
-                json.dump(doc, fp)
        
         for event_link in Events.get_events_links():
             doc = Events.get_event_doc(event_link)
-            scrape_event(doc)
+            Scraper.save_json(doc, location, doc['id'])
 
         Scraper.logger.info('Events completed.')
 
@@ -45,7 +34,7 @@ class Events:
                 }
             url_parts[4] = urlencode(params)
             paging_index += 1
-            html = Events.s.get(urlparse.urlunparse(url_parts)).text
+            html = Scraper.get(urlparse.urlunparse(url_parts))
             soup = BeautifulSoup(html, 'html.parser')
             events_dom_arr = soup.select('#results')[0].find_all('li')
             events_count = len(events_dom_arr)
@@ -55,7 +44,7 @@ class Events:
     @staticmethod
     def get_event_doc(url_tail):
         event_url = Events.host + url_tail
-        html = Events.s.get(event_url).text
+        html = Scraper.get(event_url)
         url_parts = list(urlparse.urlparse(event_url))
         query = dict(urlparse.parse_qsl(url_parts[4]))
         soup = BeautifulSoup(html, 'html.parser')
