@@ -591,11 +591,11 @@ https://m.utm.utoronto.ca/shuttle.php
 
 ------
 
-### UTEvents
+### Events
 
 ##### Class name
 ```python
-uoftscrapers.UTEvents
+uoftscrapers.Events
 ```
 
 ##### Scraper source
