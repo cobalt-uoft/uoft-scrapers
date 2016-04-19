@@ -72,7 +72,7 @@ class Events:
         event_url = evt_bar.select('dd')[1].a['href']
         event_price = evt_bar.select('dl')[1].dd.text
 
-        event_campus = 'Off Campus'
+        event_campus = ''
         if evt_bar.select('dd')[0].b != None:
             event_campus = evt_bar.select('dd')[0].b.text
 
@@ -109,7 +109,7 @@ class Events:
             ('description', event_description),
             ('admission_price', event_price),
             ('campus', event_campus),
-            ('address', event_address),
+            ('location', event_address),
             ('audiences', event_audiences),
         ])
         return doc

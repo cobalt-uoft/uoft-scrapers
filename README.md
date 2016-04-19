@@ -614,7 +614,7 @@ https://www.events.utoronto.ca/
   description: String,
   admission_price: String,
   campus: String,
-  address: String,
+  location: String,
   audiences: [String],
 }
 ```
