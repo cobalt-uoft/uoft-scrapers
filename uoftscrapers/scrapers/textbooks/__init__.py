@@ -93,8 +93,8 @@ class Textbooks:
             book['courses'] = sorted(book['courses'], key=itemgetter('id'))
             for i in range(len(book['courses'])):
                 book['courses'][i]['meeting_sections'] = \
-                sorted(book['courses'][i]['meeting_sections'],
-                    key=itemgetter('code'))
+                    sorted(book['courses'][i]['meeting_sections'],
+                           key=itemgetter('code'))
 
             Scraper.save_json(book, location, book['id'])
 
@@ -111,7 +111,7 @@ class Textbooks:
         for term in terms:
             val = term.get_text()
             if val.startswith('ST GEORGE') or val.startswith('MISSISSAUGA') \
-                or val.startswith('SCARBOROUGH'):
+                    or val.startswith('SCARBOROUGH'):
                 accepted_terms.append(term)
 
         return accepted_terms
@@ -137,7 +137,7 @@ class Textbooks:
             }
 
             xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-                params=payload, headers=headers)
+                              params=payload, headers=headers)
 
             departments = BeautifulSoup(xml, "xml").find_all('department')
             for department in departments:
@@ -148,7 +148,8 @@ class Textbooks:
                     'session': session
                 })
 
-            Scraper.logger.info('Retreived department info from %s.' % term_name)
+            Scraper.logger.info(
+                'Retreived department info from %s.' % term_name)
 
         return all_departments
 
@@ -167,7 +168,7 @@ class Textbooks:
         }
 
         xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-            params=payload, headers=headers)
+                          params=payload, headers=headers)
 
         courses = BeautifulSoup(xml, "xml").find_all('course')
         for course in courses:
@@ -195,7 +196,7 @@ class Textbooks:
         }
 
         xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-            params=payload, headers=headers)
+                          params=payload, headers=headers)
 
         sections = BeautifulSoup(xml, "xml").find_all('section')
         for section in sections:
@@ -223,10 +224,10 @@ class Textbooks:
         }
 
         xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-            params=payload, headers=headers)
+                          params=payload, headers=headers)
 
         soup = BeautifulSoup(xml, "html.parser")
-        books = soup.find_all('tr', { 'class': 'book' })
+        books = soup.find_all('tr', {'class': 'book'})
 
         if books == None:
             done += 1

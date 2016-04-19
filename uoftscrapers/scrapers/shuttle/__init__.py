@@ -32,7 +32,8 @@ class Shuttle:
         month = now.strftime('%m') if month is None else str(month).zfill(2)
         days = monthrange(int(year), int(month))[1]
 
-        Scraper.logger.info('Fetching schedules for {0}-{1}-01 to {0}-{1}-{2}.'.format(year, month, days))
+        Scraper.logger.info(
+            'Fetching schedules for {0}-{1}-01 to {0}-{1}-{2}.'.format(year, month, days))
 
         for day in range(1, days + 1):
             html = Scraper.get(Shuttle.host % (year, month, day))
@@ -49,7 +50,8 @@ class Shuttle:
         soup = BeautifulSoup(html, 'html.parser')
 
         # Get date
-        date = time.strftime('%Y-%m-%d', time.strptime(soup.find('h2').get_text().strip(), '%b %d %Y'))
+        date = time.strftime(
+            '%Y-%m-%d', time.strptime(soup.find('h2').get_text().strip(), '%b %d %Y'))
 
         # Get route data
         routes = {}
@@ -65,7 +67,8 @@ class Shuttle:
                 times = []
                 for _route_time in _route_times:
                     _route_time_text = _route_time.get_text().strip().lower()
-                    _route_time_clean = re.sub('\*.*\*', '', _route_time_text).strip()
+                    _route_time_clean = re.sub(
+                        '\*.*\*', '', _route_time_text).strip()
 
                     time_rush_hour = 'rush hour' in _route_time_text
                     time_no_overload = 'no overload' in _route_time_text
@@ -73,7 +76,8 @@ class Shuttle:
                     times.append(OrderedDict([
                         ('time', '%sT%s:00-04:00' % (
                             date,
-                            time.strftime('%H:%M %p', time.strptime(_route_time_clean, '%I:%M %p'))[:-3]
+                            time.strftime('%H:%M %p', time.strptime(
+                                _route_time_clean, '%I:%M %p'))[:-3]
                         )),
                         ('rush_hour', time_rush_hour),
                         ('no_overload', time_no_overload)

@@ -28,7 +28,7 @@ class UTSGExams:
                 'Referer': UTSGExams.host
             }
             html = Scraper.get('%s%s' % (UTSGExams.host, p),
-                                   headers=headers)
+                               headers=headers)
             soup = BeautifulSoup(html, 'html.parser')
 
             if not soup.find('table', class_='vertical listing'):

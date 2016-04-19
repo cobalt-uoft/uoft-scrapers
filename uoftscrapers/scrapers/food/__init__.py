@@ -28,7 +28,7 @@ class Food:
                 building_id = LayersScraper.get_value(entry, 'building_code')
 
                 address = ' '.join(filter(None,
-                    LayersScraper.get_value(entry, 'address').split()))
+                                          LayersScraper.get_value(entry, 'address').split()))
 
                 hours = Food.get_hours(id_)
                 short_name = LayersScraper.get_value(entry, 'slug')
@@ -38,7 +38,7 @@ class Food:
                     'html.parser').text
 
                 tags = list(filter(None,
-                    LayersScraper.get_value(entry, 'tags').lower().split(', ')))
+                                   LayersScraper.get_value(entry, 'tags').lower().split(', ')))
 
                 image = LayersScraper.get_value(entry, 'image')
                 lat = LayersScraper.get_value(entry, 'lat', True)
@@ -85,7 +85,7 @@ class Food:
 
             # for mistyped times (i.e. http://map.utoronto.ca/json/hours/1329)
             if t[0] == ':':
-                time = time[1:len(time)-2] + ':' + time[-2:]
+                time = time[1:len(time) - 2] + ':' + time[-2:]
 
             m = 0
             if ':' in time:
@@ -100,7 +100,7 @@ class Food:
             'Referer': Food.host
         }
         html = Scraper.get('%s%s%s' % (Food.host, 'json/hours/', food_id),
-            headers=headers)
+                           headers=headers)
         soup = BeautifulSoup(html, 'html.parser')
 
         hours = OrderedDict()

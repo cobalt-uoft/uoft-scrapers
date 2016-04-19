@@ -170,7 +170,7 @@ class Courses:
                     times.append(raw_times[i] + " " + raw_times[i + 1])
 
                 instructors = BeautifulSoup(str(tds[2]).replace("<br>", "\n"),
-                    "html.parser")
+                                            "html.parser")
                 instructors = instructors.get_text().split("\n")
                 instructors = \
                     list(filter(None, [x.strip() for x in instructors]))
@@ -197,7 +197,7 @@ class Courses:
 
                     for i in range(len(hours)):
                         x = hours[i].split(':')
-                        hours[i] = int(x[0]) + (int(x[1])/60)
+                        hours[i] = int(x[0]) + (int(x[1]) / 60)
 
                     time_data.append(OrderedDict([
                         ("day", day),

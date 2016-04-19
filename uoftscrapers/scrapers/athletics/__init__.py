@@ -5,6 +5,7 @@ from .utsc import UTSCAthletics
 
 
 class Athletics:
+
     @staticmethod
     def scrape(location='.'):
         Scraper.logger.info('Athletics initialized.')
