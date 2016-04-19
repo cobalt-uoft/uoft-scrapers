@@ -61,7 +61,7 @@ class UTEvents:
         soup = BeautifulSoup(html, 'html.parser')
 
         event_id = query['eventid']
-        event_title = soup.select('.eventTitle')[0].text
+        event_title = soup.select('.eventTitle')[0].text.strip()
         raw_time = soup.select('.date')[0].text.split(',')
         
         date_arr = raw_time[0].split(' - ')
@@ -94,6 +94,7 @@ class UTEvents:
         for content in address_block.contents:
             text = content if type(content) == NavigableString else content.text
             event_address += text.strip().replace('\r', '') + ' '
+        event_address = event_address.strip()
 
         event_audiences = list(map(lambda a: a.text, 
             evt_bar.select('dl')[1].select('dd')[1].select('a')))
@@ -106,6 +107,7 @@ class UTEvents:
         for content in soup.select('#content')[0].contents:
             text = content if type(content) == NavigableString else content.text
             event_description += text.strip().replace('\r', '') + ' '
+        event_description = event_description.strip()
 
         doc = OrderedDict([
             ('id', event_id),
