@@ -36,6 +36,7 @@ from .scrapers.shuttle import Shuttle
 
 from .scrapers.events import Events
 
+from .scrapers.libraries import Libraries
 
 class NullHandler(logging.Handler):
     def emit(self, record):
