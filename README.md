@@ -29,6 +29,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
     - [UTSC Athletics](#utsc-athletics)
   - [Parking](#parking)
   - [Shuttle Bus Schedule](#shuttle)
+  - [Events](#events)
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.5.1)
