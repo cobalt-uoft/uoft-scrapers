@@ -588,3 +588,33 @@ https://m.utm.utoronto.ca/shuttle.php
   }]
 }
 ```
+
+------
+
+### Events
+
+##### Class name
+```python
+uoftscrapers.Events
+```
+
+##### Scraper source
+https://www.events.utoronto.ca/
+
+##### Output format
+```js
+{
+  id: String,
+  title: String,
+  start_date: String
+  end_date: String,
+  start_time: String,
+  end_time: String,
+  url: String,
+  description: String,
+  admission_price: String,
+  campus: String,
+  location: String,
+  audiences: [String],
+}
+```

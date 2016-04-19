@@ -34,6 +34,8 @@ from .scrapers.parking import Parking
 
 from .scrapers.shuttle import Shuttle
 
+from .scrapers.events import Events
+
 
 class NullHandler(logging.Handler):
     def emit(self, record):
