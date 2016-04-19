@@ -11,6 +11,8 @@ class Events:
     """A scraper for Events at the University of Toronto."""
     host = 'https://www.events.utoronto.ca/'
 
+    campuses_tags = {'St. George': 'UTSG', 'U of T Mississauga': 'UTM', 'U of T Scarborough': 'UTSC'}
+
     @staticmethod
     def scrape(location='.'):
         Scraper.logger.info('Events initialized.')
@@ -78,7 +80,8 @@ class Events:
 
         event_campus = ''
         if evt_bar.select('dd')[0].b is not None:
-            event_campus = evt_bar.select('dd')[0].b.text
+            campus_full_name = evt_bar.select('dd')[0].b.text
+            event_campus = Events.campuses_tags[campus_full_name]
 
         event_address = ''
         address_block = evt_bar.select('dd')[0]
