@@ -2,7 +2,6 @@ from ..utils import Scraper, LayersScraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from decimal import *
-import json
 import os
 import re
 
@@ -83,13 +82,12 @@ class Buildings:
         Scraper.get(Buildings.host)
 
         headers = {'Referer': Buildings.host}
-        html = Scraper.get('%s%s%s' % (
+        data = Scraper.get('%s%s%s' % (
             Buildings.host,
             'data/map/',
             campus
-        ), headers=headers)
+        ), headers=headers, json=True)
 
-        data = json.loads(html)
         return data
 
     @staticmethod
@@ -99,11 +97,10 @@ class Buildings:
         Scraper.get(Buildings.host)
 
         headers = {'Referer': Buildings.host}
-        html = Scraper.get('%s%s%s' % (
+        data = Scraper.get('%s%s%s' % (
             Buildings.host,
             'data/regions/',
             campus
-        ), headers=headers)
+        ), headers=headers, json=True)
 
-        data = json.loads(html)
         return data
