@@ -41,7 +41,7 @@ class UTMExams:
                 'Referer': UTMExams.host
             }
             html = Scraper.get('%s%s' % (UTMExams.host, course),
-                                  headers=headers)
+                               headers=headers)
             soup = BeautifulSoup(html, 'html.parser')
 
             course_code = soup.find('div', class_='title').text.strip()
@@ -102,7 +102,7 @@ class UTMExams:
             'Referer': UTMExams.host
         }
         html = Scraper.get('%s%s' % (UTMExams.host, endpoint),
-                              headers=headers)
+                           headers=headers)
         soup = BeautifulSoup(html, 'html.parser')
         return [li.find('a')['href']
                 for li in soup.find('ul', class_='link').find_all('li')]
@@ -135,7 +135,7 @@ class UTMExams:
     @staticmethod
     def get_course_id(course_code, date):
         d = datetime.strptime(date, '%Y-%m-%d')
-        month, year, period = d.strftime("%b").lower(), d.year, UTMExams.get_period(date)
+        month, year, period = d.strftime('%b').lower(), d.year, UTMExams.get_period(date)
         endings = {
             'dec': {
                 'F': '%s9' % str(year),
@@ -176,7 +176,8 @@ class UTMExams:
     def parse_time(start, end, date):
         def convert_time(t):
             h, m, s = [int(x) for x in t.split(':')]
-            d = datetime.strptime('%s %s %s %s' % (date, h, m, s), '%Y-%m-%d %H %M %S')
+            d = datetime.strptime('%s %s %s %s' % (date, h, m, s),
+                                  '%Y-%m-%d %H %M %S')
             return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
 
         return convert_time(start), convert_time(end)

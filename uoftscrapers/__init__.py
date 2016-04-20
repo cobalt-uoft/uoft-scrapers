@@ -38,6 +38,7 @@ from .scrapers.events import Events
 
 
 class NullHandler(logging.Handler):
+
     def emit(self, record):
         pass
 

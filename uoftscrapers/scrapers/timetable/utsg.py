@@ -93,15 +93,15 @@ class UTSGTimetable:
 
             if len(tds) >= 9:
                 course_code = UTSGTimetable.format_data(tds[0].get_text(),
-                    '([A-Z]{3}[0-9]{3}[HY]1)')
+                                                        '([A-Z]{3}[0-9]{3}[HY]1)')
 
                 if len(course_code) > 0:
                     course_info.append(current_course)
 
                     current_course = [
-                        None,            # course code
-                        None,            # name
-                        OrderedDict([]), # sections
+                        None,             # course code
+                        None,             # name
+                        OrderedDict([]),  # sections
                         []
                     ]
 
@@ -112,17 +112,17 @@ class UTSGTimetable:
                     current_course[1] = name
 
                 section = UTSGTimetable.format_data(tds[3].get_text(),
-                    '([LTP][0-9]{4})')
+                                                    '([LTP][0-9]{4})')
 
                 if len(section) > 0:
                     current_section = section
 
                 time = UTSGTimetable.format_data(tds[5].get_text(),
-                    '([MTWRFS]{1,3}[0-9]{1,2}(?::[0-9]' +
-                    '{2})?(?:-[0-9]{1,2}(?::[0-9]{2})?)?)')
+                                                 '([MTWRFS]{1,3}[0-9]{1,2}(?::[0-9]' +
+                                                 '{2})?(?:-[0-9]{1,2}(?::[0-9]{2})?)?)')
 
                 location = UTSGTimetable.format_data(tds[6].get_text(),
-                    '([A-Z]{2,4}[ ]?[0-9]{1,8})')
+                                                     '([A-Z]{2,4}[ ]?[0-9]{1,8})')
 
                 instructors = tds[7].get_text().strip()
 
@@ -132,7 +132,8 @@ class UTSGTimetable:
                 if len(instructors) > 0:
                     instructors = instructors.split('/')
                     for i in range(len(instructors)):
-                        instructors[i] = ' '.join([x.strip() for x in instructors[i].split('.')])
+                        instructors[i] = ' '.join(
+                            [x.strip() for x in instructors[i].split('.')])
                 else:
                     instructors = []
 
@@ -152,37 +153,37 @@ class UTSGTimetable:
                 if tds[0].get('colspan') == '6':
                     course_code = \
                         UTSGTimetable.format_data(tds[0].get_text(),
-                            '([A-Z]{3}[0-9]{3}[HY]{1}1[YFS]{1})')
+                                                  '([A-Z]{3}[0-9]{3}[HY]{1}1[YFS]{1})')
                     breadths = [int(x) for x in
                                 re.findall('(?:\()([12345])(?:\))',
-                                tds[0].get_text().strip())]
+                                           tds[0].get_text().strip())]
                     name = ''.join(tds[0].get_text()
-                        .replace('Categories ', ':')
-                        .replace('Categories:', ':')
-                        .split(':')[1:]).split(', Count')[0].strip()
+                                   .replace('Categories ', ':')
+                                   .replace('Categories:', ':')
+                                   .split(':')[1:]).split(', Count')[0].strip()
 
                     if len(course_code) > 0:
                         course_info.append(current_course)
                         current_course = [
                             course_code,     # course code
                             name,            # name
-                            OrderedDict([]), # sections
+                            OrderedDict([]),  # sections
                             breadths
                         ]
                 else:
                     section = UTSGTimetable.format_data(tds[0].get_text(),
-                        '([LTP][0-9]{4})')
+                                                        '([LTP][0-9]{4})')
 
                     if len(section) > 0:
                         current_section = section
 
                     time = UTSGTimetable.format_data(tds[3].get_text(),
-                        '([MTWRFS]{1,3}[0-9]{1,2}' +
-                        '(?::[0-9]{2})?(?:-[0-9]{1,2}' +
-                        '(?::[0-9]{2})?)?)')
+                                                     '([MTWRFS]{1,3}[0-9]{1,2}' +
+                                                     '(?::[0-9]{2})?(?:-[0-9]{1,2}' +
+                                                     '(?::[0-9]{2})?)?)')
 
                     location = UTSGTimetable.format_data(tds[4].get_text(),
-                        '([A-Z]{2,4}[ ]?[0-9]{1,8})')
+                                                         '([A-Z]{2,4}[ ]?[0-9]{1,8})')
 
                     instructors = tds[5].get_text().strip()
 
@@ -198,7 +199,7 @@ class UTSGTimetable:
 
                     try:
                         if not isinstance(current_course[2][current_section],
-                            list):
+                                          list):
                             current_course[2][current_section] = []
                     except KeyError:
                         current_course[2][current_section] = []

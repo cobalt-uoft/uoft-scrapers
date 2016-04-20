@@ -35,7 +35,7 @@ class Buildings:
                 lng = LayersScraper.get_value(building, 'lng', True)
 
                 street = ' '.join(filter(None,
-                    LayersScraper.get_value(building, 'street').split(' ')))
+                                         LayersScraper.get_value(building, 'street').split(' ')))
                 city = LayersScraper.get_value(building, 'city')
                 province = LayersScraper.get_value(building, 'province')
                 country = LayersScraper.get_value(building, 'country')
@@ -82,7 +82,7 @@ class Buildings:
 
         Scraper.get(Buildings.host)
 
-        headers = { 'Referer': Buildings.host }
+        headers = {'Referer': Buildings.host}
         html = Scraper.get('%s%s%s' % (
             Buildings.host,
             'data/map/',
@@ -98,7 +98,7 @@ class Buildings:
 
         Scraper.get(Buildings.host)
 
-        headers = { 'Referer': Buildings.host }
+        headers = {'Referer': Buildings.host}
         html = Scraper.get('%s%s%s' % (
             Buildings.host,
             'data/regions/',

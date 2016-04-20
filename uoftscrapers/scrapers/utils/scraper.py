@@ -24,7 +24,7 @@ class Scraper:
     def save_json(data, location, filename):
         Scraper.ensure_location(location)
 
-        with open('%s/%s.json' % (location, filename),'w+') as outfile:
+        with open('%s/%s.json' % (location, filename), 'w+') as outfile:
             json.dump(data, outfile)
 
     @staticmethod
@@ -35,7 +35,8 @@ class Scraper:
         attempts = 0
         while doc is None and attempts < max_attempts:
             try:
-                r = Scraper.s.get(url, params=params, cookies=cookies, headers=headers)
+                r = Scraper.s.get(url, params=params,
+                                  cookies=cookies, headers=headers)
                 if r.status_code == 200:
                     doc = r
                 else:

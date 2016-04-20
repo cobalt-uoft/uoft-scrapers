@@ -95,7 +95,8 @@ class UTSCExams:
     @staticmethod
     def get_course_id(course_code, date):
         d = datetime.strptime(date, '%Y-%m-%d')
-        month, year, period = d.strftime("%b").lower(), d.year, UTSCExams.get_period(date)
+        month, year, period = d.strftime(
+            "%b").lower(), d.year, UTSCExams.get_period(date)
         endings = {
             'dec': {
                 'F': '%s9' % str(year),
