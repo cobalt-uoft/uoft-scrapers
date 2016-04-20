@@ -10,7 +10,6 @@ class LayersScraper:
     """
 
     host = 'http://map.utoronto.ca/'
-    s = requests.Session()
 
     @staticmethod
     def get_layers_json(campus):
@@ -18,16 +17,13 @@ class LayersScraper:
 
         Scraper.logger.info('Retrieving map layers for %s.' % campus.upper())
 
-        headers = {
-            'Referer': LayersScraper.host
-        }
-        html = LayersScraper.s.get('%s%s%s' % (
+        headers = {'Referer': LayersScraper.host}
+        data = Scraper.get('%s%s%s' % (
             LayersScraper.host,
             'data/map/',
             campus
-        ), headers=headers).text
+        ), headers=headers, json=True)
 
-        data = json.loads(html)
         return data['layers']
 
     @staticmethod

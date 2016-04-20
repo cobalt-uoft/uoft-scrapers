@@ -28,10 +28,15 @@ class UTSGExams:
                 'Referer': UTSGExams.host
             }
             html = Scraper.get('%s%s' % (UTSGExams.host, p),
-                               headers=headers)
-            soup = BeautifulSoup(html, 'html.parser')
+                               headers=headers,
+                               max_attempts=3)
 
-            if not soup.find('table', class_='vertical listing'):
+            try:
+                soup = BeautifulSoup(html, 'html.parser')
+            except TypeError:
+                soup = None
+
+            if not (html and soup and soup.find(class_='vertical listing')):
                 # no exam data available
                 Scraper.logger.info('No %s exams.' % p.upper())
                 continue
