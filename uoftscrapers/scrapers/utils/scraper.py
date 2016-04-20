@@ -41,6 +41,7 @@ class Scraper:
                     doc = r
                 else:
                     sleep(0.5)
+                    attempts += 1
             except (requests.exceptions.Timeout,
                     requests.exceptions.ConnectionError):
                 attempts += 1
