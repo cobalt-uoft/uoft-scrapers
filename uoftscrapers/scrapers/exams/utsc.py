@@ -26,14 +26,13 @@ class UTSCExams:
             for tr in table.find_all('tr')[1:]:
                 data = [x.text.strip() for x in tr.find_all('td')]
 
-                course_code = data[0]
+                course_code, lecture_code = data[0], None
                 if ' ' in course_code:
                     course_code, lecture_code = course_code.split(' ')
-                else:
-                    lecture_code = None
 
                 date = data[1]
                 start, end = UTSCExams.parse_time(data[2], data[3], date)
+
                 location_ = data[4]
 
                 id_, course_id = UTSCExams.get_course_id(course_code, date)
@@ -58,10 +57,11 @@ class UTSCExams:
                 if id_ not in exams:
                     exams[id_] = doc
 
-                exams[id_]['sections'].append({
-                    'section': lecture_code or '',
-                    'location': location_
-                })
+                exams[id_]['sections'].append(OrderedDict([
+                    ('lecture_code', lecture_code or ''),
+                    ('exam_section', ''),
+                    ('location', location_)
+                ]))
 
         for id_, doc in exams.items():
             Scraper.save_json(doc, location, id_)
