@@ -79,6 +79,7 @@ class UTMExams:
                 ('id', id_),
                 ('course_id', course_id),
                 ('course_code', course_code),
+                ('campus', 'UTM'),
                 ('period', period),
                 ('date', date),
                 ('start_time', start),

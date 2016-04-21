@@ -47,6 +47,7 @@ class UTSCExams:
                     ('id', id_),
                     ('course_id', course_id),
                     ('course_code', course_code),
+                    ('campus', 'UTSC'),
                     ('period', period),
                     ('date', date),
                     ('start_time', start),
