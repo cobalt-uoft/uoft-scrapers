@@ -405,7 +405,8 @@ uoftscrapers.Exams
   "start_time": String,
   "end_time": String,
   "sections": [{
-    "section": String,
+    "lecture_code": String,
+    "exam_section": String,
     "location": String
   }]
 }

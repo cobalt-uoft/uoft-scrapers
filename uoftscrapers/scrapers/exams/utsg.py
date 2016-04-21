@@ -50,7 +50,19 @@ class UTSGExams:
                 if id_ is None:
                     continue
 
-                section, location_ = data[1], data[4]
+                section = data[1]
+
+                lecture_section = exam_section = None
+
+                if '  ' in section:
+                    lecture_section, exam_section = section.split('  ')
+                elif '-' in section:
+                    exam_section = section
+                else:
+                    lecture_section = section
+
+                location_ = data[4]
+
                 date_ = UTSGExams.parse_date(data[2], p[-2:]) or ''
                 start, end = UTSGExams.parse_time(data[3], date_) or (0, 0)
 
@@ -58,6 +70,7 @@ class UTSGExams:
                     ('id', id_),
                     ('course_id', course_id),
                     ('course_code', course_code),
+                    ('campus', 'UTSG'),
                     ('period', p.upper()),
                     ('date', date_),
                     ('start_time', start),
@@ -69,7 +82,8 @@ class UTSGExams:
                     exams[id_] = doc
 
                 exams[id_]['sections'].append(OrderedDict([
-                    ('section', section),
+                    ('lecture_code', lecture_section or ''),
+                    ('exam_section', exam_section or ''),
                     ('location', location_)
                 ]))
 

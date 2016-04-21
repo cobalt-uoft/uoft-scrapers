@@ -45,12 +45,11 @@ class UTMExams:
             soup = BeautifulSoup(html, 'html.parser')
 
             course_code = soup.find('div', class_='title').text.strip()
+            lecture_code = None
 
             # some course names include lecture code (see CHI200Y5Y)
             if ' ' in course_code:
                 course_code, lecture_code = course_code.split(' ')
-            else:
-                lecture_code = None
 
             data = [br.previous_sibling.string.strip()
                     for br in soup.find('div', class_='info').find_all('br')]
@@ -71,14 +70,14 @@ class UTMExams:
                         for room in [x for x in data[3:] if 'Room:' in x]]
 
             # append lecture code to section range if it exists
-            if lecture_code:
-                sections[0]['section'] = '%s %s' % (lecture_code,
-                                                    sections[0]['section'])
+            for i in range(len(sections)):
+                sections[i]['lecture'] = lecture_code or ''
 
             doc = OrderedDict([
                 ('id', id_),
                 ('course_id', course_id),
                 ('course_code', course_code),
+                ('campus', 'UTM'),
                 ('period', period),
                 ('date', date),
                 ('start_time', start),
@@ -90,10 +89,11 @@ class UTMExams:
                 exams[id_] = doc
 
             for section in sections:
-                exams[id_]['sections'].append({
-                    'section': section['section'].strip(),
-                    'locaton': section['room']
-                })
+                exams[id_]['sections'].append(OrderedDict([
+                    ('lecture_code', section['lecture']),
+                    ('exam_section', section['section']),
+                    ('location', section['room'])
+                ]))
         return exams
 
     @staticmethod
