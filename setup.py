@@ -21,7 +21,7 @@ setup(
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
-    url = 'https://github.com/cobalt-io/uoft-scrapers',
+    url = 'https://github.com/cobalt-uoft/uoft-scrapers',
     download_url = 'https://github.com/cobalt-uoft/uoft-scrapers/tarball/0.4.5',
     package_data = {'': ['LICENSE.md']},
     package_dir = {'uoftscrapers': 'uoftscrapers'},
