@@ -1,8 +1,8 @@
 from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from datetime import datetime, date
-import pytz
+from datetime import datetime
+from pytz import timezone
 
 
 class UTSGExams:
@@ -63,8 +63,8 @@ class UTSGExams:
 
                 location_ = data[4]
 
-                date_ = UTSGExams.parse_date(data[2], p[-2:]) or ''
-                start, end = UTSGExams.parse_time(data[3], date_) or (0, 0)
+                date = UTSGExams.parse_date(data[2], p[-2:]) or ''
+                start, end = UTSGExams.parse_time(data[3], date) or (0, 0)
 
                 doc = OrderedDict([
                     ('id', id_),
@@ -72,7 +72,7 @@ class UTSGExams:
                     ('course_code', course_code),
                     ('campus', 'UTSG'),
                     ('period', p.upper()),
-                    ('date', date_),
+                    ('date', date),
                     ('start_time', start),
                     ('end_time', end),
                     ('sections', [])
@@ -124,14 +124,14 @@ class UTSGExams:
         return exam_id, course_id, course_code
 
     @staticmethod
-    def parse_date(date_, year):
+    def parse_date(date, year):
         """Convert date of form `D DD MMM` to ISO 8601 format."""
 
-        date_ = date_.split(' ')
-        if len(date_) == 3:
-            day, date_, month = date_
+        date = date.split(' ')
+        if len(date) == 3:
+            day, date, month = date
 
-            return datetime.strptime('%s %s %s %s' % (day, date_, month, year),
+            return datetime.strptime('%s %s %s %s' % (day, date, month, year),
                                      '%a %d %b %y').date().isoformat()
 
     @staticmethod
@@ -142,9 +142,8 @@ class UTSGExams:
             """Convert time from `HH:MM` to an ISO 8601 datetime."""
             h, m = [int(x) for x in t.split(':')]
             h += 12 if is_pm else 0
-
-            date_ = datetime.strptime('%s %s %s' % (d, h, m), '%Y-%m-%d %H %M')
-            return date_.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
+            dt = datetime.strptime('%s %s %s' % (d, h, m), '%Y-%m-%d %H %M')
+            return timezone('US/Eastern').localize(dt).isoformat()
 
         time = list(filter(None, time.replace('-', '').split(' ')))
         if len(time) == 3:
@@ -156,7 +155,7 @@ class UTSGExams:
     @staticmethod
     def get_exam_periods(year):
         if not year:
-            year = date.today().year
+            year = datetime.today().year
 
         periods = []
         for m in ('dec', 'apr', 'june', 'aug'):

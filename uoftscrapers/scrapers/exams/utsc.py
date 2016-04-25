@@ -2,7 +2,7 @@ from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from datetime import datetime
-import pytz
+from pytz import timezone
 
 
 class UTSCExams:
@@ -130,6 +130,7 @@ class UTSCExams:
     def parse_time(start, end, date):
         def convert_time(t):
             h, m = [int(x) for x in t.split(':')]
-            d = datetime.strptime('%s %s %s' % (date, h, m), '%Y-%m-%d %H %M')
-            return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
+            dt = datetime.strptime('%s %s %s' % (date, h, m), '%Y-%m-%d %H %M')
+            return timezone('US/Eastern').localize(dt).isoformat()
+
         return convert_time(start), convert_time(end)
