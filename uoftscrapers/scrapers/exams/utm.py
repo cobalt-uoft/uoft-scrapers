@@ -2,7 +2,7 @@ from ..utils import Scraper
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from datetime import datetime
-import pytz
+from pytz import timezone
 import re
 
 
@@ -176,8 +176,8 @@ class UTMExams:
     def parse_time(start, end, date):
         def convert_time(t):
             h, m, s = [int(x) for x in t.split(':')]
-            d = datetime.strptime('%s %s %s %s' % (date, h, m, s),
-                                  '%Y-%m-%d %H %M %S')
-            return d.replace(tzinfo=pytz.timezone('US/Eastern')).isoformat()
+            dt = datetime.strptime('%s %s %s %s' % (date, h, m, s),
+                                   '%Y-%m-%d %H %M %S')
+            return timezone('US/Eastern').localize(dt).isoformat()
 
         return convert_time(start), convert_time(end)
