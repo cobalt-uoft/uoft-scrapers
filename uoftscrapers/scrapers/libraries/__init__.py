@@ -87,6 +87,7 @@ class Libraries:
             main_content = main_content[0]
 
         library_name = main_content.h1.extract().text
+
         library_image = ''
         if main_content.img is not None:
             library_image = main_content.img.extract()['src']
@@ -146,5 +147,4 @@ class Libraries:
             ('collection_strenghts', library_collection_strenghts),
             ('access', library_how_to_access)
         ])
-
         return doc
