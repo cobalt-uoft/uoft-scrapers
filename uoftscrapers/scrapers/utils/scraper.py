@@ -42,7 +42,8 @@ class Scraper:
                     attempts += 1
                     sleep(0.5)
             except (requests.exceptions.Timeout,
-                    requests.exceptions.ConnectionError):
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.InvalidSchema):
                 attempts += 1
                 continue
 
