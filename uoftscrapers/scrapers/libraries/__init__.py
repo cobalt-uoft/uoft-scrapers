@@ -1,6 +1,5 @@
 from ..utils import Scraper
 from bs4 import BeautifulSoup, NavigableString, Comment
-from datetime import datetime, date
 from collections import OrderedDict
 
 
@@ -16,10 +15,12 @@ class Libraries:
         for library_link in Libraries.get_library_link():
             doc = Libraries.get_library_doc(library_link)
             if (doc is not None):
-                Scraper.save_json(doc, location, library_link.split('/')[-1])
+                Scraper.save_json(
+                    doc, location, library_link.split('/')[-1].upper())
             else:
                 # Not a real library page
-                Scraper.logger.info('Skipped: ' + library_link.split('/')[-1])
+                Scraper.logger.info(
+                    'Skipped: ' + library_link.split('/')[-1].upper())
         Scraper.logger.info('Libraries completed.')
 
     @staticmethod
@@ -54,24 +55,54 @@ class Libraries:
         return paragraph
 
     @staticmethod
+    def convert_time(time_str):
+        end = len(time_str)
+        if 'am' in time_str:
+            end = time_str.index('am') + 2
+        elif 'pm' in time_str:
+            end = time_str.index('pm') + 2
+        time_str = time_str[:end]
+        hour_tks = time_str[:-2].split(':')
+        meridiem = time_str[-2:]
+
+        hours = '%02d' % int(hour_tks[0])
+        minutes = '00'
+        if len(hour_tks) > 1:
+            minutes = '%02d' % int(hour_tks[1])
+        if (meridiem == 'pm'):
+            hours = '%02d' % int(hours)
+        decimal_time_string = hours + '.' + minutes
+        return decimal_time_string
+
+    @staticmethod
     def get_library_hours(calendar_link):
-        weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        weekdays = ['sunday', 'monday', 'tuesday', 'wednesday',
+                    'thursday', 'friday', 'saturday']
+
         html = Scraper.get(calendar_link, max_attempts=5)
-        week = []
-        if html is None:
-            week = ['Hours are not available, please contact the library.'] * 7
-        else:
+        week = ['Closed'] * 7
+        if html is not None:
             soup = BeautifulSoup(html, 'html.parser')
             if soup.select('.calendar-wrapper') != []:
                 week = soup.select('.calendar-wrapper')[0].select(
                     '.start-week')[1].select('.start-day')
                 week = list(map(Libraries.normalize_text_sections, week))
-            else:
-                week = ['Hours are not available, login required.'] * 7
         hours = OrderedDict()
+        week = [day[1:].strip() for day in week]
         for day in range(len(weekdays)):
             hour = week[day]
-            hours[weekdays[day]] = hour
+            closed = not hour.startswith('Open')
+            opening_hour = '00.00'
+            closing_hour = '00.00'
+            if not closed:
+                hour_tks = hour.replace('Open:', '').split('-')
+                opening_hour = Libraries.convert_time(hour_tks[0])
+                closing_hour = Libraries.convert_time(hour_tks[1])
+            hours[weekdays[day]] = OrderedDict([
+                ('closed', closed),
+                ('open', opening_hour),
+                ('close', closing_hour)
+            ])
         return hours
 
     @staticmethod
@@ -99,8 +130,6 @@ class Libraries:
 
         library_hours_link = main_content.a['href']
         library_hours = Libraries.get_library_hours(library_hours_link)
-        for day, hour in library_hours.items():
-            library_hours[day] = hour[1:].strip()
 
         library_address = ''
         if main_content.select('.library-address') != []:
@@ -124,14 +153,14 @@ class Libraries:
             map(Libraries.normalize_text_sections, library_info_texts))
 
         library_about = ''
-        library_collection_strenghts = ''
+        library_collection_strengths = ''
         library_how_to_access = ''
 
         for i in range(len(library_info_titles)):
             if library_info_titles[i] == 'About the library':
                 library_about = library_info_texts[i]
             elif library_info_titles[i] == 'Collection strengths':
-                library_collection_strenghts = library_info_texts[i].replace(
+                library_collection_strengths = library_info_texts[i].replace(
                     '  ', ', ')
             elif library_info_titles[i] == 'How to access':
                 library_how_to_access = library_info_texts[i]
@@ -144,7 +173,7 @@ class Libraries:
             ('address', library_address),
             ('phone', library_phone),
             ('about', library_about),
-            ('collection_strenghts', library_collection_strenghts),
+            ('collection_strenghts', library_collection_strengths),
             ('access', library_how_to_access)
         ])
         return doc

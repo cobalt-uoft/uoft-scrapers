@@ -639,15 +639,43 @@ https://onesearch.library.utoronto.ca/
   name: String,
   image: String,
   website: String,
-  hours: {
-    Sun: String,
-    Mon: String,
-    Tue: String,
-    Wed: String,
-    Thu: String,
-    Fri: String,
-    Sat: String
-  },
+  hours: [{
+    sunday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    monday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    tuesday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    wednesday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    thursday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    friday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    saturday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }]
+  }],
   address: String,
   phone: String,
   about: String,
