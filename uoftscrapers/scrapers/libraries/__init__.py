@@ -1,5 +1,5 @@
 from ..utils import Scraper
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Comment
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -11,9 +11,11 @@ class Libraries:
     def scrape(location='.'):
         Scraper.logger.info('Libraries initialized.')
         Scraper.ensure_location(location)
-        # using innis library as example
-        return Libraries.get_library_doc(Libraries.get_library_link()[24])
-        raise NotImplementedError('This scraper has not been implemented yet.')
+        return Libraries.get_library_doc(Libraries.get_library_link()[0])
+
+        for library_link in Libraries.get_library_link():
+            doc = Libraries.get_library_doc(library_link)
+            #Scraper.save_json(doc, location, library_link.split('/')[-1])
         Scraper.logger.info('Libraries completed.')
 
     @staticmethod
@@ -26,15 +28,43 @@ class Libraries:
         library_links = [l.a['href'] for l in list_obj_arr]
         return library_links
 
-    # TODO: This should probably a standard scraper function
     @staticmethod
     def normalize_text_sections(div):
         paragraph = ''
         for content in div.contents:
-            text = content if type(content) == NavigableString else content.text
-            paragraph += text.strip().replace('\r', '').replace('\n', ', ') + ' '
+            text = ''
+            if type(content) == NavigableString:
+                text = content
+            elif type(content) == Comment:
+                pass
+            elif content.name == 'li':
+                text = content.text
+            else:
+                text = content.text
+            text = text.strip()
+            paragraph += text.strip() + ' '
+        paragraph = paragraph.strip()
+        paragraph = paragraph.replace('\r', '')
+        paragraph = paragraph.replace('\n', ', ')
         paragraph = paragraph.strip()
         return paragraph
+
+    @staticmethod
+    def get_library_hours(calendar_link):
+        weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        html = Scraper.get(calendar_link, max_attempts=5)
+        week = []
+        if html is None:
+            week = [''] * 7
+        else:
+            soup = BeautifulSoup(html, 'html.parser')
+            week = soup.select('.calendar-wrapper')[0].select(
+                '.start-week')[1].select('.start-day')
+        hours = OrderedDict()
+        for day in range(len(weekdays)):
+            hour = Libraries.normalize_text_sections(week[day])
+            hours[weekdays[day]] = hour
+        return hours
 
     @staticmethod
     def get_library_doc(url_tail):
@@ -50,7 +80,11 @@ class Libraries:
             content.extract()
         
         library_website = main_content.a.extract()['href']
+
         library_hours_link = main_content.a['href']
+        library_hours = Libraries.get_library_hours(library_hours_link)
+        for day, hour in library_hours.items():
+            library_hours[day] = hour[1:].strip()
 
         library_address = Libraries.normalize_text_sections(
             main_content.select('.library-address')[0].extract())
@@ -61,7 +95,7 @@ class Libraries:
 
         library_info = main_content.select('.library-info-text')[0].extract()
         library_info_titles = [s.text for s in  library_info.select('h2')]
-        library_info_texts = library_info.select('p')
+        library_info_texts = library_info.select('p') + library_info.select('ul')
 
         library_about = ''
         library_collection_strenghts = ''
@@ -71,10 +105,10 @@ class Libraries:
             if library_info_titles[i] == 'About the library':
                 library_about = Libraries.normalize_text_sections(
                     library_info_texts[i])
-            if library_info_titles[i] == 'Collection strengths':
+            elif library_info_titles[i] == 'Collection strengths':
                 library_collection_strenghts = Libraries.normalize_text_sections(
-                    library_info_texts[i])
-            if library_info_titles[i] == 'How to access':
+                    library_info_texts[i]).replace('  ', ', ')
+            elif library_info_titles[i] == 'How to access':
                 library_how_to_access = Libraries.normalize_text_sections(
                     library_info_texts[i])
 
@@ -82,7 +116,7 @@ class Libraries:
             ('name', library_name),
             ('image', library_image), 
             ('website', library_website),
-            ('hours', library_hours_link),
+            ('hours', library_hours),
             ('address', library_address),
             ('phone', library_phone),
             ('about', library_about),
