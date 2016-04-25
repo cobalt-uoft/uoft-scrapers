@@ -39,6 +39,7 @@ class Scraper:
                 if r.status_code == 200:
                     doc = r
                 else:
+                    attempts += 1
                     sleep(0.5)
             except (requests.exceptions.Timeout,
                     requests.exceptions.ConnectionError):
