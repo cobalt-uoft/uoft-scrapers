@@ -679,7 +679,7 @@ https://onesearch.library.utoronto.ca/
   address: String,
   phone: String,
   about: String,
-  collection_strenghts: String,
+  collection_strengths: String,
   access: String
 }
 ```

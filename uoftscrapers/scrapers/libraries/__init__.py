@@ -173,7 +173,7 @@ class Libraries:
             ('address', library_address),
             ('phone', library_phone),
             ('about', library_about),
-            ('collection_strenghts', library_collection_strengths),
+            ('collection_strengths', library_collection_strengths),
             ('access', library_how_to_access)
         ])
         return doc
