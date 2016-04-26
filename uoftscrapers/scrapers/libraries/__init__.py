@@ -107,6 +107,8 @@ class Libraries:
 
     @staticmethod
     def get_library_doc(url_tail):
+        _id = url_tail.split('/')[-1].upper()
+
         library_url = Libraries.host + url_tail
         html = Scraper.get(library_url)
         soup = BeautifulSoup(html, 'html.parser')
@@ -166,14 +168,15 @@ class Libraries:
                 library_how_to_access = library_info_texts[i]
 
         doc = OrderedDict([
+            ('id', _id),
             ('name', library_name),
             ('image', library_image),
             ('website', library_website),
-            ('hours', library_hours),
             ('address', library_address),
             ('phone', library_phone),
             ('about', library_about),
             ('collection_strengths', library_collection_strengths),
-            ('access', library_how_to_access)
+            ('access', library_how_to_access),
+            ('hours', library_hours)
         ])
         return doc

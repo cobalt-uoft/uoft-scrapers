@@ -16,9 +16,10 @@ setup(
         'uoftscrapers.scrapers.athletics',
         'uoftscrapers.scrapers.parking',
         'uoftscrapers.scrapers.shuttle',
-        'uoftscrapers.scrapers.events'
+        'uoftscrapers.scrapers.events',
+        'uoftscrapers.scrapers.libraries'
     ],
-    version = '0.4.7',
+    version = '0.5.0',
     description = 'University of Toronto public web scraping scripts.',
     author = 'Qasim Iqbal',
     author_email = 'me@qas.im',
