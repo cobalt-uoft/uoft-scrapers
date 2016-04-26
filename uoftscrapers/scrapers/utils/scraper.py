@@ -40,10 +40,13 @@ class Scraper:
                 if r.status_code == 200:
                     doc = r
                 else:
+                    attempts += 1
                     sleep(0.5)
                     attempts += 1
             except (requests.exceptions.Timeout,
-                    requests.exceptions.ConnectionError):
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.InvalidSchema,
+                    requests.exceptions.MissingSchema):
                 attempts += 1
                 continue
 

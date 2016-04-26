@@ -30,6 +30,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [Parking](#parking)
   - [Shuttle Bus Schedule](#shuttle)
   - [Events](#events)
+  - [Libraries](#libraries)
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.5.1)
@@ -618,5 +619,68 @@ https://www.events.utoronto.ca/
   campus: String,
   location: String,
   audiences: [String],
+}
+```
+
+------
+
+### Libraries
+
+##### Class name
+```python
+uoftscrapers.Libraries
+```
+
+##### Scraper source
+https://onesearch.library.utoronto.ca/
+
+##### Output format
+```js
+{
+  name: String,
+  image: String,
+  website: String,
+  hours: [{
+    sunday: [{
+      closed: Boolean,
+      open: String,
+      close: String,
+    }],
+    monday: [{
+      closed: Boolean,
+      open: Number,
+      close: Number,
+    }],
+    tuesday: [{
+      closed: Boolean,
+      open: Number,
+      close: Number,
+    }],
+    wednesday: [{
+      closed: Boolean,
+      open: Number,
+      close: Number,
+    }],
+    thursday: [{
+      closed: Boolean,
+      open: Number,
+      close: Number,
+    }],
+    friday: [{
+      closed: Boolean,
+      open: Number,
+      close: Number,
+    }],
+    saturday: [{
+      closed: Boolean,
+      open: Number,
+      close: Number,
+    }]
+  }],
+  address: String,
+  phone: String,
+  about: String,
+  collection_strengths: String,
+  access: String
 }
 ```
