@@ -21,6 +21,7 @@ class Libraries:
                 # Not a real library page
                 Scraper.logger.info(
                     'Skipped: ' + library_link.split('/')[-1].upper())
+
         Scraper.logger.info('Libraries completed.')
 
     @staticmethod
@@ -64,21 +65,20 @@ class Libraries:
         time_str = time_str[:end]
         hour_tks = time_str[:-2].split(':')
         meridiem = time_str[-2:]
-
-        hours = '%02d' % int(hour_tks[0])
-        minutes = '00'
+        hours = int(hour_tks[0])
+        minutes = 0
         if len(hour_tks) > 1:
-            minutes = '%02d' % int(hour_tks[1])
+            minutes = int(hour_tks[1])
         if (meridiem == 'pm'):
-            hours = '%02d' % int(hours)
-        decimal_time_string = hours + '.' + minutes
-        return decimal_time_string
+            if (int(hours) != 12):
+                hours = int(hours) + 12
+        posix_from_midnight = hours*60*60 + minutes*60
+        return posix_from_midnight
 
     @staticmethod
     def get_library_hours(calendar_link):
         weekdays = ['sunday', 'monday', 'tuesday', 'wednesday',
                     'thursday', 'friday', 'saturday']
-
         html = Scraper.get(calendar_link, max_attempts=5)
         week = ['Closed'] * 7
         if html is not None:
@@ -92,8 +92,8 @@ class Libraries:
         for day in range(len(weekdays)):
             hour = week[day]
             closed = not hour.startswith('Open')
-            opening_hour = '00.00'
-            closing_hour = '00.00'
+            opening_hour = 0
+            closing_hour = 0
             if not closed:
                 hour_tks = hour.replace('Open:', '').split('-')
                 opening_hour = Libraries.convert_time(hour_tks[0])
