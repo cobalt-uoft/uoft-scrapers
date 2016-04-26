@@ -637,9 +637,15 @@ https://onesearch.library.utoronto.ca/
 ##### Output format
 ```js
 {
+  id: String,
   name: String,
   image: String,
   website: String,
+  address: String,
+  phone: String,
+  about: String,
+  collection_strengths: String,
+  access: String,
   hours: [{
     sunday: [{
       closed: Boolean,
@@ -676,11 +682,6 @@ https://onesearch.library.utoronto.ca/
       open: Number,
       close: Number,
     }]
-  }],
-  address: String,
-  phone: String,
-  about: String,
-  collection_strengths: String,
-  access: String
+  }]
 }
 ```
