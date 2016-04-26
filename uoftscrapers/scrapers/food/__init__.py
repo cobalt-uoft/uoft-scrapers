@@ -78,8 +78,8 @@ class Food:
         """Parse and return the restaurant's opening and closing times."""
 
         def conv_time(t):
-            """Convert time of form "HH:MM p.d." to decimal (p.d. is one
-            of a.m./p.m.)"""
+            """Convert time of form "HH:MM p.d." to seconds since midnight (p.d.
+            is one of a.m./p.m.)"""
 
             time, period = t[:-4].strip(), t[-4:].strip()
 
@@ -94,7 +94,7 @@ class Food:
                 h = int(time)
 
             h += 12 if period == 'p.m.' else 0
-            return h + (m / 60)
+            return (60 * 60 * h) + (60 * m)
 
         headers = {
             'Referer': Food.host

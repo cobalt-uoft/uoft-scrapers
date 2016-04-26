@@ -197,7 +197,7 @@ class Courses:
 
                     for i in range(len(hours)):
                         x = hours[i].split(':')
-                        hours[i] = int(x[0]) + (int(x[1]) / 60)
+                        hours[i] = (60 * 60 * int(x[0])) + (int(x[1]) * 60)
 
                     time_data.append(OrderedDict([
                         ("day", day),
