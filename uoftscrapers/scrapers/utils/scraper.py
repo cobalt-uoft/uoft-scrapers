@@ -35,8 +35,8 @@ class Scraper:
         attempts = 0
         while doc is None and attempts < max_attempts:
             try:
-                r = Scraper.s.get(url, params=params,
-                                  cookies=cookies, headers=headers)
+                r = Scraper.s.get(url, params=params, cookies=cookies,
+                    headers=headers, timeout=5)
                 if r.status_code == 200:
                     doc = r
                 else:

@@ -17,10 +17,12 @@ class Libraries:
             if (doc is not None):
                 Scraper.save_json(
                     doc, location, library_link.split('/')[-1].upper())
+                Scraper.logger.info(
+                    'Scraped ' + library_link.split('/')[-1].upper() + '.')
             else:
                 # Not a real library page
                 Scraper.logger.info(
-                    'Skipped: ' + library_link.split('/')[-1].upper())
+                    'Skipped ' + library_link.split('/')[-1].upper() + '.')
 
         Scraper.logger.info('Libraries completed.')
 
@@ -79,7 +81,7 @@ class Libraries:
     def get_library_hours(calendar_link):
         weekdays = ['sunday', 'monday', 'tuesday', 'wednesday',
                     'thursday', 'friday', 'saturday']
-        html = Scraper.get(calendar_link, max_attempts=5)
+        html = Scraper.get(calendar_link, max_attempts=1)
         week = ['Closed'] * 7
         if html is not None:
             soup = BeautifulSoup(html, 'html.parser')
