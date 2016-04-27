@@ -1,5 +1,5 @@
 from ..utils import Scraper
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Comment
 from collections import OrderedDict
 from datetime import datetime, date
 from urllib.parse import urlencode
@@ -11,7 +11,8 @@ class Events:
     """A scraper for Events at the University of Toronto."""
     host = 'https://www.events.utoronto.ca/'
 
-    campuses_tags = {'St. George': 'UTSG', 'U of T Mississauga': 'UTM', 'U of T Scarborough': 'UTSC'}
+    campuses_tags = {'St. George': 'UTSG', 'U of T Mississauga': 'UTM',
+                     'U of T Scarborough': 'UTSC'}
 
     @staticmethod
     def scrape(location='.'):
@@ -47,6 +48,41 @@ class Events:
         return events_links
 
     @staticmethod
+    def convert_time(time_str):
+        hour_tks = time_str[:-2].split(':')
+        meridiem = time_str[-2:]
+        hours = int(hour_tks[0])
+        minutes = 0
+        if len(hour_tks) > 1:
+            minutes = int(hour_tks[1])
+        if (meridiem == 'pm'):
+            if (int(hours) != 12):
+                hours = int(hours) + 12
+        posix_from_midnight = hours*60*60 + minutes*60
+        return posix_from_midnight
+
+    @staticmethod
+    def normalize_text_sections(div):
+        paragraph = ''
+        for content in div.contents:
+            text = ''
+            if type(content) == NavigableString:
+                text = content
+            elif type(content) == Comment:
+                pass
+            elif content.name == 'li':
+                text = content.text
+            else:
+                text = content.text
+            text = text.strip()
+            paragraph += text.strip() + ' '
+        paragraph = paragraph.strip()
+        paragraph = paragraph.replace('\r', '')
+        paragraph = paragraph.replace('\n', ', ')
+        paragraph = paragraph.strip()
+        return paragraph
+
+    @staticmethod
     def get_event_doc(url_tail):
         event_url = Events.host + url_tail
         html = Scraper.get(event_url)
@@ -63,16 +99,22 @@ class Events:
 
         # Some of the strings are misformed and gives an extra empty space
         time_arr = list(filter(None, time_arr))
-        event_start_date = datetime.strptime(date_arr[0],
-                                             '%b %d').replace(year=date.today().year).date().isoformat()
-        event_end_date = datetime.strptime(date_arr[-1],
-                                           '%b %d').replace(year=date.today().year).date().isoformat()
+        event_start_date = datetime.strptime(date_arr[0], '%b %d')
+        event_start_date = event_start_date.replace(
+            year=date.today().year).date().isoformat()
+        event_end_date = datetime.strptime(date_arr[-1], '%b %d')
+        event_end_date = event_end_date.replace(
+            year=date.today().year).date().isoformat()
 
-        # Note: Some events span across several days e.g. 8350, thus specifying
-        # dates makes no sense
-        event_meridiem = time_arr[2]
-        event_start_time = time_arr[0] + ' ' + event_meridiem
-        event_end_time = time_arr[1] + ' ' + event_meridiem
+        event_start_str = time_arr[0]
+        event_end_str = time_arr[-2] + time_arr[-1]
+        if (len(time_arr) == 3):
+            event_start_str += time_arr[-1]
+        else:
+            event_start_str += time_arr[1]
+
+        event_start_time = Events.convert_time(event_start_str)
+        event_end_time = Events.convert_time(event_end_str)
 
         evt_bar = soup.select('#evt_bar')[0]
         event_url = evt_bar.select('dd')[1].a['href']
@@ -87,27 +129,20 @@ class Events:
         address_block = evt_bar.select('dd')[0]
         if address_block.a is not None:
             address_block = address_block.a
-        for content in address_block.contents:
-            text = content if type(
-                content) == NavigableString else content.text
-            event_address += text.strip().replace('\r', '') + ' '
-        event_address = event_address.strip()
+        event_address = Events.normalize_text_sections(address_block)
 
-        event_audiences = list(map(lambda a: a.text,
-                                   evt_bar.select('dl')[1].select('dd')[1].select('a')))
+        event_audiences = list(
+            map(lambda a: a.text, evt_bar.select(
+                'dl')[1].select('dd')[1].select('a')))
 
         soup.select('.eventTitle')[0].extract()
         soup.select('.date')[0].extract()
         evt_bar.extract()
         soup.select('#cal_bar')[0].extract()
-        event_description = ''
-        for content in soup.select('#content')[0].contents:
-            text = content if type(
-                content) == NavigableString else content.text
-            event_description += text.strip().replace('\r', '') + ' '
-        event_description = event_description.strip()
+        event_description = Events.normalize_text_sections(
+            soup.select('#content')[0])
 
-        return OrderedDict([
+        doc = OrderedDict([
             ('id', event_id),
             ('title', event_title),
             ('start_date', event_start_date),
@@ -121,3 +156,4 @@ class Events:
             ('location', event_address),
             ('audiences', event_audiences)
         ])
+        return doc
