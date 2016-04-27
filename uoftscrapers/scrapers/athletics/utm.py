@@ -15,7 +15,7 @@ class UTMAthletics:
     host = 'http://www.utm.utoronto.ca/athletics/schedule/month/'
 
     @staticmethod
-    def scrape(location='.', month=None):
+    def scrape(location='.', month=None, save=True):
         """Update the local JSON files for this scraper."""
         month = month or UTMAthletics.get_month(month)
 
@@ -35,6 +35,7 @@ class UTMAthletics:
                     continue
 
                 events = []
+
                 for item in td.find(class_='inner').find_all(class_='item'):
 
                     # event cancelled or athletic center closed
@@ -52,20 +53,20 @@ class UTMAthletics:
                     events.append(OrderedDict([
                         ('title', title),
                         ('location', location_),
+                        ('campus', 'UTM'),
                         ('building_id', '332'),
                         ('start_time', start),
                         ('end_time', end)
                     ]))
 
-                athletics[id_] = OrderedDict([
-                    ('id', id_),
+                athletics[date] = OrderedDict([
                     ('date', date),
-                    ('campus', 'UTM'),
                     ('events', events)
                 ])
 
-        for id_, doc in athletics.items():
-            Scraper.save_json(doc, location, id_)
+        if save:
+            for id_, doc in athletics.items():
+                Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('UTMAthletics completed.')
 
@@ -85,3 +86,4 @@ class UTMAthletics:
         m = datetime.strptime(m, '%Y-%m')
 
         return d.month == m.month
+        return athletics
