@@ -611,8 +611,8 @@ https://www.events.utoronto.ca/
   title: String,
   start_date: String
   end_date: String,
-  start_time: String,
-  end_time: String,
+  start_time: Number,
+  end_time: Number,
   url: String,
   description: String,
   admission_price: String,
