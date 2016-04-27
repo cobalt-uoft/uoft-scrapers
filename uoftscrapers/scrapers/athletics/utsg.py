@@ -8,7 +8,7 @@ import requests
 class UTSGAthletics:
 
     @staticmethod
-    def scrape(location='.'):
+    def scrape(location='.', month=None, save=True):
         Scraper.logger.info('UTSGAthletics initialized.')
         Scraper.logger.info('Not implemented.')
         Scraper.logger.info('UTSGAthletics completed.')
