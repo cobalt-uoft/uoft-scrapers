@@ -1,4 +1,5 @@
 from ..utils import Scraper
+from .athletics_helpers import *
 from bs4 import BeautifulSoup
 from datetime import datetime
 from collections import OrderedDict
@@ -15,9 +16,9 @@ class UTSCAthletics:
     host = 'http://www.utsc.utoronto.ca/athletics/calendar-node-field-date-time/month/'
 
     @staticmethod
-    def scrape(location='.', month=None):
+    def scrape(location='.', month=None, save=True):
         """Update the local JSON files for this scraper."""
-        month = month or UTSCAthletics.get_month(month)
+        month = month or get_current_month()
 
         Scraper.logger.info('UTSCAthletics initialized.')
         html = Scraper.get('%s%s' % (UTSCAthletics.host, month))
@@ -29,12 +30,13 @@ class UTSCAthletics:
         for tr in calendar.find_all('tr', class_='single-day'):
             for td in tr.find_all('td'):
                 date = td.get('data-date')
-                id_ = UTSCAthletics.get_id(date)
+                id_ = get_campus_id(date, 'SC')
 
-                if not UTSCAthletics.date_in_month(date, month):
+                if not is_date_in_month(date, month):
                     continue
 
                 events = []
+
                 for item in td.find(class_='inner').find_all(class_='item'):
                     title = item.find(class_='views-field-title').text.strip()
 
@@ -45,42 +47,29 @@ class UTSCAthletics:
 
                     location_ = location_.text.strip()
 
-                    start = item.find(class_='date-display-start').get('content')
-                    end = item.find(class_='date-display-end').get('content')
+                    start = convert_time(item.find(class_='date-display-start').get('content'))
+                    end = convert_time(item.find(class_='date-display-end').get('content'))
+
+                    duration = end - start
 
                     events.append(OrderedDict([
                         ('title', title.replace('/ ', '/')),
+                        ('campus', 'UTSC'),
                         ('location', location_),
                         ('building_id', '208'),
                         ('start_time', start),
-                        ('end_time', end)
+                        ('end_time', end),
+                        ('duration', duration)
                     ]))
 
-                athletics[id_] = OrderedDict([
-                    ('id', id_),
+                athletics[date] = OrderedDict([
                     ('date', date),
-                    ('campus', 'UTSC'),
                     ('events', events)
                 ])
 
-        for id_, doc in athletics.items():
-            Scraper.save_json(doc, location, id_)
+        if save:
+            for id_, doc in athletics.items():
+                Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('UTSCAthletics completed.')
-
-    @staticmethod
-    def get_month(m):
-        now = datetime.now()
-        return '%s-%s' % (now.year, now.month)
-
-    @staticmethod
-    def get_id(d):
-        day = datetime.strptime(d, '%Y-%m-%d').day
-        return '%s%s' % (str(day).zfill(2), 'SC')
-
-    @staticmethod
-    def date_in_month(d, m):
-        d = datetime.strptime(d, '%Y-%m-%d')
-        m = datetime.strptime(m, '%Y-%m')
-
-        return d.month == m.month
+        return athletics
