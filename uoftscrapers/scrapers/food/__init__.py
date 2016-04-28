@@ -93,7 +93,7 @@ class Food:
             else:
                 h = int(time)
 
-            h += 12 if period == 'p.m.' else 0
+            h += 12 if period == 'p.m.' and h != 12 else 0
             return (60 * 60 * h) + (60 * m)
 
         headers = {
