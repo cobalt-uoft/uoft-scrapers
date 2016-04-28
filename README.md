@@ -613,6 +613,7 @@ https://www.events.utoronto.ca/
   end_date: String,
   start_time: Number,
   end_time: Number,
+  duration: Number,
   url: String,
   description: String,
   admission_price: String,

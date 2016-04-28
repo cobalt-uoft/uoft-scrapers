@@ -116,6 +116,8 @@ class Events:
         event_start_time = Events.convert_time(event_start_str)
         event_end_time = Events.convert_time(event_end_str)
 
+        event_duration = event_end_time - event_start_time
+
         evt_bar = soup.select('#evt_bar')[0]
         event_url = evt_bar.select('dd')[1].a['href']
         event_price = evt_bar.select('dl')[1].dd.text
@@ -149,6 +151,7 @@ class Events:
             ('end_date', event_end_date),
             ('start_time', event_start_time),
             ('end_time', event_end_time),
+            ('duration', event_duration),
             ('url', event_url),
             ('description', event_description),
             ('admission_price', event_price),
