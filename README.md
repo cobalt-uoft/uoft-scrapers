@@ -648,42 +648,42 @@ https://onesearch.library.utoronto.ca/
   about: String,
   collection_strengths: String,
   access: String,
-  hours: [{
-    sunday: [{
+  hours: {
+    sunday: {
       closed: Boolean,
       open: String,
       close: String,
-    }],
-    monday: [{
+    },
+    monday: {
       closed: Boolean,
       open: Number,
       close: Number,
-    }],
-    tuesday: [{
+    },
+    tuesday: {
       closed: Boolean,
       open: Number,
       close: Number,
-    }],
-    wednesday: [{
+    },
+    wednesday: {
       closed: Boolean,
       open: Number,
       close: Number,
-    }],
-    thursday: [{
+    },
+    thursday: {
       closed: Boolean,
       open: Number,
       close: Number,
-    }],
-    friday: [{
+    },
+    friday: {
       closed: Boolean,
       open: Number,
       close: Number,
-    }],
-    saturday: [{
+    },
+    saturday: {
       closed: Boolean,
       open: Number,
       close: Number,
-    }]
-  }]
+    }
+  }
 }
 ```
