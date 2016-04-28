@@ -65,6 +65,7 @@ class UTMExams:
 
             start, end = UTMExams.parse_time(data[1].split(': ')[1],
                                              data[2].split(': ')[1], date)
+            duration = end - start
 
             sections = [UTMExams.parse_sections(room.split(': ')[1])
                         for room in [x for x in data[3:] if 'Room:' in x]]
@@ -82,6 +83,7 @@ class UTMExams:
                 ('date', date),
                 ('start_time', start),
                 ('end_time', end),
+                ('duration', duration),
                 ('sections', [])
             ])
 
@@ -176,8 +178,5 @@ class UTMExams:
     def parse_time(start, end, date):
         def convert_time(t):
             h, m, s = [int(x) for x in t.split(':')]
-            dt = datetime.strptime('%s %s %s %s' % (date, h, m, s),
-                                   '%Y-%m-%d %H %M %S')
-            return timezone('US/Eastern').localize(dt).isoformat()
-
+            return (h * 60 * 60) + (m * 60) + s
         return convert_time(start), convert_time(end)
