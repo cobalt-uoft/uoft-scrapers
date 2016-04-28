@@ -7,10 +7,10 @@ import re
 import time
 
 
-class Shuttle:
+class Shuttles:
     """A scraper for UofT's shuttle bus schedule.
 
-    The schedule is located at https://m.utm.utoronto.ca/shuttle.php.
+    The schedule is located at https://m.utm.utoronto.ca/Shuttles.php.
     """
 
     host = 'https://m.utm.utoronto.ca/shuttleByDate.php?year=%s&month=%s&day=%s'
@@ -36,8 +36,8 @@ class Shuttle:
             'Fetching schedules for {0}-{1}-01 to {0}-{1}-{2}.'.format(year, month, days))
 
         for day in range(1, days + 1):
-            html = Scraper.get(Shuttle.host % (year, month, day))
-            schedule = Shuttle.parse_schedule_html(html)
+            html = Scraper.get(Shuttles.host % (year, month, day))
+            schedule = Shuttles.parse_schedule_html(html)
 
             Scraper.save_json(schedule, location, schedule['date'])
 
@@ -73,18 +73,20 @@ class Shuttle:
                     time_rush_hour = 'rush hour' in _route_time_text
                     time_no_overload = 'no overload' in _route_time_text
 
+                    military_time = time.strftime('%H:%M %p',
+                        time.strptime(_route_time_clean, '%I:%M %p'))[:-3]
+                    military_time = [int(x) for x in military_time.split(':')]
+
+                    seconds = military_time[0] * 3600 + military_time[1] * 60
+
                     times.append(OrderedDict([
-                        ('time', '%sT%s:00-04:00' % (
-                            date,
-                            time.strftime('%H:%M %p', time.strptime(
-                                _route_time_clean, '%I:%M %p'))[:-3]
-                        )),
+                        ('time', seconds),
                         ('rush_hour', time_rush_hour),
                         ('no_overload', time_no_overload)
                     ]))
 
                 # TODO: fetch this dynamically
-                route_building_id = Shuttle.building_ids[route_location] if route_location in Shuttle.building_ids else ''
+                route_building_id = Shuttles.building_ids[route_location] if route_location in Shuttles.building_ids else ''
 
                 route_stops = OrderedDict([
                     ('location', route_location),

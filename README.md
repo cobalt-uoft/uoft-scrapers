@@ -562,11 +562,11 @@ http://map.utoronto.ca
 
 --------------------------------------------------------------------------------
 
-### Shuttle
+### Shuttles
 
 ##### Class name
 ```python
-uoftscrapers.Shuttle
+uoftscrapers.Shuttles
 ```
 
 ##### Scraper source
@@ -583,7 +583,7 @@ https://m.utm.utoronto.ca/shuttle.php
       "location": String,
       "building_id": String,
       "times": [{
-        "time": String,
+        "time": Number,
         "rush_hour": Boolean,
         "no_overload": Boolean
       }]

@@ -15,7 +15,7 @@ setup(
         'uoftscrapers.scrapers.exams',
         'uoftscrapers.scrapers.athletics',
         'uoftscrapers.scrapers.parking',
-        'uoftscrapers.scrapers.shuttle',
+        'uoftscrapers.scrapers.shuttles',
         'uoftscrapers.scrapers.events',
         'uoftscrapers.scrapers.libraries'
     ],
