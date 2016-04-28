@@ -56,8 +56,8 @@ class UTMAthletics:
 
                     events.append(OrderedDict([
                         ('title', title),
-                        ('location', location_),
                         ('campus', 'UTM'),
+                        ('location', location_),
                         ('building_id', '332'),
                         ('start_time', start),
                         ('end_time', end),

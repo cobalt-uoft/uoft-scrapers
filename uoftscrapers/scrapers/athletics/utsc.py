@@ -54,8 +54,8 @@ class UTSCAthletics:
 
                     events.append(OrderedDict([
                         ('title', title.replace('/ ', '/')),
-                        ('location', location_),
                         ('campus', 'UTSC'),
+                        ('location', location_),
                         ('building_id', '208'),
                         ('start_time', start),
                         ('end_time', end),
