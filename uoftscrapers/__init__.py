@@ -32,7 +32,7 @@ from .scrapers.athletics.utsc import UTSCAthletics
 
 from .scrapers.parking import Parking
 
-from .scrapers.shuttle import Shuttle
+from .scrapers.shuttles import Shuttles
 
 from .scrapers.events import Events
 
