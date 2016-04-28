@@ -475,15 +475,15 @@ uoftscrapers.Athletics
 ##### Output format
 ```js
 {
-  "id": String,
   "date": String,
-  "campus": String,
   "events":[{
     "title": String,
+    "campus": String,
     "location": String,
     "building_id": String,
-    "start_time": String,
-    "end_time": String
+    "start_time": Number,
+    "end_time": Number,
+    "duration": Number
   }]
 }
 ```
