@@ -19,17 +19,17 @@ class Events:
         Scraper.logger.info('Events initialized.')
         Scraper.ensure_location(location)
 
-        for event_link in Events.get_events_links():
-            doc = Events.get_event_doc(event_link)
+        for event in Events.get_events_list():
+            doc = Events.get_event_doc(event['link'], event['date'])
             Scraper.save_json(doc, location, doc['id'])
 
         Scraper.logger.info('Events completed.')
 
     @staticmethod
-    def get_events_links():
+    def get_events_list():
         page_index_url = Events.host + 'index.php'
         url_parts = list(urlparse.urlparse(page_index_url))
-        events_links = []
+        events_links, events_dates = [], []
         paging_index = 1
         events_count = 10
 
@@ -44,8 +44,15 @@ class Events:
             events_dom_arr = soup.select('#results')[0].find_all('li')
             events_count = len(events_dom_arr)
             events_links += list(map(lambda e: e.a['href'], events_dom_arr))
+            events_dates += list(map(lambda e: e.find('p').text.split(' : ')[1].split(', ')[0], events_dom_arr))
 
-        return events_links
+        events_info = []
+        for i in range(len(events_links)):
+            events_info.append({
+                'link': events_links[i],
+                'date': events_dates[i]
+            })
+        return events_info
 
     @staticmethod
     def convert_time(time_str):
@@ -79,11 +86,12 @@ class Events:
         paragraph = paragraph.strip()
         paragraph = paragraph.replace('\r', '')
         paragraph = paragraph.replace('\n', ', ')
+        paragraph = paragraph.replace('  ', ' ')
         paragraph = paragraph.strip()
         return paragraph
 
     @staticmethod
-    def get_event_doc(url_tail):
+    def get_event_doc(url_tail, event_date):
         event_url = Events.host + url_tail
         html = Scraper.get(event_url)
         url_parts = list(urlparse.urlparse(event_url))
@@ -92,19 +100,27 @@ class Events:
 
         event_id = query['eventid']
         event_title = soup.select('.eventTitle')[0].text.strip()
+
+        date_arr = event_date.split(' - ')
+
+        start_date = date_arr[0].strip()
+        end_date = start_date if len(date_arr) == 1 else date_arr[1].strip()
+
+        if start_date.count(' ') == 1:
+            # year not in start date
+            start_date = '%s %s' % (start_date, end_date.split(' ')[2])
+
+        event_start_date = datetime.strptime(start_date,
+                                             '%b %d %Y').date().isoformat()
+        event_end_date = datetime.strptime(end_date,
+                                           '%b %d %Y').date().isoformat()
+
         raw_time = soup.select('.date')[0].text.split(',')
 
-        date_arr = raw_time[0].split(' - ')
         time_arr = re.split(' - | ', raw_time[1].strip())
 
         # Some of the strings are misformed and gives an extra empty space
         time_arr = list(filter(None, time_arr))
-        event_start_date = datetime.strptime(date_arr[0], '%b %d')
-        event_start_date = event_start_date.replace(
-            year=date.today().year).date().isoformat()
-        event_end_date = datetime.strptime(date_arr[-1], '%b %d')
-        event_end_date = event_end_date.replace(
-            year=date.today().year).date().isoformat()
 
         event_start_str = time_arr[0]
         event_end_str = time_arr[-2] + time_arr[-1]
