@@ -20,7 +20,7 @@ class Events:
         Scraper.ensure_location(location)
 
         for event in Events.get_events_list():
-            doc = Events.get_event_doc(event['link'], event['date'])
+            doc = Events.get_event_doc(event[0], event[1])
             Scraper.save_json(doc, location, doc['id'])
 
         Scraper.logger.info('Events completed.')
@@ -46,13 +46,7 @@ class Events:
             events_links += list(map(lambda e: e.a['href'], events_dom_arr))
             events_dates += list(map(lambda e: e.find('p').text.split(' : ')[1].split(', ')[0], events_dom_arr))
 
-        events_info = []
-        for i in range(len(events_links)):
-            events_info.append({
-                'link': events_links[i],
-                'date': events_dates[i]
-            })
-        return events_info
+        return zip(events_links, events_dates)
 
     @staticmethod
     def convert_time(time_str):
@@ -108,12 +102,13 @@ class Events:
 
         if start_date.count(' ') == 1:
             # year not in start date
-            start_date = '%s %s' % (start_date, end_date.split(' ')[2])
+            start_date = '%s %s' % (start_date, end_date[-4:])
 
-        event_start_date = datetime.strptime(start_date,
-                                             '%b %d %Y').date().isoformat()
-        event_end_date = datetime.strptime(end_date,
-                                           '%b %d %Y').date().isoformat()
+        start_date = datetime.strptime(start_date, '%b %d %Y')
+        end_date = datetime.strptime(end_date, '%b %d %Y')
+
+        event_start_date = start_date.date().isoformat()
+        event_end_date = end_date.date().isoformat()
 
         raw_time = soup.select('.date')[0].text.split(',')
 
