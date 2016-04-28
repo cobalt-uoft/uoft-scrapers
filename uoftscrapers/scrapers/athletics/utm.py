@@ -52,12 +52,16 @@ class UTMAthletics:
                     start = convert_time(item.find(class_='date-display-start').get('content'))
                     end = convert_time(item.find(class_='date-display-end').get('content'))
 
+                    duration = end - start
+
                     events.append(OrderedDict([
                         ('title', title),
                         ('location', location_),
                         ('campus', 'UTM'),
                         ('building_id', '332'),
                         ('start_time', start),
+                        ('end_time', end),
+                        ('duration', duration)
                     ]))
 
                 athletics[date] = OrderedDict([

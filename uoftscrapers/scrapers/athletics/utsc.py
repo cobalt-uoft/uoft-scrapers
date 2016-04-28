@@ -50,12 +50,16 @@ class UTSCAthletics:
                     start = convert_time(item.find(class_='date-display-start').get('content'))
                     end = convert_time(item.find(class_='date-display-end').get('content'))
 
+                    duration = end - start
+
                     events.append(OrderedDict([
                         ('title', title.replace('/ ', '/')),
                         ('location', location_),
                         ('campus', 'UTSC'),
                         ('building_id', '208'),
                         ('start_time', start),
+                        ('end_time', end),
+                        ('duration', duration)
                     ]))
 
                 athletics[date] = OrderedDict([
