@@ -403,8 +403,9 @@ uoftscrapers.Exams
   "course_code": String
   "period": String,
   "date": String,
-  "start_time": String,
-  "end_time": String,
+  "start_time": Number,
+  "end_time": Number,
+  "duration": Number,
   "sections": [{
     "lecture_code": String,
     "exam_section": String,

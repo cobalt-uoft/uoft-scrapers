@@ -32,6 +32,7 @@ class UTSCExams:
 
                 date = data[1]
                 start, end = UTSCExams.parse_time(data[2], data[3], date)
+                duration = end - start
 
                 location_ = data[4]
 
@@ -51,6 +52,7 @@ class UTSCExams:
                     ('date', date),
                     ('start_time', start),
                     ('end_time', end),
+                    ('duration', duration),
                     ('sections', [])
                 ])
 
@@ -130,7 +132,5 @@ class UTSCExams:
     def parse_time(start, end, date):
         def convert_time(t):
             h, m = [int(x) for x in t.split(':')]
-            dt = datetime.strptime('%s %s %s' % (date, h, m), '%Y-%m-%d %H %M')
-            return timezone('US/Eastern').localize(dt).isoformat()
-
+            return (h * 60 * 60) + (m * 60)
         return convert_time(start), convert_time(end)

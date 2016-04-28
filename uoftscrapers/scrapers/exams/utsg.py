@@ -65,6 +65,7 @@ class UTSGExams:
 
                 date = UTSGExams.parse_date(data[2], p[-2:]) or ''
                 start, end = UTSGExams.parse_time(data[3], date) or (0, 0)
+                duration = end - start
 
                 doc = OrderedDict([
                     ('id', id_),
@@ -75,6 +76,7 @@ class UTSGExams:
                     ('date', date),
                     ('start_time', start),
                     ('end_time', end),
+                    ('duration', duration),
                     ('sections', [])
                 ])
 
@@ -141,9 +143,8 @@ class UTSGExams:
         def convert_time(t, is_pm=False):
             """Convert time from `HH:MM` to an ISO 8601 datetime."""
             h, m = [int(x) for x in t.split(':')]
-            h += 12 if is_pm else 0
-            dt = datetime.strptime('%s %s %s' % (d, h, m), '%Y-%m-%d %H %M')
-            return timezone('US/Eastern').localize(dt).isoformat()
+            h += 12 if is_pm and h != 12 else 0
+            return (h * 60 * 60) + (m * 60)
 
         time = list(filter(None, time.replace('-', '').split(' ')))
         if len(time) == 3:
