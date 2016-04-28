@@ -28,7 +28,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
     - [UTM Athletics](#utm-exams)
     - [UTSC Athletics](#utsc-athletics)
   - [Parking](#parking)
-  - [Shuttle Bus Schedule](#shuttle)
+  - [Shuttle Bus Schedule](#shuttles)
   - [Events](#events)
   - [Libraries](#libraries)
 
