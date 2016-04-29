@@ -104,6 +104,9 @@ class Textbooks:
     def retrieve_terms():
         html = Scraper.get('%s/buy_courselisting.asp' % Textbooks.host)
 
+        if html is None:
+            return []
+
         listing = BeautifulSoup(html, "html.parser")
         terms = listing.find(id='fTerm').find_all('option')[1:]
 
@@ -137,7 +140,10 @@ class Textbooks:
             }
 
             xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-                              params=payload, headers=headers)
+                              params=payload, headers=headers, max_attempts=3)
+
+            if xml is None:
+                continue
 
             departments = BeautifulSoup(xml, "xml").find_all('department')
             for department in departments:
@@ -168,7 +174,10 @@ class Textbooks:
         }
 
         xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-                          params=payload, headers=headers)
+                          params=payload, headers=headers, max_attempts=3)
+
+        if xml is None:
+            return []
 
         courses = BeautifulSoup(xml, "xml").find_all('course')
         for course in courses:
@@ -196,7 +205,10 @@ class Textbooks:
         }
 
         xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-                          params=payload, headers=headers)
+                          params=payload, headers=headers, max_attempts=3)
+
+        if xml is None:
+            return []
 
         sections = BeautifulSoup(xml, "xml").find_all('section')
         for section in sections:
@@ -223,14 +235,16 @@ class Textbooks:
             'Referer': '%s/buy_courselisting.asp' % Textbooks.host
         }
 
-        xml = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
-                          params=payload, headers=headers)
+        html = Scraper.get('%s/textbooks_xml.asp' % Textbooks.host,
+                           params=payload, headers=headers, max_attempts=3)
 
-        soup = BeautifulSoup(xml, "html.parser")
+        if html is None:
+            return []
+
+        soup = BeautifulSoup(html, "html.parser")
         books = soup.find_all('tr', {'class': 'book'})
 
         if books == None:
-            done += 1
             return []
 
         for book in books:
