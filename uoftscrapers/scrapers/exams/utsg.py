@@ -279,7 +279,7 @@ class EngExams:
     @staticmethod
     def get_course_info(course, period):
         endings = {
-            'dec': {'season': 'F', 'month': '1'},
+            'dec': {'season': 'F', 'month': '9'},
             'apr': {'season': 'S', 'month': '1'},
             'june': {'season': 'F', 'month': '5F'},
             'aug': {'season': 'S', 'month': '5S'}
