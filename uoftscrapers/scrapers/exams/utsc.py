@@ -73,14 +73,8 @@ class UTSCExams:
     @staticmethod
     def get_period(d):
         def get_date(month, date, year):
-            months = {
-                'dec': 12,
-                'apr': 4,
-                'june': 6,
-                'aug': 8
-            }
-            return datetime.strptime('%s-%d-%d' % (year, months[month], date),
-                                     '%Y-%m-%d')
+            month = 'jun' if month == 'june' else month
+            return datetime.strptime('%s%s%d' % (year, month, date), '%Y%b%d')
 
         d = datetime.strptime(d, '%Y-%m-%d')
 
