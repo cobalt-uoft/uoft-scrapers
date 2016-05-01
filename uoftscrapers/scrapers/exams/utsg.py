@@ -4,8 +4,6 @@ from collections import OrderedDict
 from datetime import datetime
 from pytz import timezone
 
-from pprint import pprint
-
 
 class UTSGExams:
     """A scraper for UTSG exams."""
@@ -26,133 +24,8 @@ class UTSGExams:
         Scraper.logger.info('UTSGExams completed.')
 
 
-class EngExams:
-    """A scraper for Engineering exams.
-
-    Data is scraped from http://www.apsc.utoronto.ca/timetable/fes.aspx
-    """
-
-    host = 'http://www.apsc.utoronto.ca/timetable/fes.aspx'
-
-    @staticmethod
-    def scrape(location='.', year=None, save=True):
-        """Update the local JSON files for this scraper."""
-
-        Scraper.logger.info('EngExams initialized.')
-
-        exams = OrderedDict()
-
-        headers = {
-            'Referer': EngExams.host
-        }
-        html = Scraper.get(EngExams.host, headers=headers, max_attempts=3)
-        soup = BeautifulSoup(html, 'html.parser')
-
-        if soup is None:
-            return
-
-        for tr in soup.find('table', id='DataList1').find_all('tr'):
-            for td in tr.find_all('td'):
-                entry = td.find('div', id='logo')
-
-                if entry is None:
-                    continue
-
-                info = entry.find('div')
-                locations = entry.find('table', class_='xx')
-
-                date, time = [br.next_sibling.strip()
-                              for br in info.find_all('br')[:2]]
-
-                date = datetime.strptime(date.split(':')[-1].strip(),
-                                         '%b %d, %Y').date().isoformat()
-
-                time = time.strip().split(':')
-                hour = int(time[1])
-                minute, meridiem = time[2].split(' ')
-
-                period = EngExams.get_period(date)
-
-                exam_id, course_id, course_code = \
-                    EngExams.get_course_info(info.find('strong').text.strip(), period)
-
-                hour += 12 if meridiem == 'PM' and hour != 12 else 0
-
-                # No end times, using 2.5h for duration per
-                # http://www.undergrad.engineering.utoronto.ca/Office_of_the_Registrar/Examinations/Schedules_Locations.htm
-                start = hour * 60 * 60 + int(minute) * 60
-                duration = 2 * 60 * 60 + 30 * 60
-                end = start + duration
-
-                exam_sections = []
-                for tr in locations.find_all('tr')[1:]:
-                    location, range = [td.text.strip() for td in tr.find_all('td')[:2]]
-
-                    exam_sections.append(OrderedDict([
-                        ('lecture_code', ''),
-                        ('exam_section', range),
-                        ('location', location.replace('-', ' '))
-                    ]))
-
-                exams[exam_id] = OrderedDict([
-                    ('id', exam_id),
-                    ('course_id', course_id),
-                    ('course_code', course_code),
-                    ('campus', 'UTSG'),
-                    ('period', period),
-                    ('date', date),
-                    ('start_time', start),
-                    ('end_time', end),
-                    ('duration', duration),
-                    ('sections', exam_sections)
-                ])
-
-        if save:
-            for id_, doc in exams.items():
-                Scraper.save_json(doc, location, id_)
-
-        Scraper.logger.info('EngExams completed.')
-        return exams
-
-    @staticmethod
-    def get_course_info(course, period):
-        endings = {
-            'dec': {'season': 'F', 'month': '1'},
-            'apr': {'season': 'S', 'month': '1'},
-            'june': {'season': 'F', 'month': '5F'},
-            'aug': {'season': 'S', 'month': '5S'}
-        }
-
-        month, year = period[:-2].lower(), period[-2:]
-        exam_id = course_id = course_code = None
-        if month in endings:
-            course_code = '%s%s' % (course, endings[month]['season'])
-            course_id = '%s20%s%s' % (course_code, year, endings[month]['month'])
-            exam_id = '%s%s' % (course_id, period)
-        return exam_id, course_id, course_code
-
-    @staticmethod
-    def get_period(d):
-        def get_date(month, date, year):
-            month = 'jun' if month == 'june' else month
-            return datetime.strptime('%s%s%d' % (year, month, date), '%Y%b%d')
-
-        d = datetime.strptime(d, '%Y-%m-%d')
-
-        year = d.year
-        month = None
-
-        for m, ld in (('dec', 31), ('apr', 30), ('june', 30), ('aug', 31)):
-            if get_date(m, 1, year) <= d <= get_date(m, ld, year):
-                month = m
-                break
-
-        if month:
-            return '%s%s' % (month.upper(), str(year)[2:])
-
-
 class ArtSciExams:
-    """A scraper for Art & Science exams.
+    """A scraper for Arts & Science exams.
 
     Data is scraped from http://www.artsci.utoronto.ca/current/exams/
     """
@@ -312,3 +185,129 @@ class ArtSciExams:
             periods.append('%s%s' % (m, str(y)[2:]))
 
         return periods
+
+
+class EngExams:
+    """A scraper for Engineering exams.
+
+    Data is scraped from http://www.apsc.utoronto.ca/timetable/fes.aspx
+    """
+
+    host = 'http://www.apsc.utoronto.ca/timetable/fes.aspx'
+
+    @staticmethod
+    def scrape(location='.', year=None, save=True):
+        """Update the local JSON files for this scraper."""
+
+        Scraper.logger.info('EngExams initialized.')
+
+        exams = OrderedDict()
+
+        headers = {
+            'Referer': EngExams.host
+        }
+        html = Scraper.get(EngExams.host, headers=headers, max_attempts=3)
+        soup = BeautifulSoup(html, 'html.parser')
+
+        if soup is None:
+            return
+
+        for tr in soup.find('table', id='DataList1').find_all('tr'):
+            for td in tr.find_all('td'):
+                entry = td.find('div', id='logo')
+
+                if entry is None:
+                    continue
+
+                info = entry.find('div')
+
+                date, time = [br.next_sibling.strip()
+                              for br in info.find_all('br')[:2]]
+
+                date = datetime.strptime(date.split(':')[-1].strip(),
+                                         '%b %d, %Y').date().isoformat()
+
+                time = time.strip().split(':')
+                hour = int(time[1])
+                minute, meridiem = time[2].split(' ')
+
+                hour += 12 if meridiem == 'PM' and hour != 12 else 0
+
+                # No end times, using 2.5h for duration per
+                # http://www.undergrad.engineering.utoronto.ca/Office_of_the_Registrar/Examinations/Schedules_Locations.htm
+                start = hour * 60 * 60 + int(minute) * 60
+                duration = 2 * 60 * 60 + 30 * 60
+                end = start + duration
+
+                period = EngExams.get_period(date)
+
+                exam_id, course_id, course_code = \
+                    EngExams.get_course_info(info.find('strong').text.strip(), period)
+
+                locations = entry.find('table', class_='xx')
+
+                exam_sections = []
+                for tr in locations.find_all('tr')[1:]:
+                    location, range = [td.text.strip() for td in tr.find_all('td')[:2]]
+
+                    exam_sections.append(OrderedDict([
+                        ('lecture_code', ''),
+                        ('exam_section', range),
+                        ('location', location.replace('-', ' '))
+                    ]))
+
+                exams[exam_id] = OrderedDict([
+                    ('id', exam_id),
+                    ('course_id', course_id),
+                    ('course_code', course_code),
+                    ('campus', 'UTSG'),
+                    ('period', period),
+                    ('date', date),
+                    ('start_time', start),
+                    ('end_time', end),
+                    ('duration', duration),
+                    ('sections', exam_sections)
+                ])
+
+        if save:
+            for id_, doc in exams.items():
+                Scraper.save_json(doc, location, id_)
+
+        Scraper.logger.info('EngExams completed.')
+        return exams
+
+    @staticmethod
+    def get_course_info(course, period):
+        endings = {
+            'dec': {'season': 'F', 'month': '1'},
+            'apr': {'season': 'S', 'month': '1'},
+            'june': {'season': 'F', 'month': '5F'},
+            'aug': {'season': 'S', 'month': '5S'}
+        }
+
+        month, year = period[:-2].lower(), period[-2:]
+        exam_id = course_id = course_code = None
+        if month in endings:
+            course_code = '%s%s' % (course, endings[month]['season'])
+            course_id = '%s20%s%s' % (course_code, year, endings[month]['month'])
+            exam_id = '%s%s' % (course_id, period)
+        return exam_id, course_id, course_code
+
+    @staticmethod
+    def get_period(d):
+        def get_date(month, date, year):
+            month = 'jun' if month == 'june' else month
+            return datetime.strptime('%s%s%d' % (year, month, date), '%Y%b%d')
+
+        d = datetime.strptime(d, '%Y-%m-%d')
+
+        year = d.year
+        month = None
+
+        for m, ld in (('dec', 31), ('apr', 30), ('june', 30), ('aug', 31)):
+            if get_date(m, 1, year) <= d <= get_date(m, ld, year):
+                month = m
+                break
+
+        if month:
+            return '%s%s' % (month.upper(), str(year)[2:])
