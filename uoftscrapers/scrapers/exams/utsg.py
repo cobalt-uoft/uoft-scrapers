@@ -4,14 +4,11 @@ from collections import OrderedDict
 from datetime import datetime
 from pytz import timezone
 
+from pprint import pprint
+
 
 class UTSGExams:
-    """A scraper for UTSG exams.
-
-    Data is scraped from http://www.artsci.utoronto.ca/current/exams/
-    """
-
-    host = 'http://www.artsci.utoronto.ca/current/exams/'
+    """A scraper for UTSG exams."""
 
     @staticmethod
     def scrape(location='.', year=None):
@@ -19,15 +16,130 @@ class UTSGExams:
 
         Scraper.logger.info('UTSGExams initialized.')
 
+        artsci_exams = ArtSciExams.scrape(location, year, False)
+        eng_exams = None # EngExams.scrape(location, False)
+
+        for exams in artsci_exams, eng_exams:
+            if exams is None:
+                continue
+            for id_, doc in exams.items():
+                Scraper.save_json(doc, location, id_)
+
+        Scraper.logger.info('UTSGExams completed.')
+
+
+class EngExams:
+    """A scraper for Engineering exams.
+
+    Data is scraped from http://www.artsci.utoronto.ca/current/exams/
+    """
+
+    host = 'http://www.apsc.utoronto.ca/timetable/fes.aspx'
+
+    @staticmethod
+    def scrape(location='.', save=True):
+        """Update the local JSON files for this scraper."""
+
+        Scraper.logger.info('EngExams initialized.')
+
         exams = OrderedDict()
 
-        for p in UTSGExams.get_exam_periods(year):
+        headers = {
+            'Referer': EngExams.host
+        }
+        html = Scraper.get(EngExams.host, headers=headers, max_attempts=3)
+        soup = BeautifulSoup(html, 'html.parser')
+
+        for tr in soup.find('table', id='DataList1').find_all('tr'):
+            for td in tr.find_all('td'):
+                exam = OrderedDict()
+
+                entry = td.find('div', id='logo')
+
+                if entry is None:
+                    continue
+
+                info = entry.find('div')
+                locations = entry.find('table', class_='xx')
+
+                course_code = info.find('strong').text.strip()
+
+                id_, course_id = course_code, ''
+
+                date, time = [br.next_sibling.strip()
+                              for br in info.find_all('br')[:2]]
+
+                date = datetime.strptime(date.split(':')[-1].strip(),
+                                         '%b %d, %Y').date().isoformat()
+
+                time = time.strip().split(':')
+                hour = int(time[1])
+                minute, period = time[2].split(' ')
+
+                hour += 12 if period == 'PM' and hour != 12 else 0
+
+                start = hour * 60 * 60 + int(minute) * 60
+                # No end times, using 2.5h per http://www.undergrad.engineering.utoronto.ca/Office_of_the_Registrar/Examinations/Schedules_Locations.htm
+                duration = 2 * 60 * 60 + 30 * 60
+                end = start + duration
+
+                exam_sections = []
+                for tr in locations.find_all('tr')[1:]:
+                    location, range, _ = [td.text.strip() for td in tr.find_all('td')]
+
+                    location = location.replace('-', ' ')
+                    range = '' if range == 'A - Z' else range
+
+                    exam_sections.append(OrderedDict([
+                        ('lecture_code', ''),
+                        ('exam_section', range),
+                        ('location', location)
+                    ]))
+
+                exams[id_] = OrderedDict([
+                    ('id', id_),
+                    ('course_id', course_id),
+                    ('course_code', course_code),
+                    ('campus', 'UTSG'),
+                    ('period', ''),
+                    ('date', date),
+                    ('start_time', start),
+                    ('end_time', end),
+                    ('duration', duration),
+                    ('sections', exam_sections)
+                ])
+
+        if save:
+            for id_, doc in exams.items():
+                Scraper.save_json(doc, location, id_)
+
+        Scraper.logger.info('EngExams completed.')
+        return exams
+
+
+class ArtSciExams:
+    """A scraper for Art & Science exams.
+
+    Data is scraped from http://www.artsci.utoronto.ca/current/exams/
+    """
+
+    host = 'http://www.artsci.utoronto.ca/current/exams/'
+
+    @staticmethod
+    def scrape(location='.', year=None, save=True):
+        """Update the local JSON files for this scraper."""
+
+        Scraper.logger.info('ArtSciExams initialized.')
+
+        exams = OrderedDict()
+
+        for p in ArtSciExams.get_exam_periods(year):
             Scraper.logger.info('Scraping %s exams.' % p.upper())
 
             headers = {
-                'Referer': UTSGExams.host
+                'Referer': ArtSciExams.host
             }
-            html = Scraper.get('%s%s' % (UTSGExams.host, p),
+            html = Scraper.get('%s%s' % (ArtSciExams.host, p),
                                headers=headers,
                                max_attempts=3)
 
@@ -45,7 +157,7 @@ class UTSGExams:
             for row in rows[1:]:
                 data = [x.text.strip() for x in row.find_all('td')]
 
-                id_, course_id, course_code = UTSGExams.parse_course_info(p, data[0])
+                id_, course_id, course_code = ArtSciExams.parse_course_info(p, data[0])
 
                 if id_ is None:
                     continue
@@ -63,8 +175,8 @@ class UTSGExams:
 
                 location_ = data[4]
 
-                date = UTSGExams.parse_date(data[2], p[-2:]) or ''
-                start, end = UTSGExams.parse_time(data[3], date) or (0, 0)
+                date = ArtSciExams.parse_date(data[2], p[-2:]) or ''
+                start, end = ArtSciExams.parse_time(data[3], date) or (0, 0)
                 duration = end - start
 
                 doc = OrderedDict([
@@ -89,10 +201,12 @@ class UTSGExams:
                     ('location', location_)
                 ]))
 
-        for id_, doc in exams.items():
-            Scraper.save_json(doc, location, id_)
+        if save:
+            for id_, doc in exams.items():
+                Scraper.save_json(doc, location, id_)
 
-        Scraper.logger.info('UTSGExams completed.')
+        Scraper.logger.info('ArtSciExams completed.')
+        return exams
 
     @staticmethod
     def parse_course_info(period, course_code):
