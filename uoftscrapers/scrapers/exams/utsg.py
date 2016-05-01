@@ -1,4 +1,5 @@
 from ..utils import Scraper
+from .exams_helpers import *
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from datetime import datetime
@@ -64,9 +65,10 @@ class ArtSciExams:
             for row in rows[1:]:
                 data = [x.text.strip() for x in row.find_all('td')]
 
-                id_, course_id, course_code = ArtSciExams.parse_course_info(p, data[0])
+                exam_id, course_id, course_code = \
+                    ArtSciExams.parse_course_info(p, data[0])
 
-                if id_ is None:
+                if exam_id is None:
                     continue
 
                 section = data[1]
@@ -87,7 +89,7 @@ class ArtSciExams:
                 duration = end - start
 
                 doc = OrderedDict([
-                    ('id', id_),
+                    ('id', exam_id),
                     ('course_id', course_id),
                     ('course_code', course_code),
                     ('campus', 'UTSG'),
@@ -99,10 +101,10 @@ class ArtSciExams:
                     ('sections', [])
                 ])
 
-                if id_ not in exams:
-                    exams[id_] = doc
+                if exam_id not in exams:
+                    exams[exam_id] = doc
 
-                exams[id_]['sections'].append(OrderedDict([
+                exams[exam_id]['sections'].append(OrderedDict([
                     ('lecture_code', lecture_section or ''),
                     ('exam_section', exam_section or ''),
                     ('location', location_)
@@ -149,12 +151,8 @@ class ArtSciExams:
     @staticmethod
     def parse_date(date, year):
         """Convert date of form `D DD MMM` to ISO 8601 format."""
-
-        date = date.split(' ')
-        if len(date) == 3:
-            day, date, month = date
-
-            return datetime.strptime('%s %s %s %s' % (day, date, month, year),
+        if date.count(' ') == 2:
+            return datetime.strptime('%s %s' % (date, year),
                                      '%a %d %b %y').date().isoformat()
 
     @staticmethod
@@ -239,7 +237,7 @@ class EngExams:
                 duration = 2 * 60 * 60 + 30 * 60
                 end = start + duration
 
-                period = EngExams.get_period(date)
+                period = get_period(date)
 
                 exam_id, course_id, course_code = \
                     EngExams.get_course_info(info.find('strong').text.strip(), period)
@@ -292,22 +290,3 @@ class EngExams:
             course_id = '%s20%s%s' % (course_code, year, endings[month]['month'])
             exam_id = '%s%s' % (course_id, period)
         return exam_id, course_id, course_code
-
-    @staticmethod
-    def get_period(d):
-        def get_date(month, date, year):
-            month = 'jun' if month == 'june' else month
-            return datetime.strptime('%s%s%d' % (year, month, date), '%Y%b%d')
-
-        d = datetime.strptime(d, '%Y-%m-%d')
-
-        year = d.year
-        month = None
-
-        for m, ld in (('dec', 31), ('apr', 30), ('june', 30), ('aug', 31)):
-            if get_date(m, 1, year) <= d <= get_date(m, ld, year):
-                month = m
-                break
-
-        if month:
-            return '%s%s' % (month.upper(), str(year)[2:])
