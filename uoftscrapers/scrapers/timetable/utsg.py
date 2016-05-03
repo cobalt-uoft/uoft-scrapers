@@ -25,8 +25,13 @@ class UTSGTimetable:
         Scraper.logger.info('UTSGTimetable initialized.')
 
         orgs = UTSGTimetable.get_orgs()
-        for org in orgs[:1]:
+        for org in orgs:
+            Scraper.logger.info('Scraping %s.' % org)
+
             data = UTSGTimetable.search(org)
+
+            if not data:
+                continue
 
             for c in data.keys():
                 x = data[c]
@@ -76,7 +81,6 @@ class UTSGTimetable:
 
                         instructors = []
                         if y['instructors']:
-                            print(y['instructors'])
                             for instructor_id in y['instructors'].keys():
                                 instructor = y['instructors'][instructor_id]
                                 formatted = '%s %s' % (
@@ -153,7 +157,7 @@ class UTSGTimetable:
                     ("meeting_sections", sections)
                 ])
 
-                print(json.dumps(course))
+                Scraper.save_json(course, location, course_id)
 
         Scraper.logger.info('UTSGTimetable completed.')
 
