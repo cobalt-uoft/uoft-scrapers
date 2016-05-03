@@ -28,7 +28,7 @@ class Scraper:
             json.dump(data, outfile)
 
     @staticmethod
-    def get(url, params=None, cookies=None, headers=None, json=False, max_attempts=10):
+    def get(url, params=None, cookies=None, headers=None, json=False, max_attempts=10, timeout=5):
         """Fetches an Internet document, automatically retrying if it times out."""
 
         doc = None
