@@ -316,6 +316,11 @@ uoftscrapers.Timetable
   "id": String,
   "code": String,
   "name": String,
+  "description": String,
+  "division": String,
+  "department": String,
+  "prerequisites": String,
+  "exclusions": String,
   "level": Number,
   "campus": String,
   "term": String,
@@ -346,7 +351,7 @@ uoftscrapers.UTSGTimetable
 ```
 
 ##### Scraper source
-http://www.artsandscience.utoronto.ca/ofr/timetable/winter/sponsors.htm
+https://timetable.iit.artsci.utoronto.ca
 
 ##### Output format
 Refer to [Timetable](#timetable)
