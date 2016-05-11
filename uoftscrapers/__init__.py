@@ -38,6 +38,8 @@ from .scrapers.events import Events
 
 from .scrapers.libraries import Libraries
 
+from .scrapers.dates import Dates
+
 class NullHandler(logging.Handler):
 
     def emit(self, record):
