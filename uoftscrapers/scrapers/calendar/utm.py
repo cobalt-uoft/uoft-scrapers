@@ -60,8 +60,19 @@ class UTMCalendar:
                     currentDate = dates[i]
             UTMCalendar.currentSession = "Fall/Winter"
 
+
         for date, info in calendar.items():
-            Scraper.save_json(info, location, date)
+            Scraper.save_json(info, location, UTMCalendar.convert_date(date))
 
         Scraper.logger.info('UTMCalendar completed.')
         return calendar
+
+    @staticmethod
+    def convert_date(date):
+        date_dict = {'January':'1', 'February':'2', 'March':'3', 'April':'4', 'May':'5', 'June':'6', 'July':'7',
+                     'August':'8', 'September':'9', 'October':'10', 'November':'11', 'December':'12'}
+        splitDate = date.split(' ')
+        year = splitDate[2]
+        day = splitDate[1].strip(',')
+        month = date_dict[splitDate[0]]
+        return("{0}-{1}-{2}".format(year, month, day))
