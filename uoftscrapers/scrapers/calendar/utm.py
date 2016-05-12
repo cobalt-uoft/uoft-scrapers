@@ -9,13 +9,16 @@ now = datetime.datetime.now()
 
 
 class UTMCalendar:
+    '''Scraper for Important dates from UTM calendar found at https://www.utm.utoronto.ca/registrar/important-dates
+        '''
 
-    host1 = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}5&header='
-    host2 = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}9&header='
-    sessionLinks = [host1, host2]
-
+    summerLink = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}5&header='
+    fallLink = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}9&header='
+    sessionLinks = [summerLink, fallLink]
+    currentSession = "Summer"
     @staticmethod
-    def scrape(location='.', year=None):
+    def scrape(location='.', year=None): #scrapes most current sessions by default
+        
         year = year or now.year
 
         calendar = OrderedDict()
@@ -33,7 +36,7 @@ class UTMCalendar:
                 while (currentDate == dates[i]):
                     info = dates[i].find_next('div', class_='info')
                     description = info.text
-                    eventStartEnd = date.split('-')
+                    eventStartEnd = date.split('-') #splits event dates over a period
                     eventStart = eventStartEnd[0].strip()
                     if len(eventStartEnd)>1:
                         eventEnd = eventStartEnd[1].strip()
@@ -50,12 +53,12 @@ class UTMCalendar:
                         break;
                 calendar[date] = OrderedDict([
                         ('date', eventStart),
-                        ('session', "Summer"),
+                        ('session', UTMCalendar.currentSession),
                         ('events', events)
                     ])
                 if(i<len(dates)):
                     currentDate = dates[i]
-
+            UTMCalendar.currentSession = "Fall/Winter"
 
         for date, info in calendar.items():
             Scraper.save_json(info, location, date)
