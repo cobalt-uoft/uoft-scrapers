@@ -17,7 +17,7 @@ class UTMCalendar:
     @staticmethod
     def scrape(location='.', year=None): #scrapes most current sessions by default
         
-        year = year or datetime.datetime.now()
+        year = year or datetime.datetime.now().year
 
         calendar = OrderedDict()
         Scraper.logger.info('UTMCalendar initialized.')
@@ -68,7 +68,6 @@ class UTMCalendar:
     @staticmethod
     def convert_date(date):
         splitDate = date.split(' ')
-        print(splitDate)
         year = splitDate[2]
         day = splitDate[1].strip(',')
         month = datetime.datetime.strptime(splitDate[0], '%B').strftime('%m')
