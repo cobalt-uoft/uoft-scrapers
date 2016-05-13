@@ -5,26 +5,24 @@ import json
 import os
 import requests
 import datetime
-now = datetime.datetime.now()
 
 
 class UTMCalendar:
     '''Scraper for Important dates from UTM calendar found at https://www.utm.utoronto.ca/registrar/important-dates
         '''
 
-    summerLink = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}5&header='
-    fallLink = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}9&header='
-    sessionLinks = [summerLink, fallLink]
+    link = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}{1}&header='
+    sessionNumber = [5, 9]
     currentSession = "Summer"
     @staticmethod
     def scrape(location='.', year=None): #scrapes most current sessions by default
         
-        year = year or now.year
+        year = year or datetime.datetime.now()
 
         calendar = OrderedDict()
         Scraper.logger.info('UTMCalendar initialized.')
-        for link in UTMCalendar.sessionLinks:
-            html = Scraper.get(link.format(year))
+        for session in UTMCalendar.sessionNumber:
+            html = Scraper.get(UTMCalendar.link.format(year, session))
             soup = BeautifulSoup(html, 'html.parser')
             content = soup.find('div', class_='content')
             dates = content.find_all('div', class_='title')
@@ -37,9 +35,9 @@ class UTMCalendar:
                     info = dates[i].find_next('div', class_='info')
                     description = info.text
                     eventStartEnd = date.split('-') #splits event dates over a period
-                    eventStart = eventStartEnd[0].strip()
+                    eventStart = UTMCalendar.convert_date(eventStartEnd[0].strip())
                     if len(eventStartEnd)>1:
-                        eventEnd = eventStartEnd[1].strip()
+                        eventEnd = UTMCalendar.convert_date(eventStartEnd[1].strip())
                     else:
                         eventEnd = eventStart
 
@@ -69,10 +67,9 @@ class UTMCalendar:
 
     @staticmethod
     def convert_date(date):
-        date_dict = {'January':'1', 'February':'2', 'March':'3', 'April':'4', 'May':'5', 'June':'6', 'July':'7',
-                     'August':'8', 'September':'9', 'October':'10', 'November':'11', 'December':'12'}
         splitDate = date.split(' ')
+        print(splitDate)
         year = splitDate[2]
         day = splitDate[1].strip(',')
-        month = date_dict[splitDate[0]]
-        return("{0}-{1}-{2}".format(year, month, day))
+        month = datetime.datetime.strptime(splitDate[0], '%B').strftime('%m')
+        return("{0}-{1}-{2}".format(year, month, day.zfill(2)))
