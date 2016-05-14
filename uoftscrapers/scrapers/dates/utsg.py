@@ -37,51 +37,133 @@ class ArtSciDates:
         """Update the local JSON files for this scraper."""
         Scraper.logger.info('ArtSciDates initialized.')
 
-        for session, endpoint in ArtSciDates.get_sessions(year)[:1]:
-            headers = {
-                'Referer': ArtSciDates.host
-            }
+        docs = OrderedDict()
+
+        for endpoint in ArtSciDates.get_endpoints(year):
+            headers = {'Referer': ArtSciDates.host}
             html = Scraper.get('%s%s' % (ArtSciDates.host, endpoint),
                                headers=headers,
                                max_attempts=3)
 
             if html is None:
-                Scraper.logger.info('No data available for %s.' % session.upper)
+                Scraper.logger.info('No data available for %s.' % endpoint.upper)
                 continue
 
-            docs = OrderedDict()
-
             soup = BeautifulSoup(html, 'html.parser')
+
+            session = ArtSciDates.parse_session(soup)
+
             for tr in soup.find(class_='vertical listing').find_all('tr'):
                 if tr.find('th'):
                     continue
 
-                event = tr.find_all('td')
+                data = tr.find_all('td')
 
-                start_date, end_date = ArtSciDates.parse_dates(event[0].text, session)
+                start, end = ArtSciDates.parse_dates(data[0].text, session)
+
+                descriptions = []
+                for t in data[1].text.split(';\n'):
+                    descriptions += ArtSciDates.normalize_text(t)
 
                 events = []
-                for t in event[1].text.split(';\n'):
-                    events += ArtSciDates.normalize_text(t)
+                for description in descriptions:
+                    events.append(OrderedDict([
+                        ('end', end),
+                        ('session', session.upper()),
+                        ('campus', 'UTSG'),
+                        ('description', description)
+                    ]))
 
                 doc = OrderedDict([
-                    ('start_date', start_date),
-                    ('end_date', end_date),
-                    ('session', session),
-                    ('events', events)
+                    ('date', start),
+                    ('events', events),
                 ])
 
-                if start_date not in docs:
-                    docs[start_date] = doc
+                if start not in docs:
+                    docs[start] = doc
                 else:
-                    docs[start_date]['events'].extend(doc['events'])
+                    docs[start]['events'].extend(doc['events'])
 
         if save:
             for date, doc in docs.items():
                 Scraper.save_json(doc, location, date)
 
         Scraper.logger.info('ArtSciDates completed.')
-        return docs
+        return docs if not save else None
+
+    @staticmethod
+    def get_endpoints(year):
+        try:
+            date = datetime(year=year)
+        except:
+            year = None
+
+        if year is None:
+            year = datetime.now().strftime('%y')
+
+        session = '%s%d_fw' % (year, int(year) + 1)
+
+        endpoints = []
+
+        headers = {'Referer': ArtSciDates.host}
+        html = Scraper.get('%s%s' % (ArtSciDates.host, session),
+                           headers=headers,
+                           max_attempts=3)
+
+        if html is None:
+            return endpoints
+
+        soup = BeautifulSoup(html, 'html.parser')
+
+        for a in soup.find(id='portal-column-one').find_all('a'):
+            if a.has_attr('title') and 'important dates' in a['title'].lower():
+                endpoints.append(a['href'])
+
+        return ['%s/%s' % (session, a.split('/')[-1]) for a in endpoints] +\
+            ['20%s5/dates' % year]
+
+    @staticmethod
+    def parse_session(soup):
+        session = ''
+        if soup.find(id='parent-fieldname-title'):
+            session = soup.find(id='parent-fieldname-title').text
+            session = session.replace('Important Dates', '').replace(':', '')
+        else:
+            # TODO parse page title
+            pass
+        return session.strip()
+
+    @staticmethod
+    def parse_dates(date, session):
+
+        def get_full_date(partial_date):
+            """Convert a partial date of the form `B d` (e.g. November 8)
+            to the form `B d Y` (e.g. November 8 2016)."""
+            month, day = partial_date.split(' ')
+            year = session[:4]
+            return '%s %s %s' % (month, day, year)
+
+        date = date.replace(' to ', '-').replace('(tentative)', '').strip()
+        if '-' in date:
+            # Date range (e.g. December 21 - January 4 or November 7-8)
+            if ' - ' in date:
+                date = date.split(' - ')
+                start, end = get_full_date(date[0]), get_full_date(date[1])
+            else:
+                month, days = date.split(' ')
+                days = days.split('-')
+
+                start, end = get_full_date('%s %s' % (month, days[0])),\
+                    get_full_date('%s %s' % (month, days[1]))
+        else:
+            start = end = get_full_date(date)
+
+        return ArtSciDates.convert_date(start), ArtSciDates.convert_date(end)
+
+    @staticmethod
+    def convert_date(date):
+        """Convert a date of form `B d Y` (eg. May 13 2016) to ISO-8601."""
+        return datetime.strptime(date, '%B %d %Y').date().isoformat()
 
     @staticmethod
     def normalize_text(text):
@@ -94,64 +176,6 @@ class ArtSciDates:
             return text.split('\n')
 
         return [text]
-
-    @staticmethod
-    def get_sessions(year):
-        try:
-            date = datetime(year=year)
-        except:
-            year = None
-
-        if year is None:
-            year = datetime.now().strftime('%Y')
-
-        shortened_year = str(year)[2:]
-        session = '%s%d_fw' % (shortened_year, int(shortened_year) + 1)
-
-        fall = '%s/%s_fall_dates' % (session, str(year))
-        winter = '%s/%d_winter_dates' % (session, int(year) + 1)
-
-        summer = '%s5/dates' % year
-
-        return [
-            ('FALL%s' % shortened_year, fall),
-            ('WINTER%s' % shortened_year, winter),
-            ('SUMMER%s' % shortened_year, summer)
-        ]
-
-    @staticmethod
-    def parse_dates(date, session):
-        def get_date(date_string):
-            # date_string in the form '%B %d'
-            month = date_string.split(' ')[0]
-            year = int(session[-2:])
-            if 'FALL' in session and int(datetime.strptime(month, '%B').strftime('%m')) < 4:
-                year += 1
-
-            return '%s %d' % (date_string, year)
-
-        start = end = None
-        if '-' in date:
-            # Date range
-            if ' - ' in date:
-                # e.g. December 21 - January 4
-                date = date.split(' - ')
-
-                start, end = get_date(date[0]), get_date(date[1])
-            else:
-                # e.g. November 7-8
-                month, days = date.split(' ')
-                days = days.split('-')
-
-                start = get_date('%s %s' % (month, days[0]))
-                end = get_date('%s %s' % (month, days[1]))
-        else:
-            start = end = get_date(date)
-
-        start = datetime.strptime(start, '%B %d %y').date().isoformat()
-        end = datetime.strptime(end, '%B %d %y').date().isoformat()
-
-        return start, end
 
 
 class EngDates:
