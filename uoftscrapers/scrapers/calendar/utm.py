@@ -13,12 +13,12 @@ class UTMCalendar:
 
     link = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}{1}&header='
     sessionNumber = [5, 9]
-    currentSession = "Summer"
     @staticmethod
     def scrape(location='.', year=None): #scrapes most current sessions by default
         
         year = year or datetime.datetime.now().year
 
+        currentSession = "{0} SUMMER"
         calendar = OrderedDict()
         Scraper.logger.info('UTMCalendar initialized.')
         for session in UTMCalendar.sessionNumber:
@@ -43,6 +43,7 @@ class UTMCalendar:
 
                     events.append(OrderedDict([
                             ('end_date', eventEnd),
+                            ('session', currentSession.format(UTMCalendar.get_year_from(eventStart))),
                             ('campus', 'UTM'),
                             ('description', description)
                         ]))
@@ -51,12 +52,11 @@ class UTMCalendar:
                         break;
                 calendar[date] = OrderedDict([
                         ('date', eventStart),
-                        ('session', UTMCalendar.currentSession),
                         ('events', events)
                     ])
                 if(i<len(dates)):
                     currentDate = dates[i]
-            UTMCalendar.currentSession = "Fall/Winter"
+            currentSession = "{0} FALL/WINTER"
 
 
         for date, info in calendar.items():
@@ -72,3 +72,8 @@ class UTMCalendar:
         day = splitDate[1].strip(',')
         month = datetime.datetime.strptime(splitDate[0], '%B').strftime('%m')
         return("{0}-{1}-{2}".format(year, month, day.zfill(2)))
+
+    @staticmethod
+    def get_year_from(date):
+        splitDate = date.split('-')
+        return splitDate[0]
