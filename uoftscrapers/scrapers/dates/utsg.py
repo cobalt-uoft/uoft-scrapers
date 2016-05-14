@@ -4,6 +4,7 @@ from collections import OrderedDict
 from datetime import datetime
 from pytz import timezone
 from pprint import pprint
+from time import sleep
 import re
 
 
@@ -14,11 +15,13 @@ class UTSGDates:
     def scrape(location='.'):
         Scraper.logger.info('UTSGDates initialized.')
 
-        for faculty in ArtSciDates, EngDates:
-            docs = faculty.scrape(location, save=False)
-            if docs is not None:
-                for date, doc in docs.items():
-                    Scraper.save_json(doc, location, date)
+        # for faculty in ArtSciDates, EngDates:
+        #     docs = faculty.scrape(location, save=False)
+        #     if docs is not None:
+        #         for date, doc in docs.items():
+        #             Scraper.save_json(doc, location, date)
+
+        EngDates.scrape(location)
 
         Scraper.logger.info('UTSGDates completed.')
 
@@ -119,7 +122,7 @@ class ArtSciDates:
             if a.has_attr('title') and 'important dates' in a['title'].lower():
                 endpoints.append(a['href'])
 
-        return ['%s/%s' % (session, a.split('/')[-1]) for a in endpoints] +\
+        return ['%s/%s' % (session, a.split('/')[-1]) for a in endpoints] + \
             ['20%s5/dates' % year]
 
     @staticmethod
@@ -153,7 +156,7 @@ class ArtSciDates:
                 month, days = date.split(' ')
                 days = days.split('-')
 
-                start, end = get_full_date('%s %s' % (month, days[0])),\
+                start, end = get_full_date('%s %s' % (month, days[0])), \
                     get_full_date('%s %s' % (month, days[1]))
         else:
             start = end = get_full_date(date)
@@ -185,9 +188,72 @@ class EngDates:
     http://www.undergrad.engineering.utoronto.ca/About/Dates_Deadlines.htm.
     """
 
+    host = 'http://www.undergrad.engineering.utoronto.ca/About/Dates_Deadlines.htm'
+
+    FORM_DATA = {
+        'viewstate': '__VIEWSTATE',
+        'viewstate_generator': '__VIEWSTATEGENERATOR',
+        'numerical_date': 'ctl02$ctlSelectedDate$hdnDateValueForQuestionnaireResponses',
+        'textual_date': 'ctl02$ctlSelectedDate$txtDate'
+    }
+
     @staticmethod
-    def scrape(location='.', save=True):
+    def scrape(location='.', year=None, save=True):
         """Update the local JSON files for this scraper."""
         Scraper.logger.info('EngDates initialized.')
 
+        year = year or datetime.now().year
+
+        viewstate, viewstate_generator, numerical_date, textual_date = \
+            EngDates.FORM_DATA.values()
+
+        headers = {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Referer': EngDates.host,
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36'
+        }
+
+        s = Scraper.s
+        s.headers.update(headers)
+
+        payload = {}
+        payload[viewstate], payload[viewstate_generator] = \
+            EngDates.get_viewstate(s)
+
+        for i in range(1, 13):
+            month = datetime.strptime(str(i), '%m').strftime('%B')
+            payload[textual_date] = '%s 15 %s' % (month, year)
+
+            payload[numerical_date] = '%s.%s.15' % (year, str(i).zfill(2))
+
+            attempts = 0
+
+            html = s.post(EngDates.host, data=payload).text.encode('utf-8') or ''
+            soup = BeautifulSoup(html, 'html.parser')
+
+            while attempts < 5 and soup.find('div', class_='error'):
+                print('attempt %d' % attempts)
+
+                html = s.post(EngDates.host, data=payload).text.encode('utf-8') or ''
+                soup = BeautifulSoup(html, 'html.parser')
+
+                print(soup.find('div', class_='error'))
+
+                attempts += 1
+                sleep(1)
+
+            if not html or soup.find('div', class_='error'):
+                continue
+
         Scraper.logger.info('EngDates completed.')
+
+    @staticmethod
+    def get_viewstate(s):
+        html = s.get(EngDates.host)
+        soup = BeautifulSoup(html.content, 'html.parser')
+
+        return soup.find(id='__VIEWSTATE')['value'],\
+            soup.find(id='__VIEWSTATEGENERATOR')['value']
