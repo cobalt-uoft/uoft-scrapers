@@ -74,4 +74,4 @@ class UTMAthletics:
                 Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('UTMAthletics completed.')
-        return athletics
+        return athletics if not save else None
