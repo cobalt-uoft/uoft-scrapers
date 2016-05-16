@@ -31,6 +31,9 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [Shuttle Bus Schedule](#shuttles)
   - [Events](#events)
   - [Libraries](#libraries)
+  - [Dates](#Dates)
+    - [UTSG Dates](#utsg-dates)
+    - [UTM Dates](#utm-dates)
 
 ## Requirements
  - [python3](https://www.python.org/download/releases/3.5.1)
@@ -692,3 +695,62 @@ https://onesearch.library.utoronto.ca/
   }
 }
 ```
+
+--------------------------------------------------------------------------------
+
+### Dates
+
+##### Class name
+```python
+uoftscrapers.Dates
+```
+
+##### Scraper source
+ - [UTSG Dates](#utsg-dates)
+ - [UTM Dates](#utm-dates)
+
+##### Output format
+```js
+{
+  "date": String,
+  "events": [{
+    "end_date": String,
+    "session": String,
+    "campus": String,
+    "description": String
+  }]
+}
+```
+
+----------------------------------------
+
+### UTSG Dates
+
+##### Class name
+```python
+uoftscrapers.UTSGDates
+```
+
+##### Scraper source
+http://www.artsci.utoronto.ca/current/course/timetable/
+http://www.undergrad.engineering.utoronto.ca/About/Dates_Deadlines.htm
+
+##### Output format
+Refer to [Exams](#exams)
+
+--------------------
+
+### UTM Dates
+
+##### Class name
+```python
+uoftscrapers.UTMDates
+```
+
+##### Scraper source
+http://m.utm.utoronto.ca/importantDates.php
+
+##### Output format
+Refer to [Exams](#exams)
+
+--------------------------------------------------------------------------------

@@ -115,7 +115,7 @@ class ArtSciExams:
                 Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('ArtSciExams completed.')
-        return exams
+        return exams if not save else None
 
     @staticmethod
     def parse_course_info(period, course_code):
@@ -272,7 +272,7 @@ class EngExams:
                 Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('EngExams completed.')
-        return exams
+        return exams if not save else None
 
     @staticmethod
     def get_course_info(course, period):

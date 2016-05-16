@@ -72,4 +72,5 @@ class UTSCAthletics:
                 Scraper.save_json(doc, location, id_)
 
         Scraper.logger.info('UTSCAthletics completed.')
-        return athletics
+
+        return athletics if not save else None
