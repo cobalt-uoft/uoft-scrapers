@@ -31,7 +31,7 @@ This is a library of scrapers for various University of Toronto websites. It is 
   - [Shuttle Bus Schedule](#shuttles)
   - [Events](#events)
   - [Libraries](#libraries)
-  - [Dates](#Dates)
+  - [Dates](#dates)
     - [UTSG Dates](#utsg-dates)
     - [UTM Dates](#utm-dates)
 
