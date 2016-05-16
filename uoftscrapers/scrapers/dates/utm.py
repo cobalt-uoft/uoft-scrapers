@@ -14,7 +14,7 @@ class UTMDates:
     link = 'http://m.utm.utoronto.ca/importantDates.php?mode=full&session={0}{1}&header='
     sessionNumber = [5, 9]
     @staticmethod
-    def scrape(location='.', year=None): #scrapes most current sessions by default
+    def scrape(location='.', year=None, save=True):  # scrapes most current sessions by default
 
         year = year or datetime.datetime.now().year
 
@@ -28,15 +28,15 @@ class UTMDates:
             dates = content.find_all('div', class_='title')
             i = 0
             currentDate = dates[i]
-            while(i<len(dates)):
+            while(i < len(dates)):
                 date = dates[i].text
                 events = []
                 while (currentDate == dates[i]):
                     info = dates[i].find_next('div', class_='info')
                     description = info.text
-                    eventStartEnd = date.split('-') #splits event dates over a period
+                    eventStartEnd = date.split('-')  # splits event dates over a period
                     eventStart = UTMDates.convert_date(eventStartEnd[0].strip())
-                    if len(eventStartEnd)>1:
+                    if len(eventStartEnd) > 1:
                         eventEnd = UTMDates.convert_date(eventStartEnd[1].strip())
                     else:
                         eventEnd = eventStart
@@ -47,23 +47,23 @@ class UTMDates:
                             ('campus', 'UTM'),
                             ('description', description)
                         ]))
-                    i+=1
-                    if(i>=len(dates)):
-                        break;
-                calendar[date] = OrderedDict([
-                        ('date', eventStart),
-                        ('events', events)
-                    ])
-                if(i<len(dates)):
+                    i += 1
+                    if(i >= len(dates)):
+                        break
+                calendar[eventStart] = OrderedDict([
+                    ('date', eventStart),
+                    ('events', events)
+                ])
+                if(i < len(dates)):
                     currentDate = dates[i]
             currentSession = "{0} FALL/WINTER"
 
-
-        for date, info in calendar.items():
-            Scraper.save_json(info, location, UTMDates.convert_date(date))
+        if save:
+            for date, info in calendar.items():
+                Scraper.save_json(info, location, UTMDates.convert_date(date))
 
         Scraper.logger.info('UTMDates completed.')
-        return calendar
+        return calendar if not save else None
 
     @staticmethod
     def convert_date(date):
