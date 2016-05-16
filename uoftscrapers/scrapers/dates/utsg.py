@@ -3,27 +3,41 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 from datetime import datetime
 from pytz import timezone
-from pprint import pprint
 from time import sleep
 import re
+import http.cookiejar
 
 
 class UTSGDates:
     """A scraper for UTSG important dates."""
 
     @staticmethod
-    def scrape(location='.'):
+    def scrape(location='.', year=None, save=True):
         Scraper.logger.info('UTSGDates initialized.')
 
-        # for faculty in ArtSciDates, EngDates:
-        #     docs = faculty.scrape(location, save=False)
-        #     if docs is not None:
-        #         for date, doc in docs.items():
-        #             Scraper.save_json(doc, location, date)
+        docs = OrderedDict()
 
-        EngDates.scrape(location)
+        for faculty in ArtSciDates, EngDates:
+            dates = faculty.scrape(location, year=year, save=False)
+
+            if dates is None:
+                continue
+
+            for date, doc in dates.items():
+                if date not in docs:
+                    docs[date] = OrderedDict([
+                        ('date', date),
+                        ('events', [])
+                    ])
+
+                docs[date]['events'].extend(doc['events'])
+
+        if save:
+            for date, doc in docs.items():
+                Scraper.save_json(doc, location, date)
 
         Scraper.logger.info('UTSGDates completed.')
+        return docs if not save else None
 
 
 class ArtSciDates:
@@ -190,7 +204,9 @@ class EngDates:
 
     host = 'http://www.undergrad.engineering.utoronto.ca/About/Dates_Deadlines.htm'
 
-    FORM_DATA = {
+    cookies = http.cookiejar.CookieJar()
+
+    form_data = {
         'viewstate': '__VIEWSTATE',
         'viewstate_generator': '__VIEWSTATEGENERATOR',
         'numerical_date': 'ctl02$ctlSelectedDate$hdnDateValueForQuestionnaireResponses',
@@ -205,7 +221,7 @@ class EngDates:
         year = year or datetime.now().year
 
         viewstate, viewstate_generator, numerical_date, textual_date = \
-            EngDates.FORM_DATA.values()
+            EngDates.form_data.values()
 
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -223,36 +239,82 @@ class EngDates:
         payload[viewstate], payload[viewstate_generator] = \
             EngDates.get_viewstate(s)
 
-        for i in range(1, 13):
-            month = datetime.strptime(str(i), '%m').strftime('%B')
-            payload[textual_date] = '%s 15 %s' % (month, year)
+        docs = OrderedDict()
 
-            payload[numerical_date] = '%s.%s.15' % (year, str(i).zfill(2))
+        for m in range(1, 13):
+            Scraper.logger.info('Scraping month %d' % m)
+
+            month = datetime.strptime(str(m), '%m').strftime('%B')
+            payload[textual_date] = '%s 15 %s' % (month, year)
+            payload[numerical_date] = '%s.%s.15' % (year, str(m).zfill(2))
 
             attempts = 0
 
-            html = s.post(EngDates.host, data=payload).text.encode('utf-8') or ''
+            html = s.post(EngDates.host,
+                          data=payload,
+                          cookies=EngDates.cookies).text.encode('utf-8') or ''
             soup = BeautifulSoup(html, 'html.parser')
 
             while attempts < 5 and soup.find('div', class_='error'):
-                print('attempt %d' % attempts)
+                Scraper.logger.info('Attempt #%d' % (attempts + 1))
 
-                html = s.post(EngDates.host, data=payload).text.encode('utf-8') or ''
+                html = s.post(EngDates.host,
+                              data=payload,
+                              cookies=EngDates.cookies).text.encode('utf-8') or ''
                 soup = BeautifulSoup(html, 'html.parser')
-
-                print(soup.find('div', class_='error'))
 
                 attempts += 1
                 sleep(1)
 
             if not html or soup.find('div', class_='error'):
+                Scraper.logger.info('Couldn\'t scrape month %d' % m)
                 continue
 
+            for tr in soup.find(id='ctl02_ctlCalendar').find_all('tr')[2:]:
+                for td in tr.find_all('td'):
+                    if not td.find('a') or not td.find('div').find('a'):
+                        continue
+
+                    start = end = EngDates.get_date(td.find('a')['title'], year)
+
+                    session = '%d ENGINEERING' % year
+
+                    events = []
+                    for div in td.find_all('div'):
+                        event = div.find('a')
+
+                        events.append(OrderedDict([
+                            ('end_date', end),
+                            ('session', session),
+                            ('campus', 'UTSG'),
+                            ('description', event.text)
+                        ]))
+
+                    if start not in docs:
+                        docs[start] = OrderedDict([
+                            ('date', start),
+                            ('events', events)
+                        ])
+                    else:
+                        docs[start]['events'].extend(events)
+
+        if save:
+            for date, doc in docs.items():
+                Scraper.save_json(doc, location, date)
+
         Scraper.logger.info('EngDates completed.')
+        return docs if not save else None
+
+    @staticmethod
+    def get_date(date, year):
+        """Return a IS0 8601 date from a date string of the form `M d`"""
+        date = '%s %s' % (year, date)
+        return datetime.strptime(date, '%Y %B %d').date().isoformat()
 
     @staticmethod
     def get_viewstate(s):
-        html = s.get(EngDates.host)
+        headers = {'Referer': EngDates.host}
+        html = s.get(EngDates.host, headers=headers)
         soup = BeautifulSoup(html.content, 'html.parser')
 
         return soup.find(id='__VIEWSTATE')['value'],\
