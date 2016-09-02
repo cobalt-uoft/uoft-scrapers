@@ -39,7 +39,7 @@ class Courses:
             worker.start()
 
         Scraper.logger.info('Queued %d courses.' % total)
-        for x in urls:
+        for x in urls[:10]:
             course_id = re.search('offImg(.*)', x[0]).group(1).split('"')[0]
             url = '%s/courseSearch/coursedetails/%s' % (
                 Courses.host,
@@ -183,6 +183,11 @@ class Courses:
 
                 class_size = tds[4].get_text().strip()
 
+                try:
+                    current_enrolment = tds[5].get_text().strip()
+                except (IndexError, AttributeError) as e:
+                    current_enrolment = 0
+
                 time_data = []
                 for i in range(len(times)):
                     info = times[i].split(" ")
@@ -215,7 +220,7 @@ class Courses:
                     ("instructors", instructors),
                     ("times", time_data),
                     ("size", int(class_size)),
-                    ("enrolment", 0)
+                    ("enrolment", int(current_enrolment))
                 ])
 
                 sections.append(data)
