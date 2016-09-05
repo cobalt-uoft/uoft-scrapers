@@ -8,3 +8,5 @@ README.rst
 data
 test.py
 *.pyc
+.cobalt_data
+
