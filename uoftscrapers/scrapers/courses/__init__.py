@@ -181,11 +181,14 @@ class Courses:
                     locations.append(
                         raw_locations[i] + " " + raw_locations[i + 1])
 
-                class_size = tds[4].get_text().strip()
+                try:
+                    class_size = int(tds[4].get_text().strip())
+                except ValueError as e:
+                    class_size = 0
 
                 try:
-                    current_enrolment = tds[5].get_text().strip()
-                except (IndexError, AttributeError) as e:
+                    current_enrolment = int(tds[5].get_text().strip())
+                except (IndexError, AttributeError, ValueError) as e:
                     current_enrolment = 0
 
                 time_data = []
@@ -219,8 +222,8 @@ class Courses:
                     ("code", code),
                     ("instructors", instructors),
                     ("times", time_data),
-                    ("size", int(class_size)),
-                    ("enrolment", int(current_enrolment))
+                    ("size", class_size),
+                    ("enrolment", current_enrolment)
                 ])
 
                 sections.append(data)
