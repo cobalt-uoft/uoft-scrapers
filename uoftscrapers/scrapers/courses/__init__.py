@@ -124,15 +124,32 @@ class Courses:
 
         # Things that don't appear on all courses
 
-        as_breadth = soup.find(id="u122")
         breadths = []
-        if as_breadth is not None:
-            as_breadth = as_breadth.find_all("span", id="u122")[0] \
-                .get_text().strip()
-            for ch in as_breadth:
-                if ch in "12345":
-                    breadths.append(int(ch))
+        # If Campus is UTSG, find Breadths
+        if campus == "UTSG":
+            as_breadth = soup.find(id="u122")
+            if as_breadth is not None:
+                as_breadth = as_breadth.find_all("span", id="u122")[0] \
+                    .get_text().strip()
+                for ch in as_breadth:
+                    if ch in "12345":
+                        breadths.append(int(ch))
+        # If Campus is UTSC, find Breadths
+        elif campus == "UTSC":
+            utsc_breadths_dict = {"Arts, Literature & Language": 1,
+                                  "History, Philosophy & Cultural Studies": 2,
+                                  "Natural Sciences": 3,
+                                  "Social & Behavioural Sciences": 4,
+                                  "Quantitative Reasoning": 5}
+            utsc_breadth = soup.find(id="u104")
+            if utsc_breadth is not None:
+                utsc_breadth = utsc_breadth.find_all("span", id="u104")[0] \
+                    .get_text().strip()
 
+                if utsc_breadth in utsc_breadths_dict:
+                    breadths.append(utsc_breadths_dict[utsc_breadth])
+
+        # sort the breadths in the end
         breadths = sorted(breadths)
 
         exclusions = soup.find(id="u68")
